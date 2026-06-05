@@ -152,6 +152,37 @@
   .text-yellow { color: var(--yellow); }
   .text-cyan { color: var(--cyan); }
   input[type=range] { background: transparent; }
+
+  /* Güven skoru */
+  .skor-ring { position: relative; width: 120px; height: 120px; margin: 0 auto 12px; }
+  .skor-ring svg { transform: rotate(-90deg); }
+  .skor-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .skor-num { font-size: 28px; font-weight: 800; line-height: 1; }
+  .skor-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+
+  /* Şablon butonları */
+  .template-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .template-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all .15s;
+  }
+  .template-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Rakip fiyat kutusu */
+  .rakip-card { background: var(--surface2); border-radius: 8px; padding: 14px; position: relative; }
+  .rakip-bar { height: 8px; border-radius: 4px; background: var(--surface); margin-top: 8px; overflow: hidden; }
+  .rakip-fill { height: 100%; border-radius: 4px; transition: width .5s; }
+
+  /* Yorum kutusu */
+  .yorum-box { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 14px 16px; font-size: 13px; line-height: 1.7; }
+  .yorum-box ul { padding-left: 18px; margin-top: 6px; }
+  .yorum-box li { margin-bottom: 4px; }
   .text-accent { color: var(--accent); }
 
   /* Risk badge */
@@ -232,11 +263,27 @@
     <button class="tab-btn active" onclick="showTab('veri')">Veri Girişi</button>
     <button class="tab-btn" onclick="showTab('analiz')">Karlılık Analizi</button>
     <button class="tab-btn" onclick="showTab('risk')">Risk &amp; Senaryo</button>
+    <button class="tab-btn" onclick="showTab('rakip')">Rakip Analizi</button>
     <button class="tab-btn" onclick="showTab('rapor')">Özet Rapor</button>
   </div>
 
   <!-- TAB 1: VERİ GİRİŞİ -->
   <div class="tab-panel active" id="tab-veri">
+
+    <!-- Şablon Seçici -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:6px"><span>📁</span> Hızlı Başlangıç Şablonu</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:6px">Bir şablon seçerek maliyet kalemlerini otomatik doldurun:</p>
+      <div class="template-grid">
+        <button class="template-btn" onclick="loadTemplate('insaat')">🏗️ İnşaat / İhale</button>
+        <button class="template-btn" onclick="loadTemplate('it')">💻 IT / Yazılım Projesi</button>
+        <button class="template-btn" onclick="loadTemplate('danismanlik')">🎯 Danışmanlık / Hizmet</button>
+        <button class="template-btn" onclick="loadTemplate('nakliye')">🚛 Nakliye / Lojistik</button>
+        <button class="template-btn" onclick="loadTemplate('temizlik')">🧹 Temizlik / Bakım</button>
+        <button class="template-btn" onclick="loadTemplate('imalat')">⚙️ İmalat / Üretim</button>
+      </div>
+    </div>
+
     <div class="grid2">
       <!-- Sol: Proje Bilgileri -->
       <div class="card">
@@ -400,6 +447,31 @@
 
   <!-- TAB 2: KARLILIK ANALİZİ -->
   <div class="tab-panel" id="tab-analiz">
+
+    <!-- Güven Skoru -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="grid2" style="align-items:center;gap:24px">
+        <div style="text-align:center">
+          <div class="card-title" style="justify-content:center;margin-bottom:12px"><span>🎯</span> Teklif Güven Skoru</div>
+          <div class="skor-ring">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(46,51,82,.8)" stroke-width="10"/>
+              <circle cx="60" cy="60" r="50" fill="none" id="skorArc"
+                stroke="#4f7dff" stroke-width="10"
+                stroke-dasharray="314" stroke-dashoffset="314"
+                stroke-linecap="round" style="transition:stroke-dashoffset .8s,stroke .4s"/>
+            </svg>
+            <div class="skor-text">
+              <div class="skor-num" id="skorNum">—</div>
+              <div class="skor-lbl">/ 100</div>
+            </div>
+          </div>
+          <div id="skorEtiket" style="font-size:13px;font-weight:700;margin-top:4px">—</div>
+        </div>
+        <div id="skorDetay" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+
     <div class="grid3" id="kpiGrid">
       <div class="kpi"><div class="kpi-label">Toplam Gelir</div><div class="kpi-value text-green" id="k-gelir">-</div></div>
       <div class="kpi"><div class="kpi-label">Toplam Maliyet</div><div class="kpi-value text-red" id="k-maliyet">-</div></div>
@@ -493,7 +565,37 @@
     </div>
   </div>
 
-  <!-- TAB 4: ÖZET RAPOR -->
+  <!-- TAB 4: RAKİP ANALİZİ -->
+  <div class="tab-panel" id="tab-rakip">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span>🏁</span> Rakip Fiyatları Gir</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">En fazla 4 rakip teklif fiyatı girerek pozisyonunuzu görün.</p>
+        <div id="rakipGiris">
+          <div style="display:flex;flex-direction:column;gap:10px" id="rakipRows">
+            <!-- JS ile doldurulacak -->
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm mt12" onclick="addRakip()">+ Rakip Ekle</button>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <label>Sizin Teklif Fiyatınız</label>
+          <div id="bizimFiyatDisplay" class="font-mono text-accent font-bold" style="font-size:20px;margin-top:6px">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>📊</span> Fiyat Konumlandırması</div>
+        <div id="rakipChart" style="margin-top:8px"></div>
+        <div id="rakipYorum" class="mt16"></div>
+      </div>
+    </div>
+
+    <div class="card mt16">
+      <div class="card-title"><span>🤖</span> Otomatik Analiz Yorumu</div>
+      <div id="otomatikYorum" class="yorum-box">Veriler girildiğinde otomatik yorum üretilecek.</div>
+    </div>
+  </div>
+
+  <!-- TAB 5: ÖZET RAPOR -->
   <div class="tab-panel" id="tab-rapor">
     <div class="card">
       <div id="raporIcerik"></div>
@@ -522,6 +624,7 @@ window.addEventListener('load', () => {
   addRow('iscilik');
   addRow('gider');
   addGelirRow();
+  addRakip();
   loadLocal();
   calculate();
 });
@@ -753,9 +856,15 @@ function calculate() {
   // Rapor
   renderRapor(sym, toplamGelir, toplamMaliyetNet, toplamMaliyetKDV, netKar, karMarji, roi, sc, hedefMarj, basaBasFiyat);
 
-  // Charts — sym de iletiliyor
+  // Charts
   updateCharts(tipTotals, toplamGelir, toplamMaliyetNet, netKar, sc, toplamMaliyetNet, sym);
-  // Duyarlılık tablosu için sym dışarı sızdırılıyor (closure üzerinden)
+
+  // Güven skoru
+  updateGuvenSkoru(karMarji, roi, netKar, toplamMaliyetNet, sc);
+
+  // Otomatik yorum + rakip güncelle
+  generateYorum(toplamGelir, toplamMaliyetNet, netKar, karMarji, roi, sc, tipTotals);
+  updateRakipChart();
 
 
   saveLocal();
@@ -1010,6 +1119,287 @@ function setKPI(id, val, cls) {
 }
 
 // ──────────────────────────────────────────────
+// ŞABLONLAR
+// ──────────────────────────────────────────────
+const TEMPLATES = {
+  insaat: {
+    ad: 'İnşaat / İhale Projesi',
+    rows: [
+      { tip: 'malzeme', ad: 'Çimento / Beton', miktar: 100, birim: 'Ton', birimFiyat: 3500 },
+      { tip: 'malzeme', ad: 'Demir / Donatı', miktar: 50, birim: 'Ton', birimFiyat: 28000 },
+      { tip: 'malzeme', ad: 'Kum / Mıcır', miktar: 200, birim: 'Ton', birimFiyat: 450 },
+      { tip: 'iscilik', ad: 'Ustabaşı', miktar: 200, birim: 'Saat', birimFiyat: 350 },
+      { tip: 'iscilik', ad: 'İşçi', miktar: 800, birim: 'Saat', birimFiyat: 180 },
+      { tip: 'gider', ad: 'İş Makinesi Kirası', miktar: 30, birim: 'Gün', birimFiyat: 5000 },
+      { tip: 'gider', ad: 'Nakliye', miktar: 1, birim: 'Götürü', birimFiyat: 25000 },
+    ]
+  },
+  it: {
+    ad: 'IT / Yazılım Projesi',
+    rows: [
+      { tip: 'iscilik', ad: 'Kıdemli Geliştirici', miktar: 320, birim: 'Saat', birimFiyat: 1200 },
+      { tip: 'iscilik', ad: 'Orta Seviye Geliştirici', miktar: 480, birim: 'Saat', birimFiyat: 700 },
+      { tip: 'iscilik', ad: 'UI/UX Tasarımcı', miktar: 120, birim: 'Saat', birimFiyat: 800 },
+      { tip: 'iscilik', ad: 'Test Mühendisi', miktar: 160, birim: 'Saat', birimFiyat: 500 },
+      { tip: 'malzeme', ad: 'Yazılım Lisansları', miktar: 1, birim: 'Paket', birimFiyat: 50000 },
+      { tip: 'gider', ad: 'Sunucu / Hosting (1 yıl)', miktar: 12, birim: 'Ay', birimFiyat: 8000 },
+      { tip: 'gider', ad: 'Proje Yönetimi', miktar: 1, birim: 'Götürü', birimFiyat: 40000 },
+    ]
+  },
+  danismanlik: {
+    ad: 'Danışmanlık / Hizmet',
+    rows: [
+      { tip: 'iscilik', ad: 'Kıdemli Danışman', miktar: 160, birim: 'Saat', birimFiyat: 2500 },
+      { tip: 'iscilik', ad: 'Uzman', miktar: 240, birim: 'Saat', birimFiyat: 1500 },
+      { tip: 'iscilik', ad: 'Analist', miktar: 200, birim: 'Saat', birimFiyat: 800 },
+      { tip: 'gider', ad: 'Seyahat / Konaklama', miktar: 1, birim: 'Götürü', birimFiyat: 20000 },
+      { tip: 'gider', ad: 'Rapor / Doküman Hazırlama', miktar: 1, birim: 'Götürü', birimFiyat: 15000 },
+    ]
+  },
+  nakliye: {
+    ad: 'Nakliye / Lojistik',
+    rows: [
+      { tip: 'malzeme', ad: 'Yakıt', miktar: 2000, birim: 'Litre', birimFiyat: 52 },
+      { tip: 'iscilik', ad: 'Şoför', miktar: 20, birim: 'Gün', birimFiyat: 2000 },
+      { tip: 'iscilik', ad: 'Yardımcı Personel', miktar: 20, birim: 'Gün', birimFiyat: 1200 },
+      { tip: 'gider', ad: 'Araç Amortismanı', miktar: 20, birim: 'Gün', birimFiyat: 3000 },
+      { tip: 'gider', ad: 'Sigorta / Ruhsat', miktar: 1, birim: 'Götürü', birimFiyat: 8000 },
+      { tip: 'gider', ad: 'Yükleme / Boşaltma', miktar: 1, birim: 'Götürü', birimFiyat: 5000 },
+    ]
+  },
+  temizlik: {
+    ad: 'Temizlik / Bakım Hizmeti',
+    rows: [
+      { tip: 'iscilik', ad: 'Temizlik Personeli', miktar: 22, birim: 'Gün', birimFiyat: 800 },
+      { tip: 'malzeme', ad: 'Temizlik Malzemesi', miktar: 1, birim: 'Ay', birimFiyat: 3000 },
+      { tip: 'malzeme', ad: 'Ekipman / Makine', miktar: 1, birim: 'Ay', birimFiyat: 2000 },
+      { tip: 'gider', ad: 'Ulaşım', miktar: 22, birim: 'Gün', birimFiyat: 200 },
+      { tip: 'gider', ad: 'Yönetim Gideri', miktar: 1, birim: 'Ay', birimFiyat: 2500 },
+    ]
+  },
+  imalat: {
+    ad: 'İmalat / Üretim',
+    rows: [
+      { tip: 'malzeme', ad: 'Hammadde A', miktar: 500, birim: 'kg', birimFiyat: 150 },
+      { tip: 'malzeme', ad: 'Hammadde B', miktar: 200, birim: 'kg', birimFiyat: 380 },
+      { tip: 'malzeme', ad: 'Ambalaj Malzemesi', miktar: 1000, birim: 'Adet', birimFiyat: 12 },
+      { tip: 'iscilik', ad: 'Üretim İşçisi', miktar: 480, birim: 'Saat', birimFiyat: 200 },
+      { tip: 'iscilik', ad: 'Kalite Kontrol', miktar: 80, birim: 'Saat', birimFiyat: 350 },
+      { tip: 'gider', ad: 'Enerji / Elektrik', miktar: 1, birim: 'Dönem', birimFiyat: 20000 },
+      { tip: 'gider', ad: 'Makine Bakım', miktar: 1, birim: 'Dönem', birimFiyat: 8000 },
+    ]
+  }
+};
+
+function loadTemplate(key) {
+  const tpl = TEMPLATES[key];
+  if (!tpl) return;
+  if (!confirm(`"${tpl.ad}" şablonu yüklensin mi? Mevcut maliyet kalemleri silinecek.`)) return;
+  maliyetRows = tpl.rows.map(r => ({ ...r, id: ++rowCounter, kdv: true }));
+  document.getElementById('projeAdi').value = tpl.ad;
+  renderMaliyetTable();
+  calculate();
+}
+
+// ──────────────────────────────────────────────
+// GÜVEN SKORU
+// ──────────────────────────────────────────────
+function calcGuvenSkoru(marj, roi, netKar, toplamMaliyet, sc) {
+  // 4 bileşen: marj (0-40), roi (0-25), tampon (0-20), senaryo dayanıklılığı (0-15)
+  const marjPuan = Math.min(40, Math.max(0, marj * 1.5));
+  const roiPuan = Math.min(25, Math.max(0, roi * 0.6));
+  const tamponPuan = toplamMaliyet > 0 ? Math.min(20, Math.max(0, (netKar / toplamMaliyet) * 40)) : 0;
+  const senaryoPuan = sc.kotumser.kar >= 0 ? 15 : sc.kotumser.marj > -5 ? 8 : 0;
+  const toplam = Math.round(marjPuan + roiPuan + tamponPuan + senaryoPuan);
+  return {
+    toplam: Math.min(100, toplam),
+    parcalar: [
+      { ad: 'Kar Marjı', puan: Math.round(marjPuan), maks: 40 },
+      { ad: 'ROI', puan: Math.round(roiPuan), maks: 25 },
+      { ad: 'Güvenlik Tamponu', puan: Math.round(tamponPuan), maks: 20 },
+      { ad: 'Senaryo Dayanıklılığı', puan: Math.round(senaryoPuan), maks: 15 },
+    ]
+  };
+}
+
+function updateGuvenSkoru(marj, roi, netKar, toplamMaliyet, sc) {
+  const skor = calcGuvenSkoru(marj, roi, netKar, toplamMaliyet, sc);
+  const pct = skor.toplam / 100;
+  const dashLen = 314;
+  const offset = dashLen - dashLen * pct;
+  const arc = document.getElementById('skorArc');
+  const numEl = document.getElementById('skorNum');
+  const etiket = document.getElementById('skorEtiket');
+  const detay = document.getElementById('skorDetay');
+  if (!arc) return;
+
+  const color = skor.toplam < 30 ? '#ef4444' : skor.toplam < 55 ? '#f59e0b' : skor.toplam < 75 ? '#4f7dff' : '#22c55e';
+  arc.setAttribute('stroke', color);
+  arc.setAttribute('stroke-dashoffset', offset.toFixed(1));
+  numEl.textContent = skor.toplam;
+  numEl.style.color = color;
+
+  const etiketler = [
+    [0, 'Yüksek Risk'], [30, 'Riskli'], [55, 'Kabul Edilebilir'], [75, 'İyi'], [85, 'Mükemmel']
+  ];
+  const e = etiketler.reduce((a, b) => skor.toplam >= b[0] ? b : a);
+  etiket.textContent = e[1];
+  etiket.style.color = color;
+
+  detay.innerHTML = skor.parcalar.map(p => `
+    <div>
+      <div class="flex justify-between" style="margin-bottom:3px">
+        <span style="font-size:12px;color:var(--muted)">${p.ad}</span>
+        <span style="font-size:12px;font-weight:600">${p.puan}/${p.maks}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${(p.puan/p.maks*100).toFixed(0)}%;background:${color}"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ──────────────────────────────────────────────
+// RAKİP ANALİZİ
+// ──────────────────────────────────────────────
+let rakipRows = [];
+let rakipCounter = 0;
+
+function addRakip() {
+  if (rakipRows.length >= 4) return;
+  const id = ++rakipCounter;
+  rakipRows.push({ id, ad: 'Rakip ' + id, fiyat: 0 });
+  renderRakipRows();
+}
+
+function removeRakip(id) {
+  rakipRows = rakipRows.filter(r => r.id !== id);
+  renderRakipRows();
+  updateRakipChart();
+}
+
+function updateRakipRow(id, field, val) {
+  const r = rakipRows.find(r => r.id === id);
+  if (!r) return;
+  r[field] = field === 'fiyat' ? parseFloat(val) || 0 : val;
+  updateRakipChart();
+}
+
+function renderRakipRows() {
+  document.getElementById('rakipRows').innerHTML = rakipRows.map(r => `
+    <div class="flex items-center gap8">
+      <input type="text" value="${r.ad}" onchange="updateRakipRow(${r.id},'ad',this.value)"
+        style="flex:1" placeholder="Rakip adı">
+      <input type="number" value="${r.fiyat}" oninput="updateRakipRow(${r.id},'fiyat',this.value)"
+        style="width:140px" placeholder="Fiyat">
+      <button class="btn btn-danger" onclick="removeRakip(${r.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+function updateRakipChart() {
+  const paraBirimi = document.getElementById('paraBirimi').value;
+  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
+  const bizimFiyat = parseFloat(document.getElementById('teklifFiyati').value) || 0;
+
+  document.getElementById('bizimFiyatDisplay').textContent = sym + fmt(bizimFiyat);
+
+  const tumFiyatlar = [...rakipRows.map(r => r.fiyat), bizimFiyat].filter(f => f > 0);
+  if (tumFiyatlar.length === 0) {
+    document.getElementById('rakipChart').innerHTML = '<p style="color:var(--muted);font-size:13px">Fiyat girisi bekleniyor...</p>';
+    return;
+  }
+  const maks = Math.max(...tumFiyatlar) * 1.1;
+  const sirali = [...rakipRows.map(r => ({ ad: r.ad, fiyat: r.fiyat, bizim: false })),
+    { ad: '⭐ Sizin Teklifiniz', fiyat: bizimFiyat, bizim: true }]
+    .filter(r => r.fiyat > 0)
+    .sort((a, b) => a.fiyat - b.fiyat);
+
+  const html = sirali.map((r, i) => {
+    const pct = (r.fiyat / maks * 100).toFixed(1);
+    const color = r.bizim ? 'var(--accent)' : 'var(--muted)';
+    const rank = i + 1;
+    return `
+      <div class="rakip-card" style="border:1px solid ${r.bizim ? 'var(--accent)' : 'var(--border)'}">
+        <div class="flex justify-between items-center">
+          <span style="font-size:12px;font-weight:${r.bizim?'700':'400'};color:${color}">${rank}. ${r.ad}</span>
+          <span class="font-mono" style="color:${color};font-weight:700">${sym}${fmt(r.fiyat)}</span>
+        </div>
+        <div class="rakip-bar"><div class="rakip-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('rakipChart').innerHTML = html;
+
+  // Yorum
+  const bizimSira = sirali.findIndex(r => r.bizim) + 1;
+  const toplam = sirali.length;
+  const pozisyon = bizimSira === 1 ? 'en düşük teklif' : bizimSira === toplam ? 'en yüksek teklif' : `${bizimSira}. sıra`;
+  const ucuzRakip = sirali.filter(r => !r.bizim && r.fiyat < bizimFiyat);
+  const pahalıRakip = sirali.filter(r => !r.bizim && r.fiyat > bizimFiyat);
+
+  let yorumHtml = `<div style="font-size:13px;line-height:1.7">
+    Teklifiniz <strong style="color:var(--accent)">${toplam} aday arasında ${pozisyon}</strong> konumunda.`;
+  if (ucuzRakip.length > 0) yorumHtml += ` ${ucuzRakip.length} rakip daha düşük fiyat veriyor.`;
+  if (pahalıRakip.length > 0) yorumHtml += ` ${pahalıRakip.length} rakip daha yüksek fiyat veriyor.`;
+  yorumHtml += '</div>';
+  document.getElementById('rakipYorum').innerHTML = yorumHtml;
+}
+
+// ──────────────────────────────────────────────
+// OTOMATİK YORUM ÜRETECİ
+// ──────────────────────────────────────────────
+function generateYorum(gelir, maliyet, netKar, marj, roi, sc, tipTotals) {
+  const sym = document.getElementById('paraBirimi').value === 'TL' ? '₺' : '$';
+  const items = [];
+
+  // Genel değerlendirme
+  if (gelir === 0) {
+    items.push('⚠️ Henüz teklif fiyatı girilmemiş. Analiz için Veri Girişi sekmesinden teklif fiyatı belirleyin.');
+    document.getElementById('otomatikYorum').innerHTML = `<div class="yorum-box">${items.join('<br>')}</div>`;
+    return;
+  }
+
+  if (marj < 0) items.push(`🔴 <strong>Zarar uyarısı:</strong> Mevcut fiyatlamada ${sym}${fmt(Math.abs(netKar))} zarar edilecek. Teklif fiyatını en az ${sym}${fmt(maliyet)} üzerine çekmeniz gerekiyor.`);
+  else if (marj < 8) items.push(`🟡 Kar marjı oldukça düşük (%${marj.toFixed(1)}). Beklenmedik bir maliyet artışı bu projeyi zarara sokabilir.`);
+  else if (marj > 30) items.push(`🟢 Güçlü kar marjı (%${marj.toFixed(1)}). Rekabetçi fiyatlama açısından teklifin biraz düşürülmesi ihale kazanma şansını artırabilir.`);
+  else items.push(`🟢 Kar marjı (%${marj.toFixed(1)}) makul aralıkta.`);
+
+  // Maliyet yapısı analizi
+  const totalM = Object.values(tipTotals).reduce((a,b) => a+b, 0);
+  if (totalM > 0) {
+    const iscilikPct = ((tipTotals.iscilik || 0) / totalM * 100).toFixed(0);
+    const malzemePct = ((tipTotals.malzeme || 0) / totalM * 100).toFixed(0);
+    if (tipTotals.iscilik > tipTotals.malzeme && tipTotals.iscilik > (tipTotals.gider || 0))
+      items.push(`👷 Maliyet yapısının %${iscilikPct}'i işçilikten oluşuyor. İşçilik kaynaklı projelerde verimlilik ve devamsızlık riski gözetilmeli.`);
+    else if (tipTotals.malzeme > tipTotals.iscilik)
+      items.push(`📦 Malzeme maliyetleri toplam maliyetin %${malzemePct}'ini oluşturuyor. Tedarik fiyatlarındaki dalgalanmalar projeyi etkiler — sabit fiyatlı tedarikçi anlaşması yapılması önerilir.`);
+  }
+
+  // Senaryo analizi
+  if (sc.kotumser.kar < 0)
+    items.push(`⚠️ Kötümser senaryoda proje zarar ediyor (${sym}${fmt(sc.kotumser.kar)}). Acil durum bütçesi veya esnek fiyat maddesi eklenebilir.`);
+  else
+    items.push(`✅ Kötümser senaryoda bile proje karlı kalıyor (${sym}${fmt(sc.kotumser.kar)}). Risk tamponu yeterli.`);
+
+  // ROI değerlendirmesi
+  if (roi > 25) items.push(`📈 ROI %${roi.toFixed(1)} ile yüksek — bu projeye sermaye tahsis etmek verimli.`);
+  else if (roi < 10) items.push(`📉 ROI %${roi.toFixed(1)} ile düşük. Alternatif projelerin getirisiyle karşılaştırılması önerilir.`);
+
+  // Rakip konumu
+  const bizimFiyat = parseFloat(document.getElementById('teklifFiyati').value) || 0;
+  if (rakipRows.length > 0 && bizimFiyat > 0) {
+    const daha_ucuz = rakipRows.filter(r => r.fiyat > 0 && r.fiyat < bizimFiyat).length;
+    if (daha_ucuz > 0) items.push(`🏁 ${daha_ucuz} rakip daha düşük fiyat veriyor. Fiyat düşürmek yerine değer önerinizi (garanti, süre, deneyim) ön plana çıkarın.`);
+    else if (rakipRows.filter(r => r.fiyat > 0).length > 0) items.push(`🏆 Tüm rakiplerden düşük fiyat veriyorsunuz. Kazanma olasılığınız yüksek, ancak bıraktığınız marjı tekrar değerlendirin.`);
+  }
+
+  const html = `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+  const el = document.getElementById('otomatikYorum');
+  if (el) el.innerHTML = html;
+}
+
+// ──────────────────────────────────────────────
 // PERSIST
 // ──────────────────────────────────────────────
 function saveLocal() {
@@ -1027,7 +1417,8 @@ function saveLocal() {
       kotumserMaliyet: document.getElementById('kotumserMaliyet').value,
       iyimserGelir: document.getElementById('iyimserGelir').value,
       iyimserMaliyet: document.getElementById('iyimserMaliyet').value,
-      maliyetRows, gelirRows, rowCounter
+      maliyetRows, gelirRows, rowCounter,
+      rakipRows, rakipCounter
     };
     localStorage.setItem('fizibilite_state', JSON.stringify(state));
   } catch(e) {}
@@ -1046,19 +1437,21 @@ function loadLocal() {
     if (s.maliyetRows && s.maliyetRows.length) { maliyetRows = s.maliyetRows; renderMaliyetTable(); }
     if (s.gelirRows && s.gelirRows.length) { gelirRows = s.gelirRows; renderGelirTable(); }
     if (s.rowCounter) rowCounter = s.rowCounter;
+    if (s.rakipRows && s.rakipRows.length) { rakipRows = s.rakipRows; renderRakipRows(); }
+    if (s.rakipCounter) rakipCounter = s.rakipCounter;
   } catch(e) {}
 }
 
 function clearAll() {
   if (!confirm('Tüm verileri temizlemek istiyor musunuz?')) return;
   localStorage.removeItem('fizibilite_state');
-  maliyetRows = []; gelirRows = []; rowCounter = 0;
+  maliyetRows = []; gelirRows = []; rakipRows = []; rowCounter = 0; rakipCounter = 0;
   ['projeAdi','musteri','notlar','teklifFiyati'].forEach(k => document.getElementById(k).value = '');
   document.getElementById('kdvOrani').value = 20;
   document.getElementById('hedefMarj').value = 20;
   document.getElementById('tarih').value = new Date().toISOString().split('T')[0];
   addRow('malzeme'); addRow('iscilik'); addRow('gider');
-  addGelirRow();
+  addGelirRow(); addRakip();
   calculate();
 }
 
