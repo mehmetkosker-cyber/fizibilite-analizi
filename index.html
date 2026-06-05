@@ -227,6 +227,63 @@
   .total-row td:first-child { border-radius: 6px 0 0 6px; }
   .total-row td:last-child { border-radius: 0 6px 6px 0; }
 
+  /* Proje yönetimi modalı */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 680px;
+    max-width: 95vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .proje-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: border-color .15s;
+    cursor: pointer;
+  }
+  .proje-item:hover { border-color: var(--accent); }
+  .proje-item-info { flex: 1; }
+  .proje-item-name { font-weight: 600; font-size: 14px; }
+  .proje-item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Vergi paneli */
+  .vergi-satir {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(46,51,82,.5);
+    font-size: 13px;
+  }
+  .vergi-satir:last-child { border-bottom: none; }
+  .vergi-satir.toplam { font-weight: 700; font-size: 15px; padding-top: 12px; }
+
   .chart-container { position: relative; height: 280px; }
 
   /* Print */
@@ -249,12 +306,35 @@
     <p>Proje / İhale Teklif Değerlendirme Aracı</p>
   </div>
   <div class="header-actions no-print">
-    <button class="btn btn-ghost btn-sm" onclick="clearAll()">Temizle</button>
+    <button class="btn btn-ghost btn-sm" onclick="openProjeModal()">Projeler</button>
+    <button class="btn btn-ghost btn-sm" onclick="projeKaydet()">Kaydet</button>
+    <button class="btn btn-ghost btn-sm" onclick="clearAll()">Yeni Proje</button>
     <button class="btn btn-ghost btn-sm" onclick="exportCSV()">CSV Dışa Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="exportJSON()">JSON Dışa Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="importJSON()">JSON İçe Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="window.print()">Yazdır</button>
     <button class="btn btn-success btn-sm" onclick="calculate()">Hesapla &amp; Güncelle</button>
+  </div>
+</div>
+
+<!-- Proje Yönetimi Modalı -->
+<div class="modal-overlay" id="projeModal" onclick="if(event.target===this)closeProjeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div style="font-size:16px;font-weight:700">Kayıtlı Projeler</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Projeye tıklayarak yükleyin</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closeProjeModal()">✕ Kapat</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:14px;display:flex;gap:8px">
+        <input type="text" id="projeArama" placeholder="Proje ara..." oninput="renderProjeListesi()"
+          style="flex:1">
+        <button class="btn btn-primary btn-sm" onclick="projeKaydet()">+ Mevcut Projeyi Kaydet</button>
+      </div>
+      <div id="projeListesi"></div>
+    </div>
   </div>
 </div>
 
@@ -475,7 +555,8 @@
     <div class="grid3" id="kpiGrid">
       <div class="kpi"><div class="kpi-label">Toplam Gelir</div><div class="kpi-value text-green" id="k-gelir">-</div></div>
       <div class="kpi"><div class="kpi-label">Toplam Maliyet</div><div class="kpi-value text-red" id="k-maliyet">-</div></div>
-      <div class="kpi"><div class="kpi-label">Net Kar</div><div class="kpi-value" id="k-kar">-</div></div>
+      <div class="kpi"><div class="kpi-label">Brüt Kâr</div><div class="kpi-value" id="k-kar">-</div></div>
+      <div class="kpi"><div class="kpi-label">Vergi Sonrası Net Kâr</div><div class="kpi-value" id="k-netkar">-</div><div class="kpi-sub" id="k-netkar-sub"></div></div>
       <div class="kpi"><div class="kpi-label">Kar Marjı</div><div class="kpi-value" id="k-marj">-</div><div class="kpi-sub" id="k-marj-sub"></div></div>
       <div class="kpi"><div class="kpi-label">ROI</div><div class="kpi-value" id="k-roi">-</div></div>
       <div class="kpi"><div class="kpi-label">KDV Dahil Maliyet</div><div class="kpi-value text-yellow" id="k-kdv">-</div></div>
@@ -507,6 +588,19 @@
     <div class="card mt20">
       <div class="card-title"><span>⚖️</span> Başa Baş Analizi</div>
       <div class="grid3" id="basabas"></div>
+    </div>
+
+    <div class="card mt20">
+      <div class="card-title"><span>🧾</span> Vergi Sonrası Net Kâr Hesabı</div>
+      <div class="grid2" style="gap:20px">
+        <div>
+          <label>Kurumlar Vergisi Oranı (%)</label>
+          <input type="number" id="kvOrani" value="25" min="0" max="100" step="1" oninput="calculate()">
+          <label style="margin-top:12px">Stopaj Oranı (%) <span style="font-size:11px;color:var(--muted)">(opsiyonel, 0 = uygulanmaz)</span></label>
+          <input type="number" id="stopajOrani" value="0" min="0" max="30" step="1" oninput="calculate()">
+        </div>
+        <div id="vergiTablosu" style="display:flex;flex-direction:column;justify-content:center"></div>
+      </div>
     </div>
   </div>
 
@@ -775,6 +869,10 @@ function calculate() {
   setKPI('k-maliyet', sym + fmt(toplamMaliyetNet), 'text-red');
   setKPI('k-kar', sym + fmt(netKar), netKar >= 0 ? 'text-green' : 'text-red');
   setKPI('k-kdv', sym + fmt(toplamMaliyetKDV), 'text-yellow');
+  const vergi = calcVergi(netKar);
+  setKPI('k-netkar', sym + fmt(vergi.gercekNet), vergi.gercekNet >= 0 ? 'text-green' : 'text-red');
+  const kvO = parseFloat(document.getElementById('kvOrani').value) || 0;
+  document.getElementById('k-netkar-sub').textContent = 'KV %' + kvO + ' düşüldükten sonra';
 
   const marjEl = document.getElementById('k-marj');
   marjEl.textContent = karMarji.toFixed(1) + '%';
@@ -858,6 +956,9 @@ function calculate() {
 
   // Charts
   updateCharts(tipTotals, toplamGelir, toplamMaliyetNet, netKar, sc, toplamMaliyetNet, sym);
+
+  // Vergi tablosu
+  renderVergiTablosu(netKar, sym);
 
   // Güven skoru
   updateGuvenSkoru(karMarji, roi, netKar, toplamMaliyetNet, sc);
@@ -1400,28 +1501,201 @@ function generateYorum(gelir, maliyet, netKar, marj, roi, sc, tipTotals) {
 }
 
 // ──────────────────────────────────────────────
+// VERGİ HESAPLAMASI
+// ──────────────────────────────────────────────
+function calcVergi(netKar) {
+  const kvOrani = parseFloat(document.getElementById('kvOrani').value) / 100 || 0;
+  const stopajOrani = parseFloat(document.getElementById('stopajOrani').value) / 100 || 0;
+  const kvTutar = netKar > 0 ? netKar * kvOrani : 0;
+  const karSonrasiKV = netKar - kvTutar;
+  const stopajTutar = karSonrasiKV > 0 ? karSonrasiKV * stopajOrani : 0;
+  const gercekNet = karSonrasiKV - stopajTutar;
+  return { kvTutar, stopajTutar, gercekNet, karSonrasiKV };
+}
+
+function renderVergiTablosu(netKar, sym) {
+  const v = calcVergi(netKar);
+  const el = document.getElementById('vergiTablosu');
+  if (!el) return;
+  const kvOrani = parseFloat(document.getElementById('kvOrani').value) || 0;
+  const stopajOrani = parseFloat(document.getElementById('stopajOrani').value) || 0;
+  el.innerHTML = `
+    <div class="vergi-satir">
+      <span style="color:var(--muted)">Brüt Kâr (KDV hariç)</span>
+      <span class="font-mono">${sym}${fmt(netKar)}</span>
+    </div>
+    <div class="vergi-satir">
+      <span style="color:var(--yellow)">— Kurumlar Vergisi (%${kvOrani})</span>
+      <span class="font-mono text-yellow">- ${sym}${fmt(v.kvTutar)}</span>
+    </div>
+    ${stopajOrani > 0 ? `
+    <div class="vergi-satir">
+      <span style="color:var(--yellow)">— Stopaj (%${stopajOrani})</span>
+      <span class="font-mono text-yellow">- ${sym}${fmt(v.stopajTutar)}</span>
+    </div>` : ''}
+    <div class="vergi-satir toplam">
+      <span>Vergi Sonrası Gerçek Net Kâr</span>
+      <span class="font-mono ${v.gercekNet >= 0 ? 'text-green' : 'text-red'}">${sym}${fmt(v.gercekNet)}</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted)">
+      Efektif vergi yükü: %${netKar > 0 ? (((v.kvTutar + v.stopajTutar) / netKar) * 100).toFixed(1) : '0'}
+    </div>`;
+}
+
+// ──────────────────────────────────────────────
+// PROJE YÖNETİMİ
+// ──────────────────────────────────────────────
+function getAllProjects() {
+  try { return JSON.parse(localStorage.getItem('fizibilite_projeler') || '[]'); }
+  catch(e) { return []; }
+}
+function saveAllProjects(list) {
+  localStorage.setItem('fizibilite_projeler', JSON.stringify(list));
+}
+
+function projeKaydet() {
+  const ad = document.getElementById('projeAdi').value.trim() || 'İsimsiz Proje';
+  const list = getAllProjects();
+  const id = Date.now().toString();
+  const state = buildState();
+  const toplamMaliyet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
+  const gelirKalem = gelirRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
+  const gelir = gelirKalem > 0 ? gelirKalem : parseFloat(document.getElementById('teklifFiyati').value) || 0;
+  const kar = gelir - toplamMaliyet;
+  const marj = gelir > 0 ? (kar / gelir * 100).toFixed(1) : 0;
+
+  // Aynı adlı proje varsa güncelle
+  const mevcutIdx = list.findIndex(p => p.ad === ad);
+  const kayit = { id: mevcutIdx >= 0 ? list[mevcutIdx].id : id, ad, tarih: new Date().toLocaleDateString('tr-TR'), marj, gelir, maliyet: toplamMaliyet, state };
+  if (mevcutIdx >= 0) list[mevcutIdx] = kayit;
+  else list.unshift(kayit);
+
+  saveAllProjects(list);
+  renderProjeListesi();
+  showToast(`"${ad}" kaydedildi.`);
+}
+
+function projeSil(id, e) {
+  e.stopPropagation();
+  const list = getAllProjects().filter(p => p.id !== id);
+  saveAllProjects(list);
+  renderProjeListesi();
+}
+
+function projeYukle(id) {
+  const p = getAllProjects().find(p => p.id === id);
+  if (!p) return;
+  if (!confirm(`"${p.ad}" projesini yüklemek istiyor musunuz? Kaydedilmemiş değişiklikler kaybolur.`)) return;
+  const s = p.state;
+  Object.keys(s).forEach(k => {
+    const el = document.getElementById(k);
+    if (el && typeof s[k] === 'string') el.value = s[k];
+  });
+  maliyetRows = s.maliyetRows || [];
+  gelirRows = s.gelirRows || [];
+  rakipRows = s.rakipRows || [];
+  rowCounter = s.rowCounter || 0;
+  rakipCounter = s.rakipCounter || 0;
+  renderMaliyetTable();
+  renderGelirTable();
+  renderRakipRows();
+  calculate();
+  closeProjeModal();
+  showToast(`"${p.ad}" yüklendi.`);
+}
+
+function projeCopla(id, e) {
+  e.stopPropagation();
+  const list = getAllProjects();
+  const p = list.find(p => p.id === id);
+  if (!p) return;
+  const kopya = { ...p, id: Date.now().toString(), ad: p.ad + ' (Kopya)', tarih: new Date().toLocaleDateString('tr-TR') };
+  list.unshift(kopya);
+  saveAllProjects(list);
+  renderProjeListesi();
+  showToast('Proje kopyalandı.');
+}
+
+function renderProjeListesi() {
+  const arama = (document.getElementById('projeArama')?.value || '').toLowerCase();
+  const list = getAllProjects().filter(p => p.ad.toLowerCase().includes(arama));
+  const el = document.getElementById('projeListesi');
+  if (!el) return;
+  if (list.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">Henüz kayıtlı proje yok.<br>Mevcut projeyi "Kaydet" ile saklayın.</div>';
+    return;
+  }
+  const paraBirimi = document.getElementById('paraBirimi')?.value || 'TL';
+  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
+  el.innerHTML = list.map(p => {
+    const marjColor = p.marj < 0 ? 'var(--red)' : p.marj < 10 ? 'var(--yellow)' : 'var(--green)';
+    return `
+    <div class="proje-item" onclick="projeYukle('${p.id}')">
+      <div style="font-size:28px">📋</div>
+      <div class="proje-item-info">
+        <div class="proje-item-name">${p.ad}</div>
+        <div class="proje-item-meta">${p.tarih} · Gelir: ${sym}${fmt(p.gelir)} · Maliyet: ${sym}${fmt(p.maliyet)}</div>
+      </div>
+      <div style="text-align:right;min-width:70px">
+        <div style="font-size:16px;font-weight:700;color:${marjColor}">%${p.marj}</div>
+        <div style="font-size:11px;color:var(--muted)">kar marjı</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="btn btn-ghost btn-sm" onclick="projeCopla('${p.id}',event)" title="Kopyala">⎘</button>
+        <button class="btn btn-danger" onclick="projeSil('${p.id}',event)" title="Sil">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openProjeModal() {
+  renderProjeListesi();
+  document.getElementById('projeModal').classList.add('open');
+}
+function closeProjeModal() {
+  document.getElementById('projeModal').classList.remove('open');
+}
+
+function buildState() {
+  return {
+    projeAdi: document.getElementById('projeAdi').value,
+    musteri: document.getElementById('musteri').value,
+    tarih: document.getElementById('tarih').value,
+    paraBirimi: document.getElementById('paraBirimi').value,
+    kdvOrani: document.getElementById('kdvOrani').value,
+    teklifFiyati: document.getElementById('teklifFiyati').value,
+    notlar: document.getElementById('notlar').value,
+    hedefMarj: document.getElementById('hedefMarj').value,
+    kotumserGelir: document.getElementById('kotumserGelir').value,
+    kotumserMaliyet: document.getElementById('kotumserMaliyet').value,
+    iyimserGelir: document.getElementById('iyimserGelir').value,
+    iyimserMaliyet: document.getElementById('iyimserMaliyet').value,
+    kvOrani: document.getElementById('kvOrani').value,
+    stopajOrani: document.getElementById('stopajOrani').value,
+    maliyetRows, gelirRows, rowCounter, rakipRows, rakipCounter
+  };
+}
+
+// Toast bildirimi
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:2000;opacity:0;transition:opacity .3s;pointer-events:none';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+
+// ──────────────────────────────────────────────
 // PERSIST
 // ──────────────────────────────────────────────
 function saveLocal() {
-  try {
-    const state = {
-      projeAdi: document.getElementById('projeAdi').value,
-      musteri: document.getElementById('musteri').value,
-      tarih: document.getElementById('tarih').value,
-      paraBirimi: document.getElementById('paraBirimi').value,
-      kdvOrani: document.getElementById('kdvOrani').value,
-      teklifFiyati: document.getElementById('teklifFiyati').value,
-      notlar: document.getElementById('notlar').value,
-      hedefMarj: document.getElementById('hedefMarj').value,
-      kotumserGelir: document.getElementById('kotumserGelir').value,
-      kotumserMaliyet: document.getElementById('kotumserMaliyet').value,
-      iyimserGelir: document.getElementById('iyimserGelir').value,
-      iyimserMaliyet: document.getElementById('iyimserMaliyet').value,
-      maliyetRows, gelirRows, rowCounter,
-      rakipRows, rakipCounter
-    };
-    localStorage.setItem('fizibilite_state', JSON.stringify(state));
-  } catch(e) {}
+  try { localStorage.setItem('fizibilite_state', JSON.stringify(buildState())); } catch(e) {}
 }
 
 function loadLocal() {
@@ -1430,7 +1704,7 @@ function loadLocal() {
     if (!raw) return;
     const s = JSON.parse(raw);
     ['projeAdi','musteri','tarih','paraBirimi','kdvOrani','teklifFiyati','notlar','hedefMarj',
-     'kotumserGelir','kotumserMaliyet','iyimserGelir','iyimserMaliyet'].forEach(k => {
+     'kotumserGelir','kotumserMaliyet','iyimserGelir','iyimserMaliyet','kvOrani','stopajOrani'].forEach(k => {
       const el = document.getElementById(k);
       if (el && s[k] !== undefined) el.value = s[k];
     });
@@ -1449,6 +1723,8 @@ function clearAll() {
   ['projeAdi','musteri','notlar','teklifFiyati'].forEach(k => document.getElementById(k).value = '');
   document.getElementById('kdvOrani').value = 20;
   document.getElementById('hedefMarj').value = 20;
+  document.getElementById('kvOrani').value = 25;
+  document.getElementById('stopajOrani').value = 0;
   document.getElementById('tarih').value = new Date().toISOString().split('T')[0];
   addRow('malzeme'); addRow('iscilik'); addRow('gider');
   addGelirRow(); addRakip();
