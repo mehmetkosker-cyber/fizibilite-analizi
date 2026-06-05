@@ -151,6 +151,7 @@
   .text-red { color: var(--red); }
   .text-yellow { color: var(--yellow); }
   .text-cyan { color: var(--cyan); }
+  input[type=range] { background: transparent; }
   .text-accent { color: var(--accent); }
 
   /* Risk badge */
@@ -218,6 +219,7 @@
   </div>
   <div class="header-actions no-print">
     <button class="btn btn-ghost btn-sm" onclick="clearAll()">Temizle</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()">CSV Dışa Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="exportJSON()">JSON Dışa Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="importJSON()">JSON İçe Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="window.print()">Yazdır</button>
@@ -259,9 +261,34 @@
         <textarea id="notlar" rows="3" placeholder="Teklif hakkında notlar..."></textarea>
       </div>
 
-      <!-- Sağ: Ayarlar & Hızlı Özet -->
+      <!-- Sağ: Fiyat Öneri + Ayarlar -->
       <div>
         <div class="card">
+          <div class="card-title"><span>🧮</span> Fiyat Öneri Aracı</div>
+          <div class="grid2" style="gap:10px">
+            <div>
+              <label>Hedef Kar Marjı (%)</label>
+              <input type="number" id="oneriMarj" value="20" step="1" oninput="updateOneri()">
+              <div style="margin-top:8px;padding:10px;background:var(--surface2);border-radius:6px">
+                <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Marj Bazlı Min. Fiyat</div>
+                <div id="oneriMarjFiyat" class="font-mono text-accent font-bold" style="font-size:18px">—</div>
+              </div>
+            </div>
+            <div>
+              <label>Maliyet Üstü Kâr Oranı (%)</label>
+              <input type="number" id="oneriMarkup" value="25" step="1" oninput="updateOneri()">
+              <div style="margin-top:8px;padding:10px;background:var(--surface2);border-radius:6px">
+                <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Markup Bazlı Fiyat</div>
+                <div id="oneriMarkupFiyat" class="font-mono text-cyan font-bold" style="font-size:18px">—</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="kullanFiyat('marj')">Marj Fiyatını Kullan</button>
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="kullanFiyat('markup')">Markup Fiyatını Kullan</button>
+          </div>
+        </div>
+        <div class="card mt16">
           <div class="card-title"><span>⚙️</span> Risk Parametreleri</div>
           <label>Kötümser Senaryo - Gelir Değişimi (%)</label>
           <input type="number" id="kotumserGelir" value="-20" step="1">
@@ -280,6 +307,25 @@
             <p style="color:var(--muted);font-size:13px">Veri girdikten sonra "Hesapla" butonuna basın.</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Kar Simülatörü -->
+    <div class="card mt16">
+      <div class="flex items-center justify-between" style="margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0"><span>🎛️</span> Anlık Kar Simülatörü — Teklif Fiyatını Sürükle</div>
+        <span style="font-size:12px;color:var(--muted)" id="simLabel">0</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span style="font-size:12px;color:var(--muted)" id="simMin">—</span>
+        <input type="range" id="simSlider" min="0" max="1000000" value="0" step="100"
+          style="flex:1;accent-color:var(--accent);height:6px;cursor:pointer" oninput="updateSim()">
+        <span style="font-size:12px;color:var(--muted)" id="simMax">—</span>
+      </div>
+      <div class="grid3" style="margin-top:12px" id="simOutput">
+        <div class="kpi"><div class="kpi-label">Teklif Fiyatı</div><div class="kpi-value text-accent font-mono" id="simFiyat">—</div></div>
+        <div class="kpi"><div class="kpi-label">Net Kar</div><div class="kpi-value font-mono" id="simKar">—</div></div>
+        <div class="kpi"><div class="kpi-label">Kar Marjı</div><div class="kpi-value font-mono" id="simMarj">—</div></div>
       </div>
     </div>
 
@@ -426,6 +472,24 @@
     <div class="card mt20">
       <div class="card-title"><span>🔍</span> Duyarlılık Analizi — Maliyet Artışına Göre Kar Marjı</div>
       <div class="chart-container" style="height:220px"><canvas id="chartDuyarlilik"></canvas></div>
+    </div>
+
+    <div class="card mt20">
+      <div class="card-title"><span>📋</span> Duyarlılık Tablosu</div>
+      <table class="data-table" id="duyarlilikTable">
+        <thead>
+          <tr>
+            <th>Maliyet Değişimi</th>
+            <th class="text-right">Maliyet</th>
+            <th class="text-right">Gelir</th>
+            <th class="text-right">Net Kar</th>
+            <th class="text-right">Kar Marjı</th>
+            <th class="text-right">ROI</th>
+            <th>Durum</th>
+          </tr>
+        </thead>
+        <tbody id="duyarlilikBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -635,6 +699,7 @@ function calculate() {
 
   // Başa baş
   const basaBasFiyat = toplamMaliyetNet;
+  _simMaliyet = toplamMaliyetNet;
   const hedefFiyat = toplamMaliyetNet / (1 - hedefMarj / 100);
   document.getElementById('basabas').innerHTML = `
     <div class="kpi"><div class="kpi-label">Başa Baş Noktası</div><div class="kpi-value text-yellow font-mono">${sym}${fmt(basaBasFiyat)}</div><div class="kpi-sub">Bu fiyatın altında zarar</div></div>
@@ -661,11 +726,37 @@ function calculate() {
   // Risk göstergesi
   renderRiskGosterge(karMarji, netKar, toplamGelir, sym);
 
+  // Duyarlılık tablosu
+  const duyTbody = document.getElementById('duyarlilikBody');
+  if (duyTbody) {
+    const duyArtislar = [-30, -20, -10, 0, 10, 20, 30, 40, 50];
+    duyTbody.innerHTML = duyArtislar.map(a => {
+      const ym = toplamMaliyetNet * (1 + a / 100);
+      const duyKar = toplamGelir - ym;
+      const duyMarj = toplamGelir > 0 ? (duyKar / toplamGelir) * 100 : 0;
+      const duyRoi = ym > 0 ? (duyKar / ym) * 100 : 0;
+      const durum = duyMarj < 0 ? '<span class="badge badge-red">Zarar</span>' : duyMarj < 10 ? '<span class="badge badge-yellow">Düşük</span>' : '<span class="badge badge-green">İyi</span>';
+      const color = duyMarj < 0 ? 'var(--red)' : duyMarj < 10 ? 'var(--yellow)' : 'var(--green)';
+      const isBase = a === 0;
+      return `<tr style="${isBase ? 'background:rgba(79,125,255,.06)' : ''}">
+        <td style="font-weight:${isBase?'700':'400'}">${isBase ? '0% (Baz)' : (a > 0 ? '+' : '') + a + '%'}</td>
+        <td class="text-right font-mono">${sym}${fmt(ym)}</td>
+        <td class="text-right font-mono">${sym}${fmt(toplamGelir)}</td>
+        <td class="text-right font-mono" style="color:${color};font-weight:700">${sym}${fmt(duyKar)}</td>
+        <td class="text-right font-mono" style="color:${color};font-weight:700">${duyMarj.toFixed(1)}%</td>
+        <td class="text-right font-mono">${duyRoi.toFixed(1)}%</td>
+        <td>${durum}</td>
+      </tr>`;
+    }).join('');
+  }
+
   // Rapor
   renderRapor(sym, toplamGelir, toplamMaliyetNet, toplamMaliyetKDV, netKar, karMarji, roi, sc, hedefMarj, basaBasFiyat);
 
-  // Charts
+  // Charts — sym de iletiliyor
   updateCharts(tipTotals, toplamGelir, toplamMaliyetNet, netKar, sc, toplamMaliyetNet, sym);
+  // Duyarlılık tablosu için sym dışarı sızdırılıyor (closure üzerinden)
+
 
   saveLocal();
 }
@@ -863,12 +954,12 @@ function updateCharts(tipTotals, gelir, maliyet, kar, sc, totalMal, sym) {
   // Duyarlılık analizi
   if (chartDuyarlilik) chartDuyarlilik.destroy();
   const ctx4 = document.getElementById('chartDuyarlilik');
+  const artislar = [-30, -20, -10, 0, 10, 20, 30, 40, 50];
+  const marjlar = artislar.map(a => {
+    const yeniMaliyet = totalMal * (1 + a / 100);
+    return gelir > 0 ? ((gelir - yeniMaliyet) / gelir) * 100 : 0;
+  });
   if (ctx4) {
-    const artislar = [-30, -20, -10, 0, 10, 20, 30, 40, 50];
-    const marjlar = artislar.map(a => {
-      const yeniMaliyet = totalMal * (1 + a / 100);
-      return gelir > 0 ? ((gelir - yeniMaliyet) / gelir) * 100 : 0;
-    });
     chartDuyarlilik = new Chart(ctx4, {
       type: 'line',
       data: {
@@ -894,6 +985,11 @@ function updateCharts(tipTotals, gelir, maliyet, kar, sc, totalMal, sym) {
       }
     });
   }
+
+  // Fiyat öneri aracı güncelle
+  updateOneri();
+  // Simülatör sınırlarını güncelle
+  updateSimLimits(totalMal, sym);
 }
 
 // ──────────────────────────────────────────────
@@ -964,6 +1060,124 @@ function clearAll() {
   addRow('malzeme'); addRow('iscilik'); addRow('gider');
   addGelirRow();
   calculate();
+}
+
+// ──────────────────────────────────────────────
+// FİYAT ÖNERİ & SİMÜLATÖR
+// ──────────────────────────────────────────────
+function updateOneri() {
+  const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) / 100 || 0;
+  const paraBirimi = document.getElementById('paraBirimi').value;
+  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
+  const toplamMaliyetNet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
+
+  const marj = parseFloat(document.getElementById('oneriMarj').value) / 100 || 0;
+  const markup = parseFloat(document.getElementById('oneriMarkup').value) / 100 || 0;
+
+  const marjFiyat = marj < 1 ? toplamMaliyetNet / (1 - marj) : 0;
+  const markupFiyat = toplamMaliyetNet * (1 + markup);
+
+  const mEl = document.getElementById('oneriMarjFiyat');
+  const kEl = document.getElementById('oneriMarkupFiyat');
+  if (mEl) mEl.textContent = sym + fmt(marjFiyat);
+  if (kEl) kEl.textContent = sym + fmt(markupFiyat);
+}
+
+function kullanFiyat(tip) {
+  const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) / 100 || 0;
+  const toplamMaliyetNet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
+  let fiyat;
+  if (tip === 'marj') {
+    const marj = parseFloat(document.getElementById('oneriMarj').value) / 100 || 0;
+    fiyat = marj < 1 ? toplamMaliyetNet / (1 - marj) : 0;
+  } else {
+    const markup = parseFloat(document.getElementById('oneriMarkup').value) / 100 || 0;
+    fiyat = toplamMaliyetNet * (1 + markup);
+  }
+  document.getElementById('teklifFiyati').value = fiyat.toFixed(2);
+  calculate();
+}
+
+let _simMaliyet = 0;
+function updateSimLimits(maliyet, sym) {
+  _simMaliyet = maliyet;
+  const slider = document.getElementById('simSlider');
+  if (!slider) return;
+  const min = Math.max(0, maliyet * 0.5);
+  const max = maliyet * 2.5 || 1000000;
+  slider.min = min.toFixed(0);
+  slider.max = max.toFixed(0);
+  slider.step = Math.max(1, (max - min) / 500).toFixed(0);
+  const current = parseFloat(document.getElementById('teklifFiyati').value) || maliyet;
+  slider.value = Math.min(max, Math.max(min, current));
+  document.getElementById('simMin').textContent = sym + fmt(min);
+  document.getElementById('simMax').textContent = sym + fmt(max);
+  updateSim();
+}
+
+function updateSim() {
+  const paraBirimi = document.getElementById('paraBirimi').value;
+  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
+  const slider = document.getElementById('simSlider');
+  if (!slider) return;
+  const fiyat = parseFloat(slider.value) || 0;
+  const maliyet = _simMaliyet;
+  const kar = fiyat - maliyet;
+  const marj = fiyat > 0 ? (kar / fiyat) * 100 : 0;
+  document.getElementById('simLabel').textContent = sym + fmt(fiyat);
+  const karEl = document.getElementById('simKar');
+  const marjEl = document.getElementById('simMarj');
+  const color = kar >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('simFiyat').textContent = sym + fmt(fiyat);
+  karEl.textContent = sym + fmt(kar);
+  karEl.style.color = color;
+  marjEl.textContent = marj.toFixed(1) + '%';
+  marjEl.style.color = color;
+}
+
+// ──────────────────────────────────────────────
+// CSV EXPORT
+// ──────────────────────────────────────────────
+function exportCSV() {
+  const paraBirimi = document.getElementById('paraBirimi').value;
+  const projeAdi = document.getElementById('projeAdi').value || 'proje';
+  const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) / 100 || 0;
+
+  let csv = 'sep=;\n';
+  csv += `Proje;${projeAdi}\n`;
+  csv += `Tarih;${document.getElementById('tarih').value}\n`;
+  csv += `Para Birimi;${paraBirimi}\n\n`;
+
+  csv += 'MALİYET KALEMLERİ\n';
+  csv += 'Tip;Kalem Adı;Miktar;Birim;Birim Fiyat;Toplam;KDV Dahil Toplam\n';
+  maliyetRows.forEach(r => {
+    const net = r.miktar * r.birimFiyat;
+    const kdv = r.kdv ? net * kdvOrani : 0;
+    csv += `${r.tip};${r.ad};${r.miktar};${r.birim};${r.birimFiyat.toFixed(2)};${net.toFixed(2)};${(net+kdv).toFixed(2)}\n`;
+  });
+  const toplamNet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
+  csv += `;;;;;;Toplam;${toplamNet.toFixed(2)}\n\n`;
+
+  csv += 'GELİR KALEMLERİ\n';
+  csv += 'Kalem Adı;Miktar;Birim;Birim Fiyat;Toplam\n';
+  gelirRows.forEach(r => {
+    csv += `${r.ad};${r.miktar};${r.birim};${r.birimFiyat.toFixed(2)};${(r.miktar*r.birimFiyat).toFixed(2)}\n`;
+  });
+  const teklifFiyati = parseFloat(document.getElementById('teklifFiyati').value) || 0;
+  const toplamGelir = gelirRows.reduce((s,r) => s + r.miktar*r.birimFiyat, 0) || teklifFiyati;
+  const netKar = toplamGelir - toplamNet;
+  const karMarji = toplamGelir > 0 ? (netKar / toplamGelir) * 100 : 0;
+  csv += `\nANALİZ SONUÇLARI\n`;
+  csv += `Toplam Gelir;${toplamGelir.toFixed(2)}\n`;
+  csv += `Toplam Maliyet;${toplamNet.toFixed(2)}\n`;
+  csv += `Net Kar;${netKar.toFixed(2)}\n`;
+  csv += `Kar Marjı (%);${karMarji.toFixed(2)}\n`;
+
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fizibilite_' + projeAdi.replace(/\s+/g,'_') + '_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
 }
 
 function exportJSON() {
