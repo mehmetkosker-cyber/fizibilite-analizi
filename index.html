@@ -936,6 +936,36 @@
       <div class="grid3" id="basabas"></div>
     </div>
 
+    <!-- Başa Baş Nokta Grafiği — Adet Bazlı -->
+    <div class="card mt20">
+      <div class="card-title"><span>📉</span> Başa Baş Nokta Grafiği — Adet / Birim Bazlı</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">
+        Sabit ve değişken maliyetleri ayırarak kaç birimde kâra geçeceğinizi hesaplayın. Üretim, hizmet satışı veya tekrar eden projeler için idealdir.
+      </p>
+      <div class="grid3" style="gap:14px;margin-bottom:14px">
+        <div>
+          <label style="margin-top:0">Birim Satış Fiyatı (₺)</label>
+          <input type="number" id="bepSatisFiyati" value="0" min="0" step="any"
+            oninput="renderBasaBasGrafik()" placeholder="Ör: 5.000">
+        </div>
+        <div>
+          <label style="margin-top:0">Birim Değişken Maliyet (₺)</label>
+          <input type="number" id="bepDegiskenMaliyet" value="0" min="0" step="any"
+            oninput="renderBasaBasGrafik()" placeholder="Ör: 3.000">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Ham madde, işçilik, nakliye vb.</div>
+        </div>
+        <div>
+          <label style="margin-top:0">Toplam Sabit Maliyet (₺)</label>
+          <input type="number" id="bepSabitMaliyet" value="0" min="0" step="any"
+            oninput="renderBasaBasGrafik()" placeholder="Ör: 50.000">
+          <button class="btn btn-ghost btn-sm" style="margin-top:6px;width:100%;font-size:11px"
+            onclick="bepMaliyetiOtoDoldur()">↑ Hesaplanan Toplam Maliyeti Kullan</button>
+        </div>
+      </div>
+      <div id="bepKpiGrid" style="display:none;margin-bottom:16px"></div>
+      <div class="chart-container" style="height:300px"><canvas id="chartBep"></canvas></div>
+    </div>
+
     <div class="card mt20">
       <div class="card-title"><span>💹</span> ROI &amp; Geri Ödeme Analizi</div>
       <div class="grid2" style="gap:20px">
@@ -1107,6 +1137,52 @@
         <tbody id="duyarlilikBody"></tbody>
       </table>
     </div>
+
+    <!-- Monte Carlo Simülasyonu -->
+    <div class="card mt20">
+      <div class="flex items-center justify-between" style="margin-bottom:12px">
+        <div>
+          <div class="card-title" style="margin-bottom:2px"><span>🎲</span> Monte Carlo Simülasyonu</div>
+          <p style="font-size:12px;color:var(--muted)">Gelir ve maliyet belirsizliklerini olasılıksal olarak modelleyerek kâr dağılımını ve kâr etme olasılığını hesaplar.</p>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;margin-left:16px">
+          <input type="checkbox" id="mcAktif" onchange="calculate()"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+          Simülasyonu aktif et
+        </label>
+      </div>
+
+      <div id="mcGirdiler" style="display:none">
+        <div class="grid3" style="gap:14px;margin-bottom:16px">
+          <div>
+            <label style="margin-top:0">Gelir Belirsizliği (±%)</label>
+            <input type="number" id="mcGelirSigma" value="15" min="1" max="60" step="1" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Gelirin standart sapması — ör: ±15% normal dağılım</div>
+          </div>
+          <div>
+            <label style="margin-top:0">Maliyet Belirsizliği (±%)</label>
+            <input type="number" id="mcMaliyetSigma" value="10" min="1" max="60" step="1" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Maliyetin standart sapması</div>
+          </div>
+          <div>
+            <label style="margin-top:0">Simülasyon Sayısı</label>
+            <select id="mcIterasyon" onchange="calculate()">
+              <option value="500">500</option>
+              <option value="1000" selected>1.000</option>
+              <option value="5000">5.000</option>
+              <option value="10000">10.000</option>
+            </select>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Daha fazla = daha hassas sonuç</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="mcSonuclar">
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">
+          Simülasyonu aktif etmek için kutucuğu işaretleyin.
+        </p>
+      </div>
+    </div>
   </div>
 
   <!-- TAB 4: RAKİP ANALİZİ -->
@@ -1223,6 +1299,8 @@
 <script src="src/projeler.js"></script>
 <script src="src/ekipman.js"></script>
 <script src="src/vade.js"></script>
+<script src="src/montecarlo.js"></script>
+<script src="src/basabas.js"></script>
 <script src="src/init.js"></script>
 </body>
 </html>

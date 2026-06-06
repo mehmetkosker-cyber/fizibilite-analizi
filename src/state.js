@@ -33,3 +33,8 @@ let ekipmanCounter = 0;
 
 // Dashboard chart
 let dashChartMaliyet = null;
+
+// Monte Carlo & BEP için son hesaplama değerleri
+let _lastGelir   = 0;
+let _lastMaliyet = 0;
+let _lastSym     = '₺';

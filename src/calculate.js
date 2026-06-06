@@ -171,9 +171,14 @@ function calculate() {
   updateGuvenSkoru(karMarji, roi, netKar, toplamMaliyetNet, sc);
   generateYorum(toplamGelir, toplamMaliyetNet, netKar, karMarji, roi, sc, tipTotals);
   updateRakipChart();
+  _lastGelir   = toplamGelir;
+  _lastMaliyet = toplamMaliyetNet;
+  _lastSym     = sym;
   renderRoiPaneli(sym, netKar, toplamMaliyetNet);
   renderKdvRaporu(sym, toplamGelir, toplamKdv, kdvOrani);
   renderVadeAnalizi(toplamGelir, toplamMaliyetNet, toplamKdv, netKar, sym);
+  runMonteCarlo();
+  renderBasaBasGrafik();
   renderDashboard(sym, toplamGelir, toplamMaliyetNet, toplamMaliyetKDV, netKar, karMarji, roi, tipTotals, sc);
   saveLocal();
 }
