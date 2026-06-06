@@ -175,8 +175,10 @@ function calculate() {
   _lastMaliyet = toplamMaliyetNet;
   _lastSym     = sym;
   renderDovizRiski(toplamGelir, sym);
+  renderHedging(toplamGelir, toplamMaliyetNet, sym);
   renderRoiPaneli(sym, netKar, toplamMaliyetNet);
   renderKdvRaporu(sym, toplamGelir, toplamKdv, kdvOrani);
+  renderEnflasyon(toplamGelir, toplamMaliyetNet, sym);
   renderVadeAnalizi(toplamGelir, toplamMaliyetNet, toplamKdv, netKar, sym);
   runMonteCarlo();
   renderBasaBasGrafik();

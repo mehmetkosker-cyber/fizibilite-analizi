@@ -647,6 +647,9 @@
             </div>
           </div>
           <div style="font-size:11px;color:var(--muted);margin-top:6px">Satış fiyatı her zaman TL bazında hesaplanır. Maliyet kalemlerine döviz atayabilirsiniz.</div>
+          <button class="btn btn-ghost btn-sm" id="kurGuncelleBtn" onclick="kurGuncelle()"
+            style="width:100%;margin-top:8px;font-size:12px;padding:6px 10px">🔄 Kuru Güncelle</button>
+          <div id="kurGuncelleTarih" style="font-size:11px;color:var(--muted);margin-top:4px;text-align:center;min-height:16px"></div>
         </div>
         <label>Teklif Fiyatı (Satış Tutarı — TL)</label>
         <input type="number" id="teklifFiyati" placeholder="0.00" min="0" step="0.01" oninput="calculate()">
@@ -922,6 +925,37 @@
       </div>
     </div>
 
+    <!-- Döviz Korunma (Hedging) Hesaplayıcısı -->
+    <div class="card mt16" id="hedgingKart" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0"><span>🛡️</span> Döviz Korunma (Hedging) Hesaplayıcısı</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text);font-weight:500">
+          <input type="checkbox" id="hedgingAktif" onchange="calculate()"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+          Hedging analizini aktif et
+        </label>
+      </div>
+      <div id="hedgingGirdiler" style="display:none">
+        <div class="grid3" style="gap:14px;margin-bottom:14px">
+          <div>
+            <label style="margin-top:0">Forward Vade (Ay)</label>
+            <input type="number" id="hedgingVade" value="3" min="1" max="12" step="1" oninput="calculate()">
+          </div>
+          <div>
+            <label style="margin-top:0">Forward Prim (% / Yıl)</label>
+            <input type="number" id="hedgingPrim" value="25" min="0" max="100" step="0.5" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">TL/USD için bankacılık sektörü: genellikle %20–35</div>
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <div style="font-size:12px;color:var(--muted);padding-bottom:6px;line-height:1.5">
+              Forward sözleşme, dövizi belirli bir vadede bugünden belirlenen fiyata kilitleme işlemidir.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="hedgingPaneli"></div>
+    </div>
+
     <div class="grid2 mt20">
       <div class="card">
         <div class="card-title"><span>📊</span> Maliyet Dağılımı</div>
@@ -1000,6 +1034,36 @@
       <div id="kdvRaporPaneli">
         <p style="color:var(--muted);font-size:13px">Hesaplama bekleniyor...</p>
       </div>
+    </div>
+
+    <!-- Enflasyon Maliyet Projeksiyonu -->
+    <div class="card mt20">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0"><span>📈</span> Enflasyon Maliyet Projeksiyonu</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text);font-weight:500">
+          <input type="checkbox" id="enflasyonAktif" onchange="calculate()"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+          Enflasyon analizini aktif et
+        </label>
+      </div>
+      <div id="enflasyonGirdiler" style="display:none">
+        <div class="grid3" style="gap:14px;margin-bottom:14px">
+          <div>
+            <label style="margin-top:0">Yıllık TÜFE / Maliyet Enflasyonu (%)</label>
+            <input type="number" id="enflasyonOrani" value="40" min="0" max="300" step="1" oninput="calculate()">
+          </div>
+          <div>
+            <label style="margin-top:0">Projeksiyon Süresi (Yıl)</label>
+            <input type="number" id="enflasyonYil" value="3" min="1" max="5" step="1" oninput="calculate()">
+          </div>
+          <div>
+            <label style="margin-top:0">Maliyetin Enflasyon Duyarlılığı (%)</label>
+            <input type="number" id="enflasyonDuyarlilik" value="100" min="0" max="100" step="5" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">100% → tüm maliyet enflasyonla artar</div>
+          </div>
+        </div>
+      </div>
+      <div id="enflasyonPaneli"></div>
     </div>
 
     <!-- Vade & Nakit Yük Analizi -->
@@ -1316,6 +1380,9 @@
 <script src="src/doviz_riski.js"></script>
 <script src="src/montecarlo.js"></script>
 <script src="src/basabas.js"></script>
+<script src="src/tcmb.js"></script>
+<script src="src/enflasyon.js"></script>
+<script src="src/hedging.js"></script>
 <script src="src/init.js"></script>
 </body>
 </html>

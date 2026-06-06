@@ -280,6 +280,14 @@ function buildState() {
     kdvBeyanDonem: document.getElementById('kdvBeyanDonem')?.value || 'aylik',
     ilkYatirim: document.getElementById('ilkYatirim')?.value || '0',
     degSure: document.getElementById('degSure')?.value || '12',
+    // Enflasyon & Hedging
+    enflasyonAktif: document.getElementById('enflasyonAktif')?.checked ? '1' : '0',
+    enflasyonOrani: document.getElementById('enflasyonOrani')?.value || '40',
+    enflasyonYil: document.getElementById('enflasyonYil')?.value || '3',
+    enflasyonDuyarlilik: document.getElementById('enflasyonDuyarlilik')?.value || '100',
+    hedgingAktif: document.getElementById('hedgingAktif')?.checked ? '1' : '0',
+    hedgingVade: document.getElementById('hedgingVade')?.value || '3',
+    hedgingPrim: document.getElementById('hedgingPrim')?.value || '25',
     maliyetRows, gelirRows, rowCounter, rakipRows, rakipCounter,
     urunler, urunCounter,
     ekipmanRows, ekipmanCounter
@@ -318,13 +326,22 @@ function loadLocal() {
     ['projeAdi','musteri','tarih','paraBirimi','kdvOrani','teklifFiyati','notlar','hedefMarj',
      'kotumserGelir','kotumserMaliyet','iyimserGelir','iyimserMaliyet','kvOrani','stopajOrani',
      'kurUSD','kurEUR','nakitSure','nkAvans','nkAraOran','nkAraAy','nkKabulOran','nkKabulAy','nkMalBaslangic',
-     'tahsilatVadeAy','odemeVadeAy','vadeFinansmanOrani','vadeKurArtis','ilkYatirim','degSure'].forEach(k => {
+     'tahsilatVadeAy','odemeVadeAy','vadeFinansmanOrani','vadeKurArtis','ilkYatirim','degSure',
+     'enflasyonOrani','enflasyonYil','enflasyonDuyarlilik','hedgingVade','hedgingPrim'].forEach(k => {
       const el = document.getElementById(k);
       if (el && s[k] !== undefined) el.value = s[k];
     });
     if (s.vadeAktif !== undefined) {
       const cb = document.getElementById('vadeAktif');
       if (cb) cb.checked = s.vadeAktif === '1';
+    }
+    if (s.enflasyonAktif !== undefined) {
+      const cb = document.getElementById('enflasyonAktif');
+      if (cb) cb.checked = s.enflasyonAktif === '1';
+    }
+    if (s.hedgingAktif !== undefined) {
+      const cb = document.getElementById('hedgingAktif');
+      if (cb) cb.checked = s.hedgingAktif === '1';
     }
     if (s.kdvBeyanDonem) {
       const sel = document.getElementById('kdvBeyanDonem');
