@@ -174,6 +174,7 @@ function calculate() {
   _lastGelir   = toplamGelir;
   _lastMaliyet = toplamMaliyetNet;
   _lastSym     = sym;
+  renderDovizRiski(toplamGelir, sym);
   renderRoiPaneli(sym, netKar, toplamMaliyetNet);
   renderKdvRaporu(sym, toplamGelir, toplamKdv, kdvOrani);
   renderVadeAnalizi(toplamGelir, toplamMaliyetNet, toplamKdv, netKar, sym);
