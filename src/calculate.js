@@ -173,6 +173,7 @@ function calculate() {
   updateRakipChart();
   renderRoiPaneli(sym, netKar, toplamMaliyetNet);
   renderKdvRaporu(sym, toplamGelir, toplamKdv, kdvOrani);
+  renderVadeAnalizi(toplamGelir, toplamMaliyetNet, toplamKdv, netKar, sym);
   renderDashboard(sym, toplamGelir, toplamMaliyetNet, toplamMaliyetKDV, netKar, karMarji, roi, tipTotals, sc);
   saveLocal();
 }

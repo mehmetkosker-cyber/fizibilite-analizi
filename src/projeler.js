@@ -271,6 +271,15 @@ function buildState() {
     nkKabulOran: document.getElementById('nkKabulOran').value,
     nkKabulAy: document.getElementById('nkKabulAy').value,
     nkMalBaslangic: document.getElementById('nkMalBaslangic').value,
+    // Vade analizi
+    vadeAktif: document.getElementById('vadeAktif')?.checked ? '1' : '0',
+    tahsilatVadeAy: document.getElementById('tahsilatVadeAy')?.value || '3',
+    odemeVadeAy: document.getElementById('odemeVadeAy')?.value || '0',
+    vadeFinansmanOrani: document.getElementById('vadeFinansmanOrani')?.value || '30',
+    vadeKurArtis: document.getElementById('vadeKurArtis')?.value || '20',
+    kdvBeyanDonem: document.getElementById('kdvBeyanDonem')?.value || 'aylik',
+    ilkYatirim: document.getElementById('ilkYatirim')?.value || '0',
+    degSure: document.getElementById('degSure')?.value || '12',
     maliyetRows, gelirRows, rowCounter, rakipRows, rakipCounter,
     urunler, urunCounter,
     ekipmanRows, ekipmanCounter
@@ -308,10 +317,19 @@ function loadLocal() {
     const s = JSON.parse(raw);
     ['projeAdi','musteri','tarih','paraBirimi','kdvOrani','teklifFiyati','notlar','hedefMarj',
      'kotumserGelir','kotumserMaliyet','iyimserGelir','iyimserMaliyet','kvOrani','stopajOrani',
-     'kurUSD','kurEUR','nakitSure','nkAvans','nkAraOran','nkAraAy','nkKabulOran','nkKabulAy','nkMalBaslangic'].forEach(k => {
+     'kurUSD','kurEUR','nakitSure','nkAvans','nkAraOran','nkAraAy','nkKabulOran','nkKabulAy','nkMalBaslangic',
+     'tahsilatVadeAy','odemeVadeAy','vadeFinansmanOrani','vadeKurArtis','ilkYatirim','degSure'].forEach(k => {
       const el = document.getElementById(k);
       if (el && s[k] !== undefined) el.value = s[k];
     });
+    if (s.vadeAktif !== undefined) {
+      const cb = document.getElementById('vadeAktif');
+      if (cb) cb.checked = s.vadeAktif === '1';
+    }
+    if (s.kdvBeyanDonem) {
+      const sel = document.getElementById('kdvBeyanDonem');
+      if (sel) sel.value = s.kdvBeyanDonem;
+    }
     if (s.maliyetRows && s.maliyetRows.length) { maliyetRows = s.maliyetRows; renderMaliyetTable(); }
     if (s.gelirRows && s.gelirRows.length) { gelirRows = s.gelirRows; renderGelirTable(); }
     if (s.rowCounter) rowCounter = s.rowCounter;

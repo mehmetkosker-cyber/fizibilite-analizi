@@ -958,6 +958,74 @@
       </div>
     </div>
 
+    <!-- Vade & Nakit Yük Analizi -->
+    <div class="card mt20">
+      <div class="flex items-center justify-between" style="margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0"><span>📅</span> Vade &amp; Nakit Yük Analizi</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text);font-weight:500">
+          <input type="checkbox" id="vadeAktif" onchange="calculate()"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+          Vade analizini aktif et
+        </label>
+      </div>
+
+      <div id="vadeGirdiler" style="display:none">
+        <div class="grid3" style="gap:16px;margin-bottom:16px">
+          <!-- Tahsilat vadesi slider -->
+          <div>
+            <label style="margin-top:0">Tahsilat Vadesi (Ay)</label>
+            <input type="range" id="tahsilatVadeAy" min="1" max="12" value="3"
+              style="width:100%;accent-color:var(--accent);margin:8px 0 2px;height:4px;cursor:pointer"
+              oninput="document.getElementById('tahsilatVadeLabel').textContent=this.value+' Ay';calculate()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+              <span>1 Ay</span>
+              <span id="tahsilatVadeLabel" style="font-weight:700;color:var(--accent)">3 Ay</span>
+              <span>12 Ay</span>
+            </div>
+          </div>
+          <!-- Ödeme vadesi slider -->
+          <div>
+            <label style="margin-top:0">Ödeme Vadesi (Ay) — Maliyetler</label>
+            <input type="range" id="odemeVadeAy" min="0" max="12" value="0"
+              style="width:100%;accent-color:var(--green);margin:8px 0 2px;height:4px;cursor:pointer"
+              oninput="document.getElementById('odemeVadeLabel').textContent=(+this.value===0?'Peşin':this.value+' Ay');calculate()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+              <span>Peşin</span>
+              <span id="odemeVadeLabel" style="font-weight:700;color:var(--green)">Peşin</span>
+              <span>12 Ay</span>
+            </div>
+          </div>
+          <!-- KDV beyan -->
+          <div>
+            <label style="margin-top:0">KDV Beyan Dönemi</label>
+            <select id="kdvBeyanDonem" onchange="calculate()" style="margin-top:6px">
+              <option value="aylik">Aylık Beyan</option>
+              <option value="ucaylik">3 Aylık Beyan</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid2" style="gap:16px;margin-bottom:16px">
+          <div>
+            <label style="margin-top:0">Yıllık Finansman / Kredi Maliyeti (%)</label>
+            <input type="number" id="vadeFinansmanOrani" value="30" min="0" max="300" step="0.5" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Banka kredi faizi veya fırsat maliyeti (yıllık)</div>
+          </div>
+          <div>
+            <label style="margin-top:0">Yıllık Beklenen Kur Artışı (%)</label>
+            <input type="number" id="vadeKurArtis" value="20" min="-50" max="300" step="0.5" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">TL'nin USD/EUR karşısındaki beklenen değer kaybı</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="vadeSonuclar">
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">
+          Analizi aktif etmek için yukarıdaki kutucuğu işaretleyin.
+        </p>
+      </div>
+    </div>
+
     <div class="card mt20" id="ekipmanAmortisanKart">
       <div class="card-title"><span>🖥️</span> Ekipman &amp; Amortisman Çizelgesi</div>
       <div id="amortisanPaneli">
@@ -1154,6 +1222,7 @@
 <script src="src/simulators.js"></script>
 <script src="src/projeler.js"></script>
 <script src="src/ekipman.js"></script>
+<script src="src/vade.js"></script>
 <script src="src/init.js"></script>
 </body>
 </html>
