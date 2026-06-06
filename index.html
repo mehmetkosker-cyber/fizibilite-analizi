@@ -303,7 +303,12 @@
 <div class="header">
   <div>
     <h1>Fizibilite Analizi</h1>
-    <p>Proje / İhale Teklif Değerlendirme Aracı</p>
+    <p>Proje / İhale Teklif Değerlendirme Aracı &nbsp;·&nbsp;
+      <a href="https://mehmetkosker-cyber.github.io/fizibilite-analizi/" target="_blank"
+        style="color:rgba(255,255,255,.75);font-size:11px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.3)">
+        🌐 mehmetkosker-cyber.github.io/fizibilite-analizi
+      </a>
+    </p>
   </div>
   <div class="header-actions no-print">
     <button class="btn btn-ghost btn-sm" onclick="openProjeModal()">Projeler</button>
@@ -333,7 +338,20 @@
           style="flex:1">
         <button class="btn btn-primary btn-sm" onclick="projeKaydet()">+ Mevcut Projeyi Kaydet</button>
       </div>
-      <div id="projeListesi"></div>
+      <!-- Tab butonları modal içinde -->
+      <div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:0">
+        <button class="tab-btn active" id="mTab-liste" onclick="switchModalTab('liste')" style="font-size:12px">Proje Listesi</button>
+        <button class="tab-btn" id="mTab-karsilastir" onclick="switchModalTab('karsilastir')" style="font-size:12px">Karşılaştır</button>
+      </div>
+
+      <div id="modalTab-liste">
+        <div id="projeListesi"></div>
+      </div>
+
+      <div id="modalTab-karsilastir" style="display:none">
+        <div id="karsilastirIcerik"></div>
+        <div style="position:relative;height:260px;margin-top:12px"><canvas id="chartKarsilastir"></canvas></div>
+      </div>
     </div>
   </div>
 </div>
@@ -383,7 +401,21 @@
         </select>
         <label>KDV Oranı (%)</label>
         <input type="number" id="kdvOrani" value="20" min="0" max="100" step="1">
-        <label>Teklif Fiyatı (Satış Tutarı)</label>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Döviz Kurları (TL karşılığı)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <label style="margin-top:0">1 USD = ? TL</label>
+              <input type="number" id="kurUSD" value="38" min="0" step="0.01" oninput="calculate()">
+            </div>
+            <div>
+              <label style="margin-top:0">1 EUR = ? TL</label>
+              <input type="number" id="kurEUR" value="41" min="0" step="0.01" oninput="calculate()">
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Satış fiyatı her zaman TL bazında hesaplanır. Maliyet kalemlerine döviz atayabilirsiniz.</div>
+        </div>
+        <label>Teklif Fiyatı (Satış Tutarı — TL)</label>
         <input type="number" id="teklifFiyati" placeholder="0.00" min="0" step="0.01" oninput="calculate()">
         <label>Genel Notlar</label>
         <textarea id="notlar" rows="3" placeholder="Teklif hakkında notlar..."></textarea>
@@ -457,6 +489,29 @@
       </div>
     </div>
 
+    <!-- İndirim / Müzakere Simülatörü -->
+    <div class="card mt16">
+      <div class="card-title"><span>🤝</span> İndirim &amp; Müzakere Simülatörü</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Müşteri indirim isterse ne olur? Teklif fiyatınıza uygulanan indirimin etkisini anlık görün.</p>
+      <div class="grid2" style="gap:16px">
+        <div>
+          <label>İndirim Oranı (%)</label>
+          <input type="range" id="indSlider" min="0" max="50" value="0" step="0.5"
+            style="width:100%;accent-color:var(--red);margin-top:8px" oninput="updateIndirim()">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px">
+            <span>%0</span><span id="indYuzde" style="font-weight:700;color:var(--text)">%0</span><span>%50</span>
+          </div>
+          <div style="margin-top:10px">
+            <label>Veya manuel gir (%)</label>
+            <input type="number" id="indManuel" min="0" max="100" step="0.5" value="0"
+              oninput="document.getElementById('indSlider').value=this.value;updateIndirim()">
+          </div>
+        </div>
+        <div id="indSonuc" style="display:flex;flex-direction:column;gap:8px;justify-content:center"></div>
+      </div>
+      <div id="indUyari" style="margin-top:12px"></div>
+    </div>
+
     <!-- Maliyet Kalemleri -->
     <div class="card mt16">
       <div class="flex items-center justify-between" style="margin-bottom:14px">
@@ -471,14 +526,15 @@
         <thead>
           <tr>
             <th style="width:30px">#</th>
-            <th style="width:100px">Tip</th>
+            <th style="width:90px">Tip</th>
             <th>Kalem Adı</th>
-            <th style="width:120px">Miktar</th>
-            <th style="width:80px">Birim</th>
-            <th style="width:130px">Birim Fiyat</th>
-            <th style="width:130px">Toplam</th>
-            <th style="width:60px">KDV</th>
-            <th style="width:50px"></th>
+            <th style="width:100px">Miktar</th>
+            <th style="width:70px">Birim</th>
+            <th style="width:70px">Döviz</th>
+            <th style="width:120px">Birim Fiyat</th>
+            <th style="width:130px">Toplam (TL)</th>
+            <th style="width:55px">KDV</th>
+            <th style="width:40px"></th>
           </tr>
         </thead>
         <tbody id="maliyetBody">
@@ -561,6 +617,11 @@
       <div class="kpi"><div class="kpi-label">Kar Marjı</div><div class="kpi-value" id="k-marj">-</div><div class="kpi-sub" id="k-marj-sub"></div></div>
       <div class="kpi"><div class="kpi-label">ROI</div><div class="kpi-value" id="k-roi">-</div></div>
       <div class="kpi"><div class="kpi-label">KDV Dahil Maliyet</div><div class="kpi-value text-yellow" id="k-kdv">-</div></div>
+    </div>
+
+    <div class="card mt16" id="dovizKart" style="display:none">
+      <div class="card-title"><span>💱</span> Döviz Maliyet Kırılımı</div>
+      <div id="dovizOzet"></div>
     </div>
 
     <div class="grid2 mt20">
@@ -809,7 +870,7 @@ function showTab(id) {
 // ──────────────────────────────────────────────
 function addRow(tip) {
   const id = ++rowCounter;
-  maliyetRows.push({ id, tip, ad: '', miktar: 1, birim: 'Adet', birimFiyat: 0, kdv: true });
+  maliyetRows.push({ id, tip, ad: '', miktar: 1, birim: 'Adet', birimFiyat: 0, doviz: 'TL', kdv: true });
   renderMaliyetTable();
   calculate();
 }
@@ -826,33 +887,68 @@ function updateRow(id, field, val) {
   if (field === 'kdv') r.kdv = val;
   else if (['miktar', 'birimFiyat'].includes(field)) r[field] = parseFloat(val) || 0;
   else r[field] = val;
+  if (field === 'doviz') { renderRowTotal(id); return; }
   if (field !== 'ad' && field !== 'birim') calculate();
   renderRowTotal(id);
+}
+
+function getKur(doviz) {
+  if (doviz === 'USD') return parseFloat(document.getElementById('kurUSD').value) || 1;
+  if (doviz === 'EUR') return parseFloat(document.getElementById('kurEUR').value) || 1;
+  return 1;
+}
+
+function rowTotalTL(r) {
+  return r.miktar * r.birimFiyat * getKur(r.doviz || 'TL');
 }
 
 function renderRowTotal(id) {
   const r = maliyetRows.find(r => r.id === id);
   if (!r) return;
-  const total = r.miktar * r.birimFiyat;
   const el = document.getElementById('rowTotal-' + id);
-  if (el) el.textContent = fmt(total);
+  if (el) {
+    const tl = rowTotalTL(r);
+    const doviz = r.doviz || 'TL';
+    const orijinal = r.miktar * r.birimFiyat;
+    el.innerHTML = doviz !== 'TL'
+      ? `<span style="color:var(--text)">₺${fmt(tl)}</span><br><span style="font-size:10px;color:var(--muted)">${doviz === 'USD' ? '$' : '€'}${fmt(orijinal)}</span>`
+      : `₺${fmt(tl)}`;
+  }
 }
 
 function renderMaliyetTable() {
   const tbody = document.getElementById('maliyetBody');
-  tbody.innerHTML = maliyetRows.map((r, i) => `
-    <tr>
+  tbody.innerHTML = maliyetRows.map((r, i) => {
+    const doviz = r.doviz || 'TL';
+    const dovizColor = doviz === 'USD' ? 'var(--green)' : doviz === 'EUR' ? 'var(--cyan)' : 'var(--muted)';
+    const dovizSym = doviz === 'USD' ? '$' : doviz === 'EUR' ? '€' : '₺';
+    const tl = rowTotalTL(r);
+    const orijinal = r.miktar * r.birimFiyat;
+    const totalHTML = doviz !== 'TL'
+      ? `<span style="color:var(--text);font-weight:600">₺${fmt(tl)}</span><br><span style="font-size:10px;color:${dovizColor}">${dovizSym}${fmt(orijinal)}</span>`
+      : `₺${fmt(tl)}`;
+    return `
+    <tr style="${doviz !== 'TL' ? 'background:rgba(34,197,94,.03)' : ''}">
       <td style="color:var(--muted)">${i + 1}</td>
-      <td><span style="font-size:12px">${TIP_LABELS[r.tip] || r.tip}</span></td>
+      <td><span style="font-size:11px">${TIP_LABELS[r.tip] || r.tip}</span></td>
       <td><input type="text" value="${r.ad}" onchange="updateRow(${r.id},'ad',this.value)" placeholder="Kalem adı"></td>
       <td><input type="number" value="${r.miktar}" min="0" step="any" oninput="updateRow(${r.id},'miktar',this.value)"></td>
       <td><input type="text" value="${r.birim}" onchange="updateRow(${r.id},'birim',this.value)" placeholder="Adet"></td>
-      <td><input type="number" value="${r.birimFiyat}" min="0" step="any" oninput="updateRow(${r.id},'birimFiyat',this.value)"></td>
-      <td class="font-mono" id="rowTotal-${r.id}">${fmt(r.miktar * r.birimFiyat)}</td>
+      <td>
+        <select onchange="updateRow(${r.id},'doviz',this.value);calculate()"
+          style="padding:5px 4px;font-size:12px;font-weight:600;color:${dovizColor};border-color:${doviz!=='TL'?dovizColor:'var(--border)'}">
+          <option value="TL"  ${doviz==='TL' ?'selected':''}>₺ TL</option>
+          <option value="USD" ${doviz==='USD'?'selected':''}>$ USD</option>
+          <option value="EUR" ${doviz==='EUR'?'selected':''}>€ EUR</option>
+        </select>
+      </td>
+      <td><input type="number" value="${r.birimFiyat}" min="0" step="any" oninput="updateRow(${r.id},'birimFiyat',this.value)"
+        placeholder="${dovizSym}0.00"></td>
+      <td class="font-mono" id="rowTotal-${r.id}" style="line-height:1.4">${totalHTML}</td>
       <td style="text-align:center"><input type="checkbox" ${r.kdv ? 'checked' : ''} onchange="updateRow(${r.id},'kdv',this.checked)" title="KDV Dahil Et"></td>
       <td><button class="btn btn-danger" onclick="removeRow(${r.id})">✕</button></td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 function addGelirRow() {
@@ -910,7 +1006,7 @@ function calculate() {
   const tipTotals = { malzeme: 0, iscilik: 0, gider: 0 };
 
   maliyetRows.forEach(r => {
-    const net = r.miktar * r.birimFiyat;
+    const net = rowTotalTL(r);           // kur dönüşümlü TL tutar
     const kdv = r.kdv ? net * kdvOrani : 0;
     toplamMaliyetNet += net;
     toplamKdv += kdv;
@@ -950,6 +1046,40 @@ function calculate() {
   const roiEl = document.getElementById('k-roi');
   roiEl.textContent = roi.toFixed(1) + '%';
   roiEl.className = 'kpi-value ' + marjColor(roi);
+
+  // Döviz kırılım özeti
+  const kurUSD = parseFloat(document.getElementById('kurUSD').value) || 38;
+  const kurEUR = parseFloat(document.getElementById('kurEUR').value) || 41;
+  const dovizToplam = { USD: 0, EUR: 0, TL: 0 };
+  maliyetRows.forEach(r => { dovizToplam[r.doviz || 'TL'] += r.miktar * r.birimFiyat; });
+  const dovizEl = document.getElementById('dovizOzet');
+  const hasDoviz = dovizToplam.USD > 0 || dovizToplam.EUR > 0;
+  const dovizKart = document.getElementById('dovizKart');
+  if (dovizKart) dovizKart.style.display = hasDoviz ? 'block' : 'none';
+  if (dovizEl && hasDoviz) {
+    const parts = [];
+    if (dovizToplam.USD > 0) parts.push(
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(34,197,94,.07);border-radius:6px;margin-bottom:6px">
+        <span><span style="color:var(--green);font-weight:700">$ USD</span> — $${fmt(dovizToplam.USD)} × ₺${fmt(kurUSD)}</span>
+        <span class="font-mono font-bold">₺${fmt(dovizToplam.USD * kurUSD)}</span>
+      </div>`);
+    if (dovizToplam.EUR > 0) parts.push(
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(6,182,212,.07);border-radius:6px;margin-bottom:6px">
+        <span><span style="color:var(--cyan);font-weight:700">€ EUR</span> — €${fmt(dovizToplam.EUR)} × ₺${fmt(kurEUR)}</span>
+        <span class="font-mono font-bold">₺${fmt(dovizToplam.EUR * kurEUR)}</span>
+      </div>`);
+    if (dovizToplam.TL > 0) parts.push(
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface2);border-radius:6px;margin-bottom:6px">
+        <span><span style="color:var(--muted)">₺ TL kalemleri</span></span>
+        <span class="font-mono">₺${fmt(dovizToplam.TL)}</span>
+      </div>`);
+    parts.push(
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-top:1px solid var(--border);margin-top:4px">
+        <span style="font-weight:700">Toplam Maliyet (TL)</span>
+        <span class="font-mono font-bold text-red">₺${fmt(toplamMaliyetNet)}</span>
+      </div>`);
+    dovizEl.innerHTML = parts.join('');
+  }
 
   // Hızlı özet
   const riskLevel = karMarji < 0 ? 'Zarar' : karMarji < 10 ? 'Düşük' : karMarji < 20 ? 'Orta' : 'İyi';
@@ -1082,9 +1212,12 @@ function renderRiskGosterge(marj, kar, gelir, sym) {
 
 function renderDetayTable(sym, kdvOrani, totalNet) {
   document.getElementById('detayBody').innerHTML = maliyetRows.map(r => {
-    const net = r.miktar * r.birimFiyat;
+    const net = rowTotalTL(r);
     const kdv = r.kdv ? net * kdvOrani : 0;
     const pay = totalNet > 0 ? (net / totalNet * 100).toFixed(1) : '0.0';
+    const doviz = r.doviz || 'TL';
+    const dovizBadge = doviz !== 'TL'
+      ? `<span style="font-size:10px;color:${doviz==='USD'?'var(--green)':'var(--cyan)'};margin-left:4px">${doviz}</span>` : '';
     return `<tr>
       <td>${r.ad || '(İsimsiz)'}</td>
       <td><span style="font-size:12px">${TIP_LABELS[r.tip] || r.tip}</span></td>
@@ -1366,7 +1499,7 @@ function loadTemplate(key) {
   const tpl = TEMPLATES[key];
   if (!tpl) return;
   if (!confirm(`"${tpl.ad}" şablonu yüklensin mi? Mevcut maliyet kalemleri silinecek.`)) return;
-  maliyetRows = tpl.rows.map(r => ({ ...r, id: ++rowCounter, kdv: true }));
+  maliyetRows = tpl.rows.map(r => ({ ...r, id: ++rowCounter, kdv: true, doviz: r.doviz || 'TL' }));
   document.getElementById('projeAdi').value = tpl.ad;
   renderMaliyetTable();
   calculate();
@@ -1742,6 +1875,8 @@ function buildState() {
     iyimserMaliyet: document.getElementById('iyimserMaliyet').value,
     kvOrani: document.getElementById('kvOrani').value,
     stopajOrani: document.getElementById('stopajOrani').value,
+    kurUSD: document.getElementById('kurUSD').value,
+    kurEUR: document.getElementById('kurEUR').value,
     nakitSure: document.getElementById('nakitSure').value,
     nkAvans: document.getElementById('nkAvans').value,
     nkAraOran: document.getElementById('nkAraOran').value,
@@ -2027,7 +2162,7 @@ function loadLocal() {
     const s = JSON.parse(raw);
     ['projeAdi','musteri','tarih','paraBirimi','kdvOrani','teklifFiyati','notlar','hedefMarj',
      'kotumserGelir','kotumserMaliyet','iyimserGelir','iyimserMaliyet','kvOrani','stopajOrani',
-     'nakitSure','nkAvans','nkAraOran','nkAraAy','nkKabulOran','nkKabulAy','nkMalBaslangic'].forEach(k => {
+     'kurUSD','kurEUR','nakitSure','nkAvans','nkAraOran','nkAraAy','nkKabulOran','nkKabulAy','nkMalBaslangic'].forEach(k => {
       const el = document.getElementById(k);
       if (el && s[k] !== undefined) el.value = s[k];
     });
