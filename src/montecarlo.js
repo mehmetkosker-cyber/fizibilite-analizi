@@ -36,7 +36,7 @@ function runMonteCarlo() {
 
   const gelirSigma   = parseFloat(document.getElementById('mcGelirSigma')?.value)   || 15;
   const maliyetSigma = parseFloat(document.getElementById('mcMaliyetSigma')?.value) || 10;
-  const iterasyon    = parseInt(document.getElementById('mcIterasyon')?.value)       || 1000;
+  const iterasyon    = Math.max(1, parseInt(document.getElementById('mcIterasyon')?.value) || 1000);
 
   // ── Simülasyon ─────────────────────────────────────
   const results = [];
@@ -52,9 +52,10 @@ function runMonteCarlo() {
   const mean         = results.reduce((s, v) => s + v, 0) / iterasyon;
   const variance     = results.reduce((s, v) => s + (v - mean) ** 2, 0) / iterasyon;
   const stdDev       = Math.sqrt(variance);
-  const p10          = results[Math.floor(iterasyon * 0.10)];
-  const p50          = results[Math.floor(iterasyon * 0.50)];
-  const p90          = results[Math.floor(iterasyon * 0.90)];
+  const pct = q => results[Math.min(results.length - 1, Math.floor(results.length * q))];
+  const p10 = pct(0.10);
+  const p50 = pct(0.50);
+  const p90 = pct(0.90);
 
   // ── Histogram (30 bucket) ─────────────────────────
   const N      = 30;

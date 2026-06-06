@@ -2,7 +2,7 @@
 
 let _hedgingChart = null;
 
-function renderHedging(toplamGelir, toplamMaliyet, sym) {
+function renderHedging(toplamGelir, toplamMaliyet, sym, dovizPoz) {
   const el = document.getElementById('hedgingPaneli');
   if (!el) return;
 
@@ -11,7 +11,7 @@ function renderHedging(toplamGelir, toplamMaliyet, sym) {
   if (girdi) girdi.style.display = aktif ? '' : 'none';
 
   // Show/hide card based on FX exposure
-  const { usdRaw, eurRaw } = getDovizPozisyon();
+  const { usdRaw, eurRaw } = dovizPoz || getDovizPozisyon();
   const kurUSD = parseFloat(document.getElementById('kurUSD')?.value) || 38;
   const kurEUR = parseFloat(document.getElementById('kurEUR')?.value) || 41;
   const dovizTL = usdRaw * kurUSD + eurRaw * kurEUR;

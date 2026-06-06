@@ -53,9 +53,12 @@ function revizyonYukle(idx) {
   rowCounter = s.rowCounter || 0;
   rakipCounter = s.rakipCounter || 0;
   if (s.urunler) { urunler = s.urunler; urunCounter = s.urunCounter || 0; }
+  ekipmanRows = s.ekipmanRows || [];
+  ekipmanCounter = s.ekipmanCounter || 0;
   renderMaliyetTable();
   renderGelirTable();
   renderRakipRows();
+  renderEkipmanTable();
   calculate();
   renderRevList();
   showToast(`Revizyon yüklendi: ${rev.label}`, 'success');
@@ -132,9 +135,12 @@ function projeYukle(id) {
   rowCounter = s.rowCounter || 0;
   rakipCounter = s.rakipCounter || 0;
   if (s.urunler) { urunler = s.urunler; urunCounter = s.urunCounter || 0; renderKatalog(); }
+  ekipmanRows = s.ekipmanRows || [];
+  ekipmanCounter = s.ekipmanCounter || 0;
   renderMaliyetTable();
   renderGelirTable();
   renderRakipRows();
+  renderEkipmanTable();
   calculate();
   closeProjeModal();
   showToast(`"${p.ad}" yüklendi.`, 'success');

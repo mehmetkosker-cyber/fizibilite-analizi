@@ -33,13 +33,13 @@ function getDovizPozisyon() {
   return { usdRaw, eurRaw, tlSabit };
 }
 
-function renderDovizRiski(toplamGelir, sym) {
+function renderDovizRiski(toplamGelir, sym, dovizPoz) {
   const el = document.getElementById('dovizRiskiPaneli');
   if (!el) return;
 
   const kurUSD = parseFloat(document.getElementById('kurUSD')?.value) || 38;
   const kurEUR = parseFloat(document.getElementById('kurEUR')?.value) || 41;
-  const { usdRaw, eurRaw, tlSabit } = getDovizPozisyon();
+  const { usdRaw, eurRaw, tlSabit } = dovizPoz || getDovizPozisyon();
 
   const usdTL   = usdRaw * kurUSD;
   const eurTL   = eurRaw * kurEUR;

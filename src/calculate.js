@@ -3,7 +3,13 @@ function calculate() {
   // Validasyon — sadece uyarı, hesaplamayı bloklamaz
   const errors = validateForm();
   const canProceed = applyValidationUI(errors);
-  if (!canProceed) return;
+  if (!canProceed) {
+    ['enflasyonPaneli','hedgingPaneli'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '';
+    });
+    return;
+  }
 
   const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) / 100 || 0;
   const paraBirimi = document.getElementById('paraBirimi').value;
@@ -116,10 +122,12 @@ function calculate() {
 
   const basaBasFiyat = toplamMaliyetNet;
   _simMaliyet = toplamMaliyetNet;
-  const hedefFiyat = toplamMaliyetNet / (1 - hedefMarj / 100);
+  const hedefFiyat = hedefMarj < 100
+    ? toplamMaliyetNet / (1 - hedefMarj / 100)
+    : Infinity;
   document.getElementById('basabas').innerHTML = `
     <div class="kpi"><div class="kpi-label">Başa Baş Noktası</div><div class="kpi-value text-yellow font-mono">${sym}${fmt(basaBasFiyat)}</div><div class="kpi-sub">Bu fiyatın altında zarar</div></div>
-    <div class="kpi"><div class="kpi-label">Hedef Marj İçin Min. Fiyat</div><div class="kpi-value text-accent font-mono">${sym}${fmt(hedefFiyat)}</div><div class="kpi-sub">%${hedefMarj} kar için gerekli</div></div>
+    <div class="kpi"><div class="kpi-label">Hedef Marj İçin Min. Fiyat</div><div class="kpi-value text-accent font-mono">${hedefFiyat === Infinity ? '∞ (Marj ≥100%)' : sym + fmt(hedefFiyat)}</div><div class="kpi-sub">%${hedefMarj} kar için gerekli</div></div>
     <div class="kpi"><div class="kpi-label">Mevcut Güvenlik Payı</div><div class="kpi-value ${netKar>=0?'text-green':'text-red'} font-mono">${sym}${fmt(netKar)}</div><div class="kpi-sub">Başa başın ${netKar>=0?'üzerinde':'altında'}</div></div>
   `;
 
@@ -174,8 +182,9 @@ function calculate() {
   _lastGelir   = toplamGelir;
   _lastMaliyet = toplamMaliyetNet;
   _lastSym     = sym;
-  renderDovizRiski(toplamGelir, sym);
-  renderHedging(toplamGelir, toplamMaliyetNet, sym);
+  const dovizPoz = getDovizPozisyon();
+  renderDovizRiski(toplamGelir, sym, dovizPoz);
+  renderHedging(toplamGelir, toplamMaliyetNet, sym, dovizPoz);
   renderRoiPaneli(sym, netKar, toplamMaliyetNet);
   renderKdvRaporu(sym, toplamGelir, toplamKdv, kdvOrani);
   renderEnflasyon(toplamGelir, toplamMaliyetNet, sym);
