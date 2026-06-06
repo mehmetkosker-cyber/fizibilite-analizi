@@ -272,7 +272,8 @@ function buildState() {
     nkKabulAy: document.getElementById('nkKabulAy').value,
     nkMalBaslangic: document.getElementById('nkMalBaslangic').value,
     maliyetRows, gelirRows, rowCounter, rakipRows, rakipCounter,
-    urunler, urunCounter
+    urunler, urunCounter,
+    ekipmanRows, ekipmanCounter
   };
 }
 
@@ -318,6 +319,8 @@ function loadLocal() {
     if (s.rakipCounter) rakipCounter = s.rakipCounter;
     if (s.urunler && s.urunler.length) { urunler = s.urunler; renderKatalog(); }
     if (s.urunCounter) urunCounter = s.urunCounter;
+    if (s.ekipmanRows && s.ekipmanRows.length) { ekipmanRows = s.ekipmanRows; renderEkipmanTable(); }
+    if (s.ekipmanCounter) ekipmanCounter = s.ekipmanCounter;
   } catch(e) {}
 }
 
@@ -325,6 +328,7 @@ function clearAll() {
   if (!confirm('Tüm verileri temizlemek istiyor musunuz?')) return;
   localStorage.removeItem('fizibilite_state');
   maliyetRows = []; gelirRows = []; rakipRows = []; rowCounter = 0; rakipCounter = 0;
+  ekipmanRows = []; ekipmanCounter = 0; renderEkipmanTable();
   ['projeAdi','musteri','notlar','teklifFiyati'].forEach(k => document.getElementById(k).value = '');
   document.getElementById('kdvOrani').value = 20;
   document.getElementById('hedefMarj').value = 20;

@@ -702,6 +702,57 @@
       </table>
       <p style="font-size:12px;color:var(--muted);margin-top:10px">* Gelir kalemleri boş bırakılırsa yukarıdaki "Teklif Fiyatı" alanı kullanılır.</p>
     </div>
+
+    <!-- Ekipman / Cihaz Kurulumu -->
+    <div class="card mt16">
+      <div class="flex items-center justify-between" style="margin-bottom:10px">
+        <div>
+          <div class="card-title" style="margin-bottom:2px"><span>🖥️</span> Cihaz / Kit Kurulumu &amp; Amortisman</div>
+          <p style="font-size:12px;color:var(--muted)">
+            <strong>Kit (Tam):</strong> cihaz müşteriye teslim edilir — tüm maliyet projeye yüklenir. &nbsp;|&nbsp;
+            <strong>Amortisman:</strong> cihaz şirkette kalır — sadece proje süresine düşen pay maliyettir.
+          </p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addEkipman()">+ Cihaz / Kit Ekle</button>
+      </div>
+      <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:1100px">
+          <thead>
+            <tr style="background:var(--surface2)">
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600">#</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;min-width:150px">Cihaz / Ekipman Adı</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:55px">Adet</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:130px">Birim Fiyat</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:75px">Döviz</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:100px">Kurulum ₺</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:120px">Mod</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:65px" title="Faydalı ömür (ay)">Ömür (ay)</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:90px">Hurda ₺</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:100px">Yöntem</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:45px" title="KDV">KDV</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:130px">Proje Maliyeti</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="ekipmanBody">
+            <tr><td colspan="13" style="text-align:center;padding:20px;color:var(--muted);font-size:13px">
+              Henüz cihaz eklenmedi.
+            </td></tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="11" class="text-right">Toplam Ekipman Maliyeti (Projeye Yüklenen):</td>
+              <td class="font-mono" id="toplamEkipman">₺0,00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">
+        💡 Proje süresi için <strong>Nakit Akışı</strong> sekmesindeki "Proje Süresi (Ay)" değeri kullanılır.
+        Amortisman çizelgesini <strong>Karlılık Analizi</strong> sekmesinde görüntüleyin.
+      </div>
+    </div>
   </div>
 
   <!-- TAB 2: KARLILIK ANALİZİ -->
@@ -772,6 +823,15 @@
     <div class="card mt20">
       <div class="card-title"><span>⚖️</span> Başa Baş Analizi</div>
       <div class="grid3" id="basabas"></div>
+    </div>
+
+    <div class="card mt20" id="ekipmanAmortisanKart">
+      <div class="card-title"><span>🖥️</span> Ekipman &amp; Amortisman Çizelgesi</div>
+      <div id="amortisanPaneli">
+        <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">
+          Cihaz eklenmemiş. Veri Girişi → Cihaz/Kit Kurulumu bölümünden ekleyin.
+        </div>
+      </div>
     </div>
 
     <div class="card mt20">
@@ -960,6 +1020,7 @@
 <script src="src/rakip.js"></script>
 <script src="src/simulators.js"></script>
 <script src="src/projeler.js"></script>
+<script src="src/ekipman.js"></script>
 <script src="src/init.js"></script>
 </body>
 </html>

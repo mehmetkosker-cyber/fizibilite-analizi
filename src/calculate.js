@@ -12,7 +12,7 @@ function calculate() {
 
   let toplamMaliyetNet = 0;
   let toplamKdv = 0;
-  const tipTotals = { malzeme: 0, iscilik: 0, gider: 0 };
+  const tipTotals = { malzeme: 0, iscilik: 0, gider: 0, ekipman: 0 };
 
   maliyetRows.forEach(r => {
     const net = rowTotalTL(r);
@@ -21,6 +21,19 @@ function calculate() {
     toplamKdv += kdv;
     tipTotals[r.tip] = (tipTotals[r.tip] || 0) + net;
   });
+
+  // Ekipman / cihaz maliyetleri
+  const ekipmanMaliyet = totalEkipmanMaliyet();
+  if (ekipmanMaliyet > 0) {
+    tipTotals.ekipman = ekipmanMaliyet;
+    const ekipmanKdv = ekipmanRows.reduce((s, e) => {
+      const m = calcEkipmanProjeMaliyet(e, parseInt(document.getElementById('nakitSure')?.value) || 6);
+      return s + (e.kdv ? m * kdvOrani : 0);
+    }, 0);
+    toplamMaliyetNet += ekipmanMaliyet;
+    toplamKdv += ekipmanKdv;
+  }
+
   const toplamMaliyetKDV = toplamMaliyetNet + toplamKdv;
 
   const gelirKalemToplam = gelirRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
@@ -33,6 +46,9 @@ function calculate() {
 
   document.getElementById('toplamMaliyet').textContent = sym + fmt(toplamMaliyetNet);
   document.getElementById('toplamGelir').textContent = sym + fmt(toplamGelir);
+  const toplamEkipmanEl = document.getElementById('toplamEkipman');
+  if (toplamEkipmanEl) toplamEkipmanEl.textContent = sym + fmt(tipTotals.ekipman || 0);
+  renderAmortisanPaneli();
 
   setKPI('k-gelir', sym + fmt(toplamGelir), toplamGelir >= 0 ? 'text-green' : 'text-red');
   setKPI('k-maliyet', sym + fmt(toplamMaliyetNet), 'text-red');
@@ -197,6 +213,27 @@ function renderRiskGosterge(marj, kar, gelir, sym) {
 }
 
 function renderDetayTable(sym, kdvOrani, totalNet) {
+  const projeSureAy = parseInt(document.getElementById('nakitSure')?.value) || 6;
+  const ekipmanSatirlar = ekipmanRows.map(e => {
+    const net = calcEkipmanProjeMaliyet(e, projeSureAy);
+    const kdv = e.kdv ? net * kdvOrani : 0;
+    const pay = totalNet > 0 ? (net / totalNet * 100).toFixed(1) : '0.0';
+    const modLabel = e.mod === 'kit' ? 'Kit' : 'Amortisman';
+    return `<tr style="background:rgba(124,92,252,.04)">
+      <td>${e.ad||'(İsimsiz ekipman)'} <span style="font-size:10px;color:var(--accent)">[${modLabel}]</span></td>
+      <td><span style="font-size:12px">🖥️ Ekipman</span></td>
+      <td class="text-right font-mono">${sym}${fmt(net)}</td>
+      <td class="text-right font-mono" style="color:var(--yellow)">${sym}${fmt(kdv)}</td>
+      <td class="text-right font-mono">${sym}${fmt(net + kdv)}</td>
+      <td class="text-right"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+        ${pay}%
+        <div style="width:40px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden">
+          <div style="width:${pay}%;height:100%;background:var(--accent2);border-radius:3px"></div>
+        </div>
+      </div></td>
+    </tr>`;
+  }).join('');
+
   document.getElementById('detayBody').innerHTML = maliyetRows.map(r => {
     const net = rowTotalTL(r);
     const kdv = r.kdv ? net * kdvOrani : 0;
