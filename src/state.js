@@ -30,3 +30,6 @@ let chartNakit = null;
 // Ekipman / Cihaz state
 let ekipmanRows = [];
 let ekipmanCounter = 0;
+
+// Dashboard chart
+let dashChartMaliyet = null;

@@ -171,6 +171,9 @@ function calculate() {
   updateGuvenSkoru(karMarji, roi, netKar, toplamMaliyetNet, sc);
   generateYorum(toplamGelir, toplamMaliyetNet, netKar, karMarji, roi, sc, tipTotals);
   updateRakipChart();
+  renderRoiPaneli(sym, netKar, toplamMaliyetNet);
+  renderKdvRaporu(sym, toplamGelir, toplamKdv, kdvOrani);
+  renderDashboard(sym, toplamGelir, toplamMaliyetNet, toplamMaliyetKDV, netKar, karMarji, roi, tipTotals, sc);
   saveLocal();
 }
 
@@ -403,4 +406,120 @@ function updateGuvenSkoru(marj, roi, netKar, toplamMaliyet, sc) {
       </div>
     </div>
   `).join('');
+}
+
+// ── ROI PANELİ ────────────────────────────────────
+function renderRoiPaneli(sym, netKar, maliyet) {
+  const el = document.getElementById('roiPaneli');
+  if (!el) return;
+  const ilkYatirim = parseFloat(document.getElementById('ilkYatirim')?.value) || maliyet;
+  const sure = parseInt(document.getElementById('degSure')?.value) || 12;
+  const aylikNet = sure > 0 ? netKar / sure : 0;
+  const geriAy = aylikNet > 0 ? ilkYatirim / aylikNet : Infinity;
+  const roiYuzde = ilkYatirim > 0 ? (netKar / ilkYatirim) * 100 : 0;
+  const geriStr = geriAy === Infinity
+    ? '<span class="text-red">Geri ödeme yok (zarar)</span>'
+    : geriAy < 12
+      ? `<span class="text-green">${geriAy.toFixed(1)} ay</span>`
+      : `<span class="text-cyan">${(geriAy/12).toFixed(1)} yıl</span>`;
+  el.innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Yatırım ROI</div>
+      <div class="kpi-value font-mono ${roiYuzde>=0?'text-green':'text-red'}">${roiYuzde.toFixed(1)}%</div>
+      <div class="kpi-sub">Yatırım: ${sym}${fmt(ilkYatirim)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Tahmini Geri Ödeme</div>
+      <div class="kpi-value font-mono" style="font-size:20px">${geriStr}</div>
+      <div class="kpi-sub">Aylık net kâr: ${sym}${fmt(aylikNet)} / ${sure} ay üzerinden</div>
+    </div>`;
+}
+
+// ── KDV RAPORU ────────────────────────────────────
+function renderKdvRaporu(sym, gelir, giderKdv, kdvOrani) {
+  const el = document.getElementById('kdvRaporPaneli');
+  if (!el) return;
+  const tahsil = gelir * kdvOrani;
+  const net = tahsil - giderKdv;
+  const isIade = net < 0;
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
+      <div class="kpi">
+        <div class="kpi-label">Tahsil Edilen KDV</div>
+        <div class="kpi-value text-green font-mono">${sym}${fmt(tahsil)}</div>
+        <div class="kpi-sub">Satış × %${(kdvOrani*100).toFixed(0)}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Ödenen KDV (Gider)</div>
+        <div class="kpi-value text-red font-mono">${sym}${fmt(giderKdv)}</div>
+        <div class="kpi-sub">Alış faturaları KDV toplamı</div>
+      </div>
+      <div class="kpi" style="border-color:${isIade?'var(--green)':'var(--yellow)'}">
+        <div class="kpi-label">${isIade?'✅ KDV İadesi':'⚠️ Ödenecek KDV'}</div>
+        <div class="kpi-value font-mono ${isIade?'text-green':'text-yellow'}">${sym}${fmt(Math.abs(net))}</div>
+        <div class="kpi-sub">${isIade?'Hazine\'den iade alacağı':'Vergi dairesine ödenecek'}</div>
+      </div>
+    </div>
+    <div class="progress-bar" style="height:8px;margin-bottom:6px">
+      <div class="progress-fill" style="width:${Math.min(100,tahsil>0?(giderKdv/tahsil*100):0).toFixed(1)}%;background:var(--accent)"></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);text-align:center">
+      Gider KDV oranı: %${tahsil>0?((giderKdv/tahsil)*100).toFixed(1):'0.0'} (tahsil edilen KDV'ye göre)
+    </div>`;
+}
+
+// ── DASHBOARD ─────────────────────────────────────
+function renderDashboard(sym, gelir, maliyet, maliyetKdv, kar, marj, roi, tipTotals, sc) {
+  const setVal = (id, txt, cls) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = txt;
+    if (cls) el.className = 'kpi-value font-mono ' + cls;
+  };
+  setVal('dash-gelir',   sym + fmt(gelir),      'text-green');
+  setVal('dash-maliyet', sym + fmt(maliyet),     'text-red');
+  setVal('dash-kar',     sym + fmt(kar),          kar >= 0 ? 'text-green' : 'text-red');
+  setVal('dash-marj',    marj.toFixed(1) + '%',   marjColor(marj));
+  setVal('dash-roi',     roi.toFixed(1) + '%',    marjColor(roi));
+  setVal('dash-kdv',     sym + fmt(maliyetKdv),   'text-yellow');
+
+  const projeEl = document.getElementById('dashProjeOzet');
+  if (projeEl) {
+    const ad      = document.getElementById('projeAdi')?.value  || '(Ad girilmemiş)';
+    const musteri = document.getElementById('musteri')?.value   || '—';
+    const tarih   = document.getElementById('tarih')?.value     || '—';
+    const kdvO    = document.getElementById('kdvOrani')?.value  || '0';
+    projeEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+      <div class="flex justify-between"><span style="color:var(--muted)">Proje</span><strong>${ad}</strong></div>
+      <div class="flex justify-between"><span style="color:var(--muted)">Müşteri</span><span>${musteri}</span></div>
+      <div class="flex justify-between"><span style="color:var(--muted)">Tarih</span><span>${tarih}</span></div>
+      <div class="flex justify-between"><span style="color:var(--muted)">KDV</span><span>%${kdvO}</span></div>
+      <div class="flex justify-between" style="border-top:1px solid var(--border);padding-top:8px;margin-top:2px">
+        <span style="color:var(--muted)">Risk</span>
+        <span class="badge ${marj<0?'badge-red':marj<15?'badge-yellow':'badge-green'}">
+          ${marj<0?'Zarar':marj<15?'Orta Risk':'Düşük Risk'}
+        </span>
+      </div>
+    </div>`;
+  }
+
+  const scEl = document.getElementById('dashSenaryoOzet');
+  if (scEl && sc) {
+    const rows = [
+      { lbl:'Kötümser', s: sc.kotumser, c:'var(--red)'    },
+      { lbl:'Gerçekçi', s: sc.gercekci, c:'var(--accent)' },
+      { lbl:'İyimser',  s: sc.iyimser,  c:'var(--green)'  }
+    ];
+    scEl.innerHTML = `<table class="data-table">
+      <thead><tr><th>Senaryo</th><th class="text-right">Gelir</th><th class="text-right">Kâr</th><th class="text-right">Marj</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr>
+        <td><strong style="color:${r.c}">${r.lbl}</strong></td>
+        <td class="text-right font-mono">${sym}${fmt(r.s.gelir)}</td>
+        <td class="text-right font-mono" style="color:${r.s.kar>=0?'var(--green)':'var(--red)'}">${sym}${fmt(r.s.kar)}</td>
+        <td class="text-right font-mono" style="color:${r.s.kar>=0?'var(--green)':'var(--red)'}">${r.s.marj.toFixed(1)}%</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  updateDashChart(tipTotals);
 }

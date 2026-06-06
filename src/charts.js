@@ -52,9 +52,21 @@ function updateCharts(tipTotals, gelir, maliyet, kar, sc, totalMal, sym) {
       data: {
         labels: ['Kötümser', 'Gerçekçi', 'İyimser'],
         datasets: [
-          { label: 'Gelir', data: [sc.kotumser.gelir, sc.gercekci.gelir, sc.iyimser.gelir], backgroundColor: 'rgba(34,197,94,.6)', borderRadius: 4 },
-          { label: 'Maliyet', data: [sc.kotumser.maliyet, sc.gercekci.maliyet, sc.iyimser.maliyet], backgroundColor: 'rgba(239,68,68,.6)', borderRadius: 4 },
-          { label: 'Kar', data: [sc.kotumser.kar, sc.gercekci.kar, sc.iyimser.kar], backgroundColor: 'rgba(79,125,255,.8)', borderRadius: 4 }
+          { label: 'Gelir', data: [sc.kotumser.gelir, sc.gercekci.gelir, sc.iyimser.gelir], backgroundColor: 'rgba(34,197,94,.6)', borderRadius: 4, yAxisID: 'y' },
+          { label: 'Maliyet', data: [sc.kotumser.maliyet, sc.gercekci.maliyet, sc.iyimser.maliyet], backgroundColor: 'rgba(239,68,68,.6)', borderRadius: 4, yAxisID: 'y' },
+          { label: 'Kar', data: [sc.kotumser.kar, sc.gercekci.kar, sc.iyimser.kar], backgroundColor: 'rgba(79,125,255,.8)', borderRadius: 4, yAxisID: 'y' },
+          {
+            label: 'Kar Marjı %',
+            type: 'line',
+            data: [sc.kotumser.marj, sc.gercekci.marj, sc.iyimser.marj],
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245,158,11,.15)',
+            pointBackgroundColor: '#f59e0b',
+            pointRadius: 5,
+            tension: 0.3,
+            yAxisID: 'y2',
+            borderWidth: 2
+          }
         ]
       },
       options: {
@@ -62,7 +74,8 @@ function updateCharts(tipTotals, gelir, maliyet, kar, sc, totalMal, sym) {
         plugins: { legend: { labels: { color: '#8892a4', font: { size: 12 } } } },
         scales: {
           x: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4' } },
-          y: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4', callback: v => sym + fmt(v) } }
+          y: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4', callback: v => sym + fmt(v) }, position: 'left' },
+          y2: { grid: { display: false }, ticks: { color: '#f59e0b', callback: v => v.toFixed(1) + '%' }, position: 'right' }
         }
       }
     });
@@ -104,6 +117,24 @@ function updateCharts(tipTotals, gelir, maliyet, kar, sc, totalMal, sym) {
 
   updateOneri();
   updateSimLimits(totalMal, sym);
+}
+
+function updateDashChart(tipTotals) {
+  if (dashChartMaliyet) { dashChartMaliyet.destroy(); dashChartMaliyet = null; }
+  const ctx = document.getElementById('dashChartMaliyet');
+  if (!ctx) return;
+  const labels = Object.keys(tipTotals).filter(k => tipTotals[k] > 0).map(k => TIP_LABELS[k]);
+  const data   = Object.keys(tipTotals).filter(k => tipTotals[k] > 0).map(k => tipTotals[k]);
+  const colors = Object.keys(tipTotals).filter(k => tipTotals[k] > 0).map(k => TIP_COLORS[k]);
+  if (data.length === 0) return;
+  dashChartMaliyet = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels: { color: '#8892a4', font: { size: 12 } } } }
+    }
+  });
 }
 
 function updateWaterfall(gelir, tipTotals, netKar, sym) {

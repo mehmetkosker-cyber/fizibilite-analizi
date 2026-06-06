@@ -343,8 +343,53 @@
     .no-print { display: none !important; }
     .card { border: 1px solid #ddd; }
   }
+  /* Light mode */
+  body.light-mode {
+    --bg: #f1f5fb;
+    --surface: #ffffff;
+    --surface2: #eaeff8;
+    --border: #c8d0e4;
+    --text: #1e2235;
+    --muted: #4d5878;
+  }
+  body.light-mode .data-table th { background: var(--surface2); }
+  body.light-mode .modal { background: var(--surface); }
+  body.light-mode .template-btn { background: var(--surface2); }
+  body.light-mode .scenario-kötümser { background: rgba(239,68,68,.04); }
+  body.light-mode .scenario-gerçekçi { background: rgba(79,125,255,.04); }
+  body.light-mode .scenario-iyimser  { background: rgba(34,197,94,.04); }
+
+  /* Dashboard KPI cards */
+  .dash-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; position: relative; overflow: hidden; }
+  .dash-kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .dash-kpi.kpi-green::before { background: var(--green); }
+  .dash-kpi.kpi-red::before { background: var(--red); }
+  .dash-kpi.kpi-yellow::before { background: var(--yellow); }
+  .dash-kpi.kpi-cyan::before { background: var(--cyan); }
+  .dash-kpi.kpi-purple::before { background: var(--accent2); }
+
+  /* Responsive improvements */
+  @media (max-width: 900px) {
+    .grid3 { grid-template-columns: 1fr 1fr; }
+  }
   @media (max-width: 768px) {
     .grid2, .grid3, .scenario-grid { grid-template-columns: 1fr; }
+    .header { padding: 14px 16px; flex-direction: column; gap: 10px; align-items: flex-start; }
+    .header-actions { flex-wrap: wrap; gap: 6px; }
+    .main { padding: 14px 12px; }
+    .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; gap: 0; }
+    .tab-btn { white-space: nowrap; padding: 10px 14px; font-size: 12px; }
+    .kpi { padding: 12px 14px; }
+    .kpi-value { font-size: 20px; }
+    .modal { max-width: 100vw; max-height: 95vh; border-radius: 12px 12px 0 0; align-self: flex-end; }
+    .card { padding: 14px; }
+    #kpiGrid { grid-template-columns: 1fr 1fr !important; }
+    #dashKpiGrid { grid-template-columns: 1fr 1fr !important; }
+  }
+  @media (max-width: 480px) {
+    #kpiGrid, #dashKpiGrid { grid-template-columns: 1fr !important; }
+    .header h1 { font-size: 17px; }
+    .kpi-value { font-size: 18px; }
   }
 
   /* Validasyon hata durumu */
@@ -376,6 +421,7 @@
     <button class="btn btn-ghost btn-sm" onclick="exportCSV()">CSV Dışa Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="exportJSON()">JSON Dışa Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="importJSON()">JSON İçe Aktar</button>
+    <button class="btn btn-ghost btn-sm" id="temaBtn" onclick="toggleTema()" title="Koyu/Açık Tema">🌙</button>
     <button class="btn btn-ghost btn-sm" onclick="window.print()">Yazdır</button>
     <button class="btn btn-success btn-sm" onclick="calculate()">Hesapla &amp; Güncelle</button>
   </div>
@@ -425,7 +471,8 @@
 
 <div class="main">
   <div class="tabs no-print">
-    <button class="tab-btn active" onclick="showTab('katalog')">Ürün Kataloğu</button>
+    <button class="tab-btn active" onclick="showTab('ozet')">📊 Genel Bakış</button>
+    <button class="tab-btn" onclick="showTab('katalog')">Ürün Kataloğu</button>
     <button class="tab-btn" onclick="showTab('veri')">Veri Girişi</button>
     <button class="tab-btn" onclick="showTab('analiz')">Karlılık Analizi</button>
     <button class="tab-btn" onclick="showTab('risk')">Risk &amp; Senaryo</button>
@@ -434,8 +481,72 @@
     <button class="tab-btn" onclick="showTab('rapor')">Özet Rapor</button>
   </div>
 
-  <!-- TAB 0: ÜRÜN KATALOĞU -->
-  <div class="tab-panel active" id="tab-katalog">
+  <!-- TAB: GENEL BAKIŞ / DASHBOARD -->
+  <div class="tab-panel active" id="tab-ozet">
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px" id="dashKpiGrid">
+      <div class="dash-kpi kpi-green">
+        <div class="kpi-label">Toplam Gelir</div>
+        <div class="kpi-value text-green font-mono" id="dash-gelir">—</div>
+      </div>
+      <div class="dash-kpi kpi-red">
+        <div class="kpi-label">Toplam Maliyet</div>
+        <div class="kpi-value text-red font-mono" id="dash-maliyet">—</div>
+      </div>
+      <div class="dash-kpi">
+        <div class="kpi-label">Net Kâr</div>
+        <div class="kpi-value font-mono" id="dash-kar">—</div>
+      </div>
+      <div class="dash-kpi kpi-yellow">
+        <div class="kpi-label">Kar Marjı</div>
+        <div class="kpi-value font-mono" id="dash-marj">—</div>
+      </div>
+      <div class="dash-kpi kpi-cyan">
+        <div class="kpi-label">ROI</div>
+        <div class="kpi-value font-mono" id="dash-roi">—</div>
+      </div>
+      <div class="dash-kpi kpi-purple">
+        <div class="kpi-label">KDV Dahil Maliyet</div>
+        <div class="kpi-value text-yellow font-mono" id="dash-kdv">—</div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title"><span>📋</span> Proje Özeti</div>
+        <div id="dashProjeOzet">
+          <p style="color:var(--muted);font-size:13px">Veri girişi yapıp "Hesapla &amp; Güncelle" butonuna basın.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🎯</span> Senaryo Özeti</div>
+        <div id="dashSenaryoOzet">
+          <p style="color:var(--muted);font-size:13px">Senaryo sonuçları burada görünecek.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span>📊</span> Maliyet Dağılımı</div>
+        <div class="chart-container"><canvas id="dashChartMaliyet"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>⚡</span> Hızlı Erişim</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('veri')">📝 Veri Girişi &amp; Maliyet Kalemleri →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('analiz')">📈 Karlılık Analizi →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('risk')">🎯 Risk &amp; Senaryo Analizi →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('rakip')">🏁 Rakip Analizi →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('nakit')">💰 Nakit Akışı →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('rapor')">📄 Özet Rapor →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ÜRÜN KATALOĞU -->
+  <div class="tab-panel" id="tab-katalog">
 
     <!-- Toolbar -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
@@ -823,6 +934,28 @@
     <div class="card mt20">
       <div class="card-title"><span>⚖️</span> Başa Baş Analizi</div>
       <div class="grid3" id="basabas"></div>
+    </div>
+
+    <div class="card mt20">
+      <div class="card-title"><span>💹</span> ROI &amp; Geri Ödeme Analizi</div>
+      <div class="grid2" style="gap:20px">
+        <div>
+          <label>İlk Yatırım / Sabit Gider (₺) <span style="font-size:11px;color:var(--muted)">(0 = toplam maliyet kullanılır)</span></label>
+          <input type="number" id="ilkYatirim" value="0" min="0" step="any" oninput="calculate()">
+          <label>Değerlendirme Süresi (Ay)</label>
+          <input type="number" id="degSure" value="12" min="1" max="120" oninput="calculate()">
+        </div>
+        <div id="roiPaneli" style="display:flex;flex-direction:column;gap:10px;justify-content:center">
+          <p style="color:var(--muted);font-size:13px">Hesaplama bekleniyor...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt20">
+      <div class="card-title"><span>🧾</span> KDV Raporu</div>
+      <div id="kdvRaporPaneli">
+        <p style="color:var(--muted);font-size:13px">Hesaplama bekleniyor...</p>
+      </div>
     </div>
 
     <div class="card mt20" id="ekipmanAmortisanKart">
