@@ -277,6 +277,96 @@
   .total-row td:first-child { border-radius: 6px 0 0 6px; }
   .total-row td:last-child { border-radius: 0 6px 6px 0; }
 
+  /* ── Notion-like tablo ── */
+  .notion-inp {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px 6px;
+    width: 100%;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color .12s, background .12s;
+    outline: none;
+  }
+  .notion-inp:hover { background: var(--surface2); border-color: var(--border); }
+  .notion-inp:focus { background: var(--surface2); border-color: var(--accent); }
+  .notion-num { text-align: right; font-family: 'Menlo', monospace; }
+
+  .notion-sel {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px 4px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    width: 100%;
+    transition: border-color .12s, background .12s;
+  }
+  .notion-sel:hover, .notion-sel:focus {
+    background: var(--surface2);
+    border-color: var(--border);
+  }
+
+  .notion-row { transition: background .1s; }
+  .notion-row:hover { background: rgba(79,125,255,.04) !important; }
+  .notion-row:hover .notion-del-btn { opacity: 1; }
+
+  .notion-del-btn {
+    background: none;
+    border: none;
+    color: var(--red);
+    opacity: 0;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    transition: opacity .15s, background .15s;
+    line-height: 1;
+  }
+  .notion-del-btn:hover { background: rgba(239,68,68,.12); opacity: 1; }
+
+  .notion-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .notion-filter-inp {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  .notion-filter-inp:focus { border-color: var(--accent); }
+  .notion-filter-sel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+  }
+  .notion-count-badge {
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: var(--muted);
+  }
+
   /* Proje yönetimi modalı */
   .modal-overlay {
     display: none;
@@ -748,60 +838,105 @@
       <div id="indUyari" style="margin-top:12px"></div>
     </div>
 
-    <!-- Maliyet Kalemleri -->
+    <!-- Maliyet Kalemleri — Notion-like -->
     <div class="card mt16">
-      <div class="flex items-center justify-between" style="margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:0"><span>📦</span> Maliyet Kalemleri (Alış)</div>
-        <div class="flex gap8">
-          <button class="btn btn-ghost btn-sm" onclick="addRow('malzeme')">+ Malzeme/Ürün Ekle</button>
-          <button class="btn btn-ghost btn-sm" onclick="addRow('iscilik')">+ İşçilik Ekle</button>
-          <button class="btn btn-ghost btn-sm" onclick="addRow('gider')">+ Genel Gider Ekle</button>
+      <!-- Toolbar -->
+      <div class="notion-filter-bar">
+        <!-- Sol: Başlık + sayaç -->
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:160px">
+          <div class="card-title" style="margin-bottom:0"><span>📦</span> Maliyet Kalemleri</div>
+          <span id="maliyetSayac" class="notion-count-badge" style="display:none"></span>
         </div>
+
+        <!-- Arama -->
+        <input type="text" id="maliyetFiltreAd" placeholder="🔍 Ara..." oninput="renderMaliyetTable()"
+          class="notion-filter-inp" style="width:130px">
+
+        <!-- Tip filtresi -->
+        <select id="maliyetFiltreTip" class="notion-filter-sel" onchange="renderMaliyetTable()">
+          <option value="">Tüm Tipler</option>
+          <option value="malzeme">📦 Malzeme</option>
+          <option value="iscilik">👷 İşçilik</option>
+          <option value="gider">🏢 Gider</option>
+        </select>
+
+        <!-- Döviz filtresi -->
+        <select id="maliyetFiltreDoviz" class="notion-filter-sel" onchange="renderMaliyetTable()">
+          <option value="">Tüm Döviz</option>
+          <option value="TL">₺ TL</option>
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+        </select>
+
+        <!-- Sütun menüsü -->
+        <div style="position:relative">
+          <button class="btn btn-ghost btn-sm" id="kolonMenuBtn" onclick="kolonMenuToggle()">⚙ Sütunlar ▾</button>
+          <div id="kolonMenuPanel" style="display:none;position:absolute;right:0;top:36px;
+            background:var(--surface);border:1px solid var(--border);border-radius:8px;
+            padding:10px 14px;z-index:300;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,.35)">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Görünür Sütunlar</div>
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+              <input type="checkbox" id="kol-tip" checked onchange="renderMaliyetTable()" style="accent-color:var(--accent)"> Tip
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+              <input type="checkbox" id="kol-birim" checked onchange="renderMaliyetTable()" style="accent-color:var(--accent)"> Birim
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+              <input type="checkbox" id="kol-doviz" checked onchange="renderMaliyetTable()" style="accent-color:var(--accent)"> Döviz
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+              <input type="checkbox" id="kol-kdv" checked onchange="renderMaliyetTable()" style="accent-color:var(--accent)"> KDV
+            </label>
+          </div>
+        </div>
+
+        <!-- Excel yapıştır -->
+        <button class="btn btn-ghost btn-sm" onclick="excelPasteAc()" title="Excel veya Google Sheets'ten kopyala/yapıştır">
+          📋 Excel'den Yapıştır
+        </button>
+
+        <!-- Ayraç -->
+        <div style="width:1px;height:20px;background:var(--border)"></div>
+
+        <!-- Ekle butonları -->
+        <button class="btn btn-ghost btn-sm" onclick="addRow('malzeme')">+ Malzeme</button>
+        <button class="btn btn-ghost btn-sm" onclick="addRow('iscilik')">+ İşçilik</button>
+        <button class="btn btn-ghost btn-sm" onclick="addRow('gider')">+ Gider</button>
       </div>
-      <table class="data-table" id="maliyetTable">
-        <thead>
-          <tr>
-            <th style="width:30px">#</th>
-            <th style="width:90px">Tip</th>
-            <th>Kalem Adı</th>
-            <th style="width:100px">Miktar</th>
-            <th style="width:70px">Birim</th>
-            <th style="width:70px">Döviz</th>
-            <th style="width:120px">Birim Fiyat</th>
-            <th style="width:130px">Toplam (TL)</th>
-            <th style="width:55px">KDV</th>
-            <th style="width:40px"></th>
-          </tr>
-        </thead>
-        <tbody id="maliyetBody">
-          <!-- Rows injected by JS -->
-        </tbody>
-        <tfoot>
-          <tr class="total-row">
-            <td colspan="6" class="text-right">Toplam Maliyet:</td>
-            <td class="font-mono" id="toplamMaliyet">0.00</td>
-            <td></td><td></td>
-          </tr>
-        </tfoot>
-      </table>
+
+      <!-- Tablo -->
+      <div style="overflow-x:auto">
+        <table class="data-table" id="maliyetTable" style="border-collapse:collapse">
+          <thead id="maliyetHead"></thead>
+          <tbody id="maliyetBody"></tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td id="maliyetTotalSep" colspan="6" class="text-right" style="padding-right:12px">Toplam Maliyet:</td>
+              <td class="font-mono text-right" id="toplamMaliyet" style="padding-right:10px">0.00</td>
+              <td id="maliyetTotalAfter" colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </div>
 
     <!-- Gelir Kalemleri -->
     <div class="card mt16">
-      <div class="flex items-center justify-between" style="margin-bottom:14px">
+      <div class="flex items-center justify-between" style="margin-bottom:12px">
         <div class="card-title" style="margin-bottom:0"><span>💰</span> Gelir Kalemleri (Satış)</div>
         <button class="btn btn-ghost btn-sm" onclick="addGelirRow()">+ Gelir Kalemi Ekle</button>
       </div>
+      <div style="overflow-x:auto">
       <table class="data-table" id="gelirTable">
         <thead>
           <tr>
-            <th style="width:30px">#</th>
+            <th style="width:28px"></th>
             <th>Kalem Adı</th>
-            <th style="width:120px">Miktar</th>
-            <th style="width:80px">Birim</th>
-            <th style="width:130px">Birim Fiyat</th>
-            <th style="width:130px">Toplam</th>
-            <th style="width:50px"></th>
+            <th style="width:100px">Miktar</th>
+            <th style="width:70px">Birim</th>
+            <th style="width:120px">Birim Fiyat</th>
+            <th style="width:120px;text-align:right">Toplam</th>
+            <th style="width:30px"></th>
           </tr>
         </thead>
         <tbody id="gelirBody">
@@ -809,11 +944,12 @@
         <tfoot>
           <tr class="total-row">
             <td colspan="5" class="text-right">Toplam Gelir:</td>
-            <td class="font-mono" id="toplamGelir">0.00</td>
+            <td class="font-mono text-right" id="toplamGelir" style="padding-right:10px">0.00</td>
             <td></td>
           </tr>
         </tfoot>
       </table>
+      </div>
       <p style="font-size:12px;color:var(--muted);margin-top:10px">* Gelir kalemleri boş bırakılırsa yukarıdaki "Teklif Fiyatı" alanı kullanılır.</p>
     </div>
 
@@ -1359,6 +1495,41 @@
   <div class="tab-panel" id="tab-rapor">
     <div class="card">
       <div id="raporIcerik"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Excel Paste Modal -->
+<div class="modal-overlay" id="excelPasteModal" onclick="if(event.target===this)excelPasteKapat()" style="display:none">
+  <div class="modal" style="max-width:680px;width:95%;max-height:90vh;overflow:auto">
+    <div class="modal-header">
+      <div>
+        <h2 style="font-size:16px;font-weight:700">📋 Excel'den İçe Aktar</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px">Excel veya Google Sheets'ten kopyaladığınız hücreleri yapıştırın</p>
+      </div>
+      <button class="btn btn-ghost" onclick="excelPasteKapat()" style="font-size:18px;padding:4px 10px">✕</button>
+    </div>
+    <div style="padding:16px 20px">
+      <div style="background:var(--surface2);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7">
+        💡 <strong style="color:var(--text)">Beklenen sütun sırası</strong> (başlık satırı varsa otomatik algılanır):<br>
+        <code style="font-size:11px;color:var(--accent);background:rgba(79,125,255,.08);padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px">
+          Kalem Adı &nbsp;→&nbsp; Miktar &nbsp;→&nbsp; Birim &nbsp;→&nbsp; Birim Fiyat &nbsp;→&nbsp; [Tip] &nbsp;→&nbsp; [Döviz]
+        </code><br>
+        <span style="font-size:11px">Tip: malzeme / işçilik / gider &nbsp;|&nbsp; Döviz: TL / USD / EUR &nbsp;|&nbsp; Ondalık: virgül veya nokta desteklenir</span>
+      </div>
+      <textarea id="excelPasteArea" rows="8"
+        style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+               padding:12px;color:var(--text);font-family:'Menlo',monospace;font-size:12px;
+               resize:vertical;outline:none;line-height:1.6;transition:border-color .15s"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+        placeholder="Buraya yapıştırın (Ctrl+V / Cmd+V)…"
+        oninput="excelPasteOnizle(this.value)"></textarea>
+      <div id="excelOnizlePanel" style="margin-top:12px"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--muted);flex:1">Mevcut kalemlerin sonuna eklenir.</span>
+      <button class="btn btn-ghost" onclick="excelPasteKapat()">İptal</button>
+      <button class="btn btn-primary" id="excelPasteUygulaBtn" onclick="excelPasteUygula()" disabled>İçe Aktar</button>
     </div>
   </div>
 </div>
