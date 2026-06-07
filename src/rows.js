@@ -414,30 +414,37 @@ function setupSpreadsheetBehavior() {
     const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
     const inMaliyet = target.closest && target.closest('#maliyetBody');
     const inGelir   = target.closest && target.closest('#gelirBody');
+    const inKatalog = target.closest && target.closest('#katalogBody');
     // Tablo içindeki bir input'ta: sadece çok satırlı TSV'yi yakala
-    if ((inMaliyet || inGelir) && lines.length <= 1) return;
-    // Tablo dışı bir INPUT'ta: yakalamı
-    if (!inMaliyet && !inGelir && target.tagName === 'INPUT') return;
+    if ((inMaliyet || inGelir || inKatalog) && lines.length <= 1) return;
+    // Tablo dışı bir INPUT'ta: yakalama
+    if (!inMaliyet && !inGelir && !inKatalog && target.tagName === 'INPUT') return;
     e.preventDefault();
-    if (inGelir) _pasteToGelir(text);
-    else _pasteToMaliyet(text);
+    if (inGelir)   _pasteToGelir(text);
+    else if (inKatalog) _pasteToKatalog(text);
+    else           _pasteToMaliyet(text);
   });
 
-  // ② Klavye navigasyonu: Enter / Arrow tuşları
+  // ② Klavye navigasyonu: Enter / Arrow tuşları (maliyet, gelir, katalog)
   document.addEventListener('keydown', function(e) {
     const target = e.target;
-    if (!target.classList.contains('notion-inp') && !target.classList.contains('notion-sel')) return;
+    const isNotionCell = target.classList.contains('notion-inp') || target.classList.contains('notion-sel');
+    const isKsCell     = target.classList.contains('ks-input')  || target.classList.contains('ks-select');
+    if (!isNotionCell && !isKsCell) return;
     const inMaliyet = target.closest('#maliyetBody');
     const inGelir   = target.closest('#gelirBody');
-    if (!inMaliyet && !inGelir) return;
+    const inKatalog = target.closest('#katalogBody');
+    if (!inMaliyet && !inGelir && !inKatalog) return;
     const tr = target.closest('tr');
     if (!tr) return;
+    const cellSel = isKsCell ? '.ks-input, .ks-select' : '.notion-inp, .notion-sel';
 
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !inKatalog) {
+      // Katalog Enter'ı kendi katalogKeyNav içinde yönetiliyor
       e.preventDefault();
       const nextTr = tr.nextElementSibling;
       if (nextTr) {
-        const first = nextTr.querySelector('.notion-inp');
+        const first = nextTr.querySelector(cellSel);
         if (first) { first.focus(); return; }
       }
       if (inMaliyet) {
@@ -449,18 +456,18 @@ function setupSpreadsheetBehavior() {
     } else if (e.key === 'ArrowDown' && !e.altKey && !e.ctrlKey) {
       const nextTr = tr.nextElementSibling;
       if (nextTr) {
-        const inputs = [...tr.querySelectorAll('.notion-inp, .notion-sel')];
+        const inputs = [...tr.querySelectorAll(cellSel)];
         const ci = inputs.indexOf(target);
-        const nextInputs = [...nextTr.querySelectorAll('.notion-inp, .notion-sel')];
+        const nextInputs = [...nextTr.querySelectorAll(cellSel)];
         const nx = nextInputs[Math.min(ci, nextInputs.length - 1)];
         if (nx) { e.preventDefault(); nx.focus(); }
       }
     } else if (e.key === 'ArrowUp' && !e.altKey && !e.ctrlKey) {
       const prevTr = tr.previousElementSibling;
       if (prevTr) {
-        const inputs = [...tr.querySelectorAll('.notion-inp, .notion-sel')];
+        const inputs = [...tr.querySelectorAll(cellSel)];
         const ci = inputs.indexOf(target);
-        const prevInputs = [...prevTr.querySelectorAll('.notion-inp, .notion-sel')];
+        const prevInputs = [...prevTr.querySelectorAll(cellSel)];
         const px = prevInputs[Math.min(ci, prevInputs.length - 1)];
         if (px) { e.preventDefault(); px.focus(); }
       }

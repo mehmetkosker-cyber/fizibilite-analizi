@@ -711,7 +711,15 @@
         <tbody id="katalogBody"></tbody>
       </table>
     </div>
-    <div style="font-size:12px;color:var(--muted);margin-top:8px" id="katalogAltBilgi"></div>
+    <!-- E-Tablo alt çubuğu -->
+    <div class="satir-ekle-bar">
+      <input type="number" id="katalogSatirSayisi" value="5" min="1" max="100">
+      <span>boş satır ekle</span>
+      <button class="btn btn-ghost btn-sm" onclick="addMultipleKatalogRows()">+ Ekle</button>
+      <div style="flex:1"></div>
+      <span class="paste-hint">⌨️ Ctrl+V ile Excel / Sheets'ten direkt yapıştırın</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:6px" id="katalogAltBilgi"></div>
   </div>
 
   <!-- TAB 1: VERİ GİRİŞİ -->
