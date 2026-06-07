@@ -366,6 +366,31 @@
     border-radius: 10px;
     color: var(--muted);
   }
+  .satir-ekle-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px 2px;
+    border-top: 1px dashed rgba(46,51,82,.8);
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .satir-ekle-bar input[type=number] {
+    width: 56px;
+    padding: 3px 6px;
+    font-size: 13px;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .paste-hint {
+    font-size: 11px;
+    color: var(--muted);
+    opacity: .65;
+  }
 
   /* Proje yönetimi modalı */
   .modal-overlay {
@@ -918,6 +943,14 @@
           </tfoot>
         </table>
       </div>
+      <!-- E-Tablo alt çubuğu -->
+      <div class="satir-ekle-bar">
+        <input type="number" id="maliyetSatirSayisi" value="5" min="1" max="100">
+        <span>boş satır ekle</span>
+        <button class="btn btn-ghost btn-sm" onclick="addMultipleMaliyetRows()">+ Ekle</button>
+        <div style="flex:1"></div>
+        <span class="paste-hint">⌨️ Ctrl+V ile Excel / Sheets'ten direkt yapıştırın</span>
+      </div>
     </div>
 
     <!-- Gelir Kalemleri -->
@@ -950,7 +983,15 @@
         </tfoot>
       </table>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin-top:10px">* Gelir kalemleri boş bırakılırsa yukarıdaki "Teklif Fiyatı" alanı kullanılır.</p>
+      <!-- E-Tablo alt çubuğu -->
+      <div class="satir-ekle-bar" style="margin-bottom:6px">
+        <input type="number" id="gelirSatirSayisi" value="3" min="1" max="100">
+        <span>boş satır ekle</span>
+        <button class="btn btn-ghost btn-sm" onclick="addMultipleGelirRows()">+ Ekle</button>
+        <div style="flex:1"></div>
+        <span class="paste-hint">⌨️ Ctrl+V ile Excel / Sheets'ten direkt yapıştırın</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:6px">* Gelir kalemleri boş bırakılırsa yukarıdaki "Teklif Fiyatı" alanı kullanılır.</p>
     </div>
 
     <!-- Ekipman / Cihaz Kurulumu -->

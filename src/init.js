@@ -35,6 +35,7 @@ window.addEventListener('load', () => {
   }
   loadLocal();
   calculate();
+  setupSpreadsheetBehavior();
 });
 
 window.addEventListener('beforeunload', saveLocalImmediate);
