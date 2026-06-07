@@ -149,7 +149,7 @@ function renderMaliyetTable() {
         <input type="text" class="notion-inp" value="${escHtml(r.ad)}"
           onchange="updateRow(${r.id},'ad',this.value)"
           placeholder="Kalem adı..."
-          onkeydown="if(event.key==='Enter'){event.preventDefault();addRow('${r.tip}')}">
+  >
       </td>
       <td>
         <input type="number" class="notion-inp notion-num" value="${r.miktar}" min="0" step="any"
@@ -325,6 +325,147 @@ function excelPasteUygula() {
   calculate();
   excelPasteKapat();
   showToast(`${n} kalem başarıyla eklendi.`, 'success');
+}
+
+// ── Spreadsheet: Toplu satır ekleme ─────────────────
+function addMultipleMaliyetRows() {
+  const n = Math.max(1, Math.min(100, parseInt(document.getElementById('maliyetSatirSayisi')?.value) || 5));
+  const tip = document.getElementById('maliyetFiltreTip')?.value || 'malzeme';
+  const startIdx = maliyetRows.length;
+  for (let i = 0; i < n; i++) {
+    maliyetRows.push({ id: ++rowCounter, tip, ad: '', miktar: 1, birim: 'Adet', birimFiyat: 0, doviz: 'TL', kdv: true });
+  }
+  renderMaliyetTable();
+  calculate();
+  requestAnimationFrame(() => {
+    const rows = document.querySelectorAll('#maliyetBody tr');
+    const targetRow = rows[startIdx];
+    if (targetRow) {
+      const first = targetRow.querySelector('.notion-inp');
+      if (first) first.focus();
+    }
+  });
+}
+
+function addMultipleGelirRows() {
+  const n = Math.max(1, Math.min(100, parseInt(document.getElementById('gelirSatirSayisi')?.value) || 3));
+  const startIdx = gelirRows.length;
+  for (let i = 0; i < n; i++) {
+    gelirRows.push({ id: ++rowCounter, ad: '', miktar: 1, birim: 'Adet', birimFiyat: 0 });
+  }
+  renderGelirTable();
+  calculate();
+  requestAnimationFrame(() => {
+    const rows = document.querySelectorAll('#gelirBody tr');
+    const targetRow = rows[startIdx];
+    if (targetRow) {
+      const first = targetRow.querySelector('.notion-inp');
+      if (first) first.focus();
+    }
+  });
+}
+
+// ── Direkt TSV Yapıştır ─────────────────────────────
+function _pasteToMaliyet(text) {
+  const rows = _parseTSV(text);
+  if (!rows.length) {
+    showToast('Yapıştırılacak veri bulunamadı. Excel\'den sekme (Tab) ile ayrılmış veri bekleniyor.', 'error');
+    return;
+  }
+  rows.forEach(r => maliyetRows.push({ ...r, id: ++rowCounter }));
+  renderMaliyetTable();
+  calculate();
+  showToast(`✓ ${rows.length} kalem yapıştırıldı.`, 'success');
+}
+
+function _pasteToGelir(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  const first = lines[0].split('\t').map(c => c.toLowerCase().trim());
+  const isHeader = first.some(c => /^(ad|item|name|fiyat|price|miktar|qty|kalem)/.test(c));
+  const dataLines = isHeader ? lines.slice(1) : lines;
+  let colAd=0, colMiktar=1, colBirim=2, colFiyat=3;
+  if (isHeader) {
+    first.forEach((h, i) => {
+      if (/^(ad|item|name|kalem|açıklama)/.test(h)) colAd = i;
+      else if (/miktar|qty|adet/.test(h)) colMiktar = i;
+      else if (/birim\s*fiyat|^fiyat$|^price$/.test(h)) colFiyat = i;
+      else if (/birim|unit/.test(h)) colBirim = i;
+    });
+  }
+  const rows = dataLines.map(l => {
+    const c = l.split('\t').map(x => x.trim().replace(/^["']|["']$/g, ''));
+    return { id: ++rowCounter, ad: c[colAd] || '', miktar: _parseNum(c[colMiktar] || '1') || 1, birim: c[colBirim] || 'Adet', birimFiyat: _parseNum(c[colFiyat] || '0') };
+  }).filter(r => r.ad || r.birimFiyat > 0);
+  if (!rows.length) { showToast('Geçerli satır bulunamadı.', 'error'); return; }
+  rows.forEach(r => gelirRows.push(r));
+  renderGelirTable();
+  calculate();
+  showToast(`✓ ${rows.length} gelir kalemi yapıştırıldı.`, 'success');
+}
+
+// ── E-Tablo Davranışı Kurulumu ───────────────────────
+function setupSpreadsheetBehavior() {
+  // ① Ctrl+V: TSV verisini doğrudan tabloya yapıştır (modal açmadan)
+  document.addEventListener('paste', function(e) {
+    const target = e.target;
+    if (target.tagName === 'TEXTAREA') return;
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if (!text || !text.includes('\t')) return;
+    const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+    const inMaliyet = target.closest && target.closest('#maliyetBody');
+    const inGelir   = target.closest && target.closest('#gelirBody');
+    // Tablo içindeki bir input'ta: sadece çok satırlı TSV'yi yakala
+    if ((inMaliyet || inGelir) && lines.length <= 1) return;
+    // Tablo dışı bir INPUT'ta: yakalamı
+    if (!inMaliyet && !inGelir && target.tagName === 'INPUT') return;
+    e.preventDefault();
+    if (inGelir) _pasteToGelir(text);
+    else _pasteToMaliyet(text);
+  });
+
+  // ② Klavye navigasyonu: Enter / Arrow tuşları
+  document.addEventListener('keydown', function(e) {
+    const target = e.target;
+    if (!target.classList.contains('notion-inp') && !target.classList.contains('notion-sel')) return;
+    const inMaliyet = target.closest('#maliyetBody');
+    const inGelir   = target.closest('#gelirBody');
+    if (!inMaliyet && !inGelir) return;
+    const tr = target.closest('tr');
+    if (!tr) return;
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const nextTr = tr.nextElementSibling;
+      if (nextTr) {
+        const first = nextTr.querySelector('.notion-inp');
+        if (first) { first.focus(); return; }
+      }
+      if (inMaliyet) {
+        const sel = tr.querySelector('.notion-sel');
+        addRow(sel ? sel.value : 'malzeme');
+      } else {
+        addGelirRow();
+      }
+    } else if (e.key === 'ArrowDown' && !e.altKey && !e.ctrlKey) {
+      const nextTr = tr.nextElementSibling;
+      if (nextTr) {
+        const inputs = [...tr.querySelectorAll('.notion-inp, .notion-sel')];
+        const ci = inputs.indexOf(target);
+        const nextInputs = [...nextTr.querySelectorAll('.notion-inp, .notion-sel')];
+        const nx = nextInputs[Math.min(ci, nextInputs.length - 1)];
+        if (nx) { e.preventDefault(); nx.focus(); }
+      }
+    } else if (e.key === 'ArrowUp' && !e.altKey && !e.ctrlKey) {
+      const prevTr = tr.previousElementSibling;
+      if (prevTr) {
+        const inputs = [...tr.querySelectorAll('.notion-inp, .notion-sel')];
+        const ci = inputs.indexOf(target);
+        const prevInputs = [...prevTr.querySelectorAll('.notion-inp, .notion-sel')];
+        const px = prevInputs[Math.min(ci, prevInputs.length - 1)];
+        if (px) { e.preventDefault(); px.focus(); }
+      }
+    }
+  });
 }
 
 // ── Gelir Kalemleri ───────────────────────────────
