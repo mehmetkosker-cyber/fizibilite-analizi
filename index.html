@@ -277,6 +277,96 @@
   .total-row td:first-child { border-radius: 6px 0 0 6px; }
   .total-row td:last-child { border-radius: 0 6px 6px 0; }
 
+  /* ── Notion-like tablo ── */
+  .notion-inp {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px 6px;
+    width: 100%;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color .12s, background .12s;
+    outline: none;
+  }
+  .notion-inp:hover { background: var(--surface2); border-color: var(--border); }
+  .notion-inp:focus { background: var(--surface2); border-color: var(--accent); }
+  .notion-num { text-align: right; font-family: 'Menlo', monospace; }
+
+  .notion-sel {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px 4px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    width: 100%;
+    transition: border-color .12s, background .12s;
+  }
+  .notion-sel:hover, .notion-sel:focus {
+    background: var(--surface2);
+    border-color: var(--border);
+  }
+
+  .notion-row { transition: background .1s; }
+  .notion-row:hover { background: rgba(79,125,255,.04) !important; }
+  .notion-row:hover .notion-del-btn { opacity: 1; }
+
+  .notion-del-btn {
+    background: none;
+    border: none;
+    color: var(--red);
+    opacity: 0;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    transition: opacity .15s, background .15s;
+    line-height: 1;
+  }
+  .notion-del-btn:hover { background: rgba(239,68,68,.12); opacity: 1; }
+
+  .notion-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .notion-filter-inp {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  .notion-filter-inp:focus { border-color: var(--accent); }
+  .notion-filter-sel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+  }
+  .notion-count-badge {
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: var(--muted);
+  }
+
   /* Proje yönetimi modalı */
   .modal-overlay {
     display: none;
@@ -343,8 +433,62 @@
     .no-print { display: none !important; }
     .card { border: 1px solid #ddd; }
   }
+  /* Light mode */
+  body.light-mode {
+    --bg: #f1f5fb;
+    --surface: #ffffff;
+    --surface2: #eaeff8;
+    --border: #c8d0e4;
+    --text: #1e2235;
+    --muted: #4d5878;
+  }
+  body.light-mode .data-table th { background: var(--surface2); }
+  body.light-mode .modal { background: var(--surface); }
+  body.light-mode .template-btn { background: var(--surface2); }
+  body.light-mode .scenario-kötümser { background: rgba(239,68,68,.04); }
+  body.light-mode .scenario-gerçekçi { background: rgba(79,125,255,.04); }
+  body.light-mode .scenario-iyimser  { background: rgba(34,197,94,.04); }
+
+  /* Dashboard KPI cards */
+  .dash-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; position: relative; overflow: hidden; }
+  .dash-kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .dash-kpi.kpi-green::before { background: var(--green); }
+  .dash-kpi.kpi-red::before { background: var(--red); }
+  .dash-kpi.kpi-yellow::before { background: var(--yellow); }
+  .dash-kpi.kpi-cyan::before { background: var(--cyan); }
+  .dash-kpi.kpi-purple::before { background: var(--accent2); }
+
+  /* Responsive improvements */
+  @media (max-width: 900px) {
+    .grid3 { grid-template-columns: 1fr 1fr; }
+  }
   @media (max-width: 768px) {
     .grid2, .grid3, .scenario-grid { grid-template-columns: 1fr; }
+    .header { padding: 14px 16px; flex-direction: column; gap: 10px; align-items: flex-start; }
+    .header-actions { flex-wrap: wrap; gap: 6px; }
+    .main { padding: 14px 12px; }
+    .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; gap: 0; }
+    .tab-btn { white-space: nowrap; padding: 10px 14px; font-size: 12px; }
+    .kpi { padding: 12px 14px; }
+    .kpi-value { font-size: 20px; }
+    .modal { max-width: 100vw; max-height: 95vh; border-radius: 12px 12px 0 0; align-self: flex-end; }
+    .card { padding: 14px; }
+    #kpiGrid { grid-template-columns: 1fr 1fr !important; }
+    #dashKpiGrid { grid-template-columns: 1fr 1fr !important; }
+  }
+  @media (max-width: 480px) {
+    #kpiGrid, #dashKpiGrid { grid-template-columns: 1fr !important; }
+    .header h1 { font-size: 17px; }
+    .kpi-value { font-size: 18px; }
+  }
+
+  /* Validasyon hata durumu */
+  .field-error {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 0 2px rgba(239,68,68,.2);
+  }
+  .field-error:focus {
+    border-color: var(--red) !important;
   }
 </style>
 </head>
@@ -367,6 +511,7 @@
     <button class="btn btn-ghost btn-sm" onclick="exportCSV()">CSV Dışa Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="exportJSON()">JSON Dışa Aktar</button>
     <button class="btn btn-ghost btn-sm" onclick="importJSON()">JSON İçe Aktar</button>
+    <button class="btn btn-ghost btn-sm" id="temaBtn" onclick="toggleTema()" title="Koyu/Açık Tema">🌙</button>
     <button class="btn btn-ghost btn-sm" onclick="window.print()">Yazdır</button>
     <button class="btn btn-success btn-sm" onclick="calculate()">Hesapla &amp; Güncelle</button>
   </div>
@@ -392,6 +537,7 @@
       <div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:0">
         <button class="tab-btn active" id="mTab-liste" onclick="switchModalTab('liste')" style="font-size:12px">Proje Listesi</button>
         <button class="tab-btn" id="mTab-karsilastir" onclick="switchModalTab('karsilastir')" style="font-size:12px">Karşılaştır</button>
+        <button class="tab-btn" id="mTab-revisions" onclick="switchModalTab('revisions')" style="font-size:12px">🕐 Revizyon Geçmişi</button>
       </div>
 
       <div id="modalTab-liste">
@@ -402,13 +548,21 @@
         <div id="karsilastirIcerik"></div>
         <div style="position:relative;height:260px;margin-top:12px"><canvas id="chartKarsilastir"></canvas></div>
       </div>
+
+      <div id="modalTab-revisions" style="display:none">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
+          Son <strong style="color:var(--text)">10 hesaplama</strong> otomatik saklanır. Tıklayarak geri dönün.
+        </div>
+        <div id="revisionListesi"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="main">
   <div class="tabs no-print">
-    <button class="tab-btn active" onclick="showTab('katalog')">Ürün Kataloğu</button>
+    <button class="tab-btn active" onclick="showTab('ozet')">📊 Genel Bakış</button>
+    <button class="tab-btn" onclick="showTab('katalog')">Ürün Kataloğu</button>
     <button class="tab-btn" onclick="showTab('veri')">Veri Girişi</button>
     <button class="tab-btn" onclick="showTab('analiz')">Karlılık Analizi</button>
     <button class="tab-btn" onclick="showTab('risk')">Risk &amp; Senaryo</button>
@@ -417,8 +571,72 @@
     <button class="tab-btn" onclick="showTab('rapor')">Özet Rapor</button>
   </div>
 
-  <!-- TAB 0: ÜRÜN KATALOĞU -->
-  <div class="tab-panel active" id="tab-katalog">
+  <!-- TAB: GENEL BAKIŞ / DASHBOARD -->
+  <div class="tab-panel active" id="tab-ozet">
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px" id="dashKpiGrid">
+      <div class="dash-kpi kpi-green">
+        <div class="kpi-label">Toplam Gelir</div>
+        <div class="kpi-value text-green font-mono" id="dash-gelir">—</div>
+      </div>
+      <div class="dash-kpi kpi-red">
+        <div class="kpi-label">Toplam Maliyet</div>
+        <div class="kpi-value text-red font-mono" id="dash-maliyet">—</div>
+      </div>
+      <div class="dash-kpi">
+        <div class="kpi-label">Net Kâr</div>
+        <div class="kpi-value font-mono" id="dash-kar">—</div>
+      </div>
+      <div class="dash-kpi kpi-yellow">
+        <div class="kpi-label">Kar Marjı</div>
+        <div class="kpi-value font-mono" id="dash-marj">—</div>
+      </div>
+      <div class="dash-kpi kpi-cyan">
+        <div class="kpi-label">ROI</div>
+        <div class="kpi-value font-mono" id="dash-roi">—</div>
+      </div>
+      <div class="dash-kpi kpi-purple">
+        <div class="kpi-label">KDV Dahil Maliyet</div>
+        <div class="kpi-value text-yellow font-mono" id="dash-kdv">—</div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title"><span>📋</span> Proje Özeti</div>
+        <div id="dashProjeOzet">
+          <p style="color:var(--muted);font-size:13px">Veri girişi yapıp "Hesapla &amp; Güncelle" butonuna basın.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🎯</span> Senaryo Özeti</div>
+        <div id="dashSenaryoOzet">
+          <p style="color:var(--muted);font-size:13px">Senaryo sonuçları burada görünecek.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span>📊</span> Maliyet Dağılımı</div>
+        <div class="chart-container"><canvas id="dashChartMaliyet"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>⚡</span> Hızlı Erişim</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('veri')">📝 Veri Girişi &amp; Maliyet Kalemleri →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('analiz')">📈 Karlılık Analizi →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('risk')">🎯 Risk &amp; Senaryo Analizi →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('rakip')">🏁 Rakip Analizi →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('nakit')">💰 Nakit Akışı →</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start" onclick="showTab('rapor')">📄 Özet Rapor →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ÜRÜN KATALOĞU -->
+  <div class="tab-panel" id="tab-katalog">
 
     <!-- Toolbar -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
@@ -519,6 +737,9 @@
             </div>
           </div>
           <div style="font-size:11px;color:var(--muted);margin-top:6px">Satış fiyatı her zaman TL bazında hesaplanır. Maliyet kalemlerine döviz atayabilirsiniz.</div>
+          <button class="btn btn-ghost btn-sm" id="kurGuncelleBtn" onclick="kurGuncelle()"
+            style="width:100%;margin-top:8px;font-size:12px;padding:6px 10px">🔄 Kuru Güncelle</button>
+          <div id="kurGuncelleTarih" style="font-size:11px;color:var(--muted);margin-top:4px;text-align:center;min-height:16px"></div>
         </div>
         <label>Teklif Fiyatı (Satış Tutarı — TL)</label>
         <input type="number" id="teklifFiyati" placeholder="0.00" min="0" step="0.01" oninput="calculate()">
@@ -617,60 +838,105 @@
       <div id="indUyari" style="margin-top:12px"></div>
     </div>
 
-    <!-- Maliyet Kalemleri -->
+    <!-- Maliyet Kalemleri — Notion-like -->
     <div class="card mt16">
-      <div class="flex items-center justify-between" style="margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:0"><span>📦</span> Maliyet Kalemleri (Alış)</div>
-        <div class="flex gap8">
-          <button class="btn btn-ghost btn-sm" onclick="addRow('malzeme')">+ Malzeme/Ürün Ekle</button>
-          <button class="btn btn-ghost btn-sm" onclick="addRow('iscilik')">+ İşçilik Ekle</button>
-          <button class="btn btn-ghost btn-sm" onclick="addRow('gider')">+ Genel Gider Ekle</button>
+      <!-- Toolbar -->
+      <div class="notion-filter-bar">
+        <!-- Sol: Başlık + sayaç -->
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:160px">
+          <div class="card-title" style="margin-bottom:0"><span>📦</span> Maliyet Kalemleri</div>
+          <span id="maliyetSayac" class="notion-count-badge" style="display:none"></span>
         </div>
+
+        <!-- Arama -->
+        <input type="text" id="maliyetFiltreAd" placeholder="🔍 Ara..." oninput="renderMaliyetTable()"
+          class="notion-filter-inp" style="width:130px">
+
+        <!-- Tip filtresi -->
+        <select id="maliyetFiltreTip" class="notion-filter-sel" onchange="renderMaliyetTable()">
+          <option value="">Tüm Tipler</option>
+          <option value="malzeme">📦 Malzeme</option>
+          <option value="iscilik">👷 İşçilik</option>
+          <option value="gider">🏢 Gider</option>
+        </select>
+
+        <!-- Döviz filtresi -->
+        <select id="maliyetFiltreDoviz" class="notion-filter-sel" onchange="renderMaliyetTable()">
+          <option value="">Tüm Döviz</option>
+          <option value="TL">₺ TL</option>
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+        </select>
+
+        <!-- Sütun menüsü -->
+        <div style="position:relative">
+          <button class="btn btn-ghost btn-sm" id="kolonMenuBtn" onclick="kolonMenuToggle()">⚙ Sütunlar ▾</button>
+          <div id="kolonMenuPanel" style="display:none;position:absolute;right:0;top:36px;
+            background:var(--surface);border:1px solid var(--border);border-radius:8px;
+            padding:10px 14px;z-index:300;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,.35)">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Görünür Sütunlar</div>
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+              <input type="checkbox" id="kol-tip" checked onchange="renderMaliyetTable()" style="accent-color:var(--accent)"> Tip
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+              <input type="checkbox" id="kol-birim" checked onchange="renderMaliyetTable()" style="accent-color:var(--accent)"> Birim
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+              <input type="checkbox" id="kol-doviz" checked onchange="renderMaliyetTable()" style="accent-color:var(--accent)"> Döviz
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+              <input type="checkbox" id="kol-kdv" checked onchange="renderMaliyetTable()" style="accent-color:var(--accent)"> KDV
+            </label>
+          </div>
+        </div>
+
+        <!-- Excel yapıştır -->
+        <button class="btn btn-ghost btn-sm" onclick="excelPasteAc()" title="Excel veya Google Sheets'ten kopyala/yapıştır">
+          📋 Excel'den Yapıştır
+        </button>
+
+        <!-- Ayraç -->
+        <div style="width:1px;height:20px;background:var(--border)"></div>
+
+        <!-- Ekle butonları -->
+        <button class="btn btn-ghost btn-sm" onclick="addRow('malzeme')">+ Malzeme</button>
+        <button class="btn btn-ghost btn-sm" onclick="addRow('iscilik')">+ İşçilik</button>
+        <button class="btn btn-ghost btn-sm" onclick="addRow('gider')">+ Gider</button>
       </div>
-      <table class="data-table" id="maliyetTable">
-        <thead>
-          <tr>
-            <th style="width:30px">#</th>
-            <th style="width:90px">Tip</th>
-            <th>Kalem Adı</th>
-            <th style="width:100px">Miktar</th>
-            <th style="width:70px">Birim</th>
-            <th style="width:70px">Döviz</th>
-            <th style="width:120px">Birim Fiyat</th>
-            <th style="width:130px">Toplam (TL)</th>
-            <th style="width:55px">KDV</th>
-            <th style="width:40px"></th>
-          </tr>
-        </thead>
-        <tbody id="maliyetBody">
-          <!-- Rows injected by JS -->
-        </tbody>
-        <tfoot>
-          <tr class="total-row">
-            <td colspan="6" class="text-right">Toplam Maliyet:</td>
-            <td class="font-mono" id="toplamMaliyet">0.00</td>
-            <td></td><td></td>
-          </tr>
-        </tfoot>
-      </table>
+
+      <!-- Tablo -->
+      <div style="overflow-x:auto">
+        <table class="data-table" id="maliyetTable" style="border-collapse:collapse">
+          <thead id="maliyetHead"></thead>
+          <tbody id="maliyetBody"></tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td id="maliyetTotalSep" colspan="6" class="text-right" style="padding-right:12px">Toplam Maliyet:</td>
+              <td class="font-mono text-right" id="toplamMaliyet" style="padding-right:10px">0.00</td>
+              <td id="maliyetTotalAfter" colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </div>
 
     <!-- Gelir Kalemleri -->
     <div class="card mt16">
-      <div class="flex items-center justify-between" style="margin-bottom:14px">
+      <div class="flex items-center justify-between" style="margin-bottom:12px">
         <div class="card-title" style="margin-bottom:0"><span>💰</span> Gelir Kalemleri (Satış)</div>
         <button class="btn btn-ghost btn-sm" onclick="addGelirRow()">+ Gelir Kalemi Ekle</button>
       </div>
+      <div style="overflow-x:auto">
       <table class="data-table" id="gelirTable">
         <thead>
           <tr>
-            <th style="width:30px">#</th>
+            <th style="width:28px"></th>
             <th>Kalem Adı</th>
-            <th style="width:120px">Miktar</th>
-            <th style="width:80px">Birim</th>
-            <th style="width:130px">Birim Fiyat</th>
-            <th style="width:130px">Toplam</th>
-            <th style="width:50px"></th>
+            <th style="width:100px">Miktar</th>
+            <th style="width:70px">Birim</th>
+            <th style="width:120px">Birim Fiyat</th>
+            <th style="width:120px;text-align:right">Toplam</th>
+            <th style="width:30px"></th>
           </tr>
         </thead>
         <tbody id="gelirBody">
@@ -678,12 +944,64 @@
         <tfoot>
           <tr class="total-row">
             <td colspan="5" class="text-right">Toplam Gelir:</td>
-            <td class="font-mono" id="toplamGelir">0.00</td>
+            <td class="font-mono text-right" id="toplamGelir" style="padding-right:10px">0.00</td>
             <td></td>
           </tr>
         </tfoot>
       </table>
+      </div>
       <p style="font-size:12px;color:var(--muted);margin-top:10px">* Gelir kalemleri boş bırakılırsa yukarıdaki "Teklif Fiyatı" alanı kullanılır.</p>
+    </div>
+
+    <!-- Ekipman / Cihaz Kurulumu -->
+    <div class="card mt16">
+      <div class="flex items-center justify-between" style="margin-bottom:10px">
+        <div>
+          <div class="card-title" style="margin-bottom:2px"><span>🖥️</span> Cihaz / Kit Kurulumu &amp; Amortisman</div>
+          <p style="font-size:12px;color:var(--muted)">
+            <strong>Kit (Tam):</strong> cihaz müşteriye teslim edilir — tüm maliyet projeye yüklenir. &nbsp;|&nbsp;
+            <strong>Amortisman:</strong> cihaz şirkette kalır — sadece proje süresine düşen pay maliyettir.
+          </p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addEkipman()">+ Cihaz / Kit Ekle</button>
+      </div>
+      <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:1100px">
+          <thead>
+            <tr style="background:var(--surface2)">
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600">#</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;min-width:150px">Cihaz / Ekipman Adı</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:55px">Adet</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:130px">Birim Fiyat</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:75px">Döviz</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:100px">Kurulum ₺</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:120px">Mod</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:65px" title="Faydalı ömür (ay)">Ömür (ay)</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:90px">Hurda ₺</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:100px">Yöntem</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:45px" title="KDV">KDV</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:600;width:130px">Proje Maliyeti</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border);width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="ekipmanBody">
+            <tr><td colspan="13" style="text-align:center;padding:20px;color:var(--muted);font-size:13px">
+              Henüz cihaz eklenmedi.
+            </td></tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="11" class="text-right">Toplam Ekipman Maliyeti (Projeye Yüklenen):</td>
+              <td class="font-mono" id="toplamEkipman">₺0,00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">
+        💡 Proje süresi için <strong>Nakit Akışı</strong> sekmesindeki "Proje Süresi (Ay)" değeri kullanılır.
+        Amortisman çizelgesini <strong>Karlılık Analizi</strong> sekmesinde görüntüleyin.
+      </div>
     </div>
   </div>
 
@@ -729,6 +1047,51 @@
       <div id="dovizOzet"></div>
     </div>
 
+    <!-- Döviz Kur Riski Analizi -->
+    <div class="card mt16" id="dovizRiskiKart" style="display:none">
+      <div class="card-title"><span>📉</span> Döviz Kur Riski — TL Teklifli Projede Kur Artışının Etkisi</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">
+        Teklif fiyatı TL sabit, maliyetlerin döviz cinsinden kısmı kur artışından etkileniyor.
+        Kur senaryoları ve kâra döndüğü kritik eşik aşağıda gösterilmektedir.
+      </p>
+      <div id="dovizRiskiPaneli">
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">
+          Maliyet kalemlerine USD veya EUR atayın.
+        </p>
+      </div>
+    </div>
+
+    <!-- Döviz Korunma (Hedging) Hesaplayıcısı -->
+    <div class="card mt16" id="hedgingKart" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0"><span>🛡️</span> Döviz Korunma (Hedging) Hesaplayıcısı</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text);font-weight:500">
+          <input type="checkbox" id="hedgingAktif" onchange="calculate()"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+          Hedging analizini aktif et
+        </label>
+      </div>
+      <div id="hedgingGirdiler" style="display:none">
+        <div class="grid3" style="gap:14px;margin-bottom:14px">
+          <div>
+            <label style="margin-top:0">Forward Vade (Ay)</label>
+            <input type="number" id="hedgingVade" value="3" min="1" max="12" step="1" oninput="calculate()">
+          </div>
+          <div>
+            <label style="margin-top:0">Forward Prim (% / Yıl)</label>
+            <input type="number" id="hedgingPrim" value="25" min="0" max="100" step="0.5" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">TL/USD için bankacılık sektörü: genellikle %20–35</div>
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <div style="font-size:12px;color:var(--muted);padding-bottom:6px;line-height:1.5">
+              Forward sözleşme, dövizi belirli bir vadede bugünden belirlenen fiyata kilitleme işlemidir.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="hedgingPaneli"></div>
+    </div>
+
     <div class="grid2 mt20">
       <div class="card">
         <div class="card-title"><span>📊</span> Maliyet Dağılımı</div>
@@ -755,6 +1118,165 @@
     <div class="card mt20">
       <div class="card-title"><span>⚖️</span> Başa Baş Analizi</div>
       <div class="grid3" id="basabas"></div>
+    </div>
+
+    <!-- Başa Baş Nokta Grafiği — Adet Bazlı -->
+    <div class="card mt20">
+      <div class="card-title"><span>📉</span> Başa Baş Nokta Grafiği — Adet / Birim Bazlı</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">
+        Sabit ve değişken maliyetleri ayırarak kaç birimde kâra geçeceğinizi hesaplayın. Üretim, hizmet satışı veya tekrar eden projeler için idealdir.
+      </p>
+      <div class="grid3" style="gap:14px;margin-bottom:14px">
+        <div>
+          <label style="margin-top:0">Birim Satış Fiyatı (₺)</label>
+          <input type="number" id="bepSatisFiyati" value="0" min="0" step="any"
+            oninput="renderBasaBasGrafik()" placeholder="Ör: 5.000">
+        </div>
+        <div>
+          <label style="margin-top:0">Birim Değişken Maliyet (₺)</label>
+          <input type="number" id="bepDegiskenMaliyet" value="0" min="0" step="any"
+            oninput="renderBasaBasGrafik()" placeholder="Ör: 3.000">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Ham madde, işçilik, nakliye vb.</div>
+        </div>
+        <div>
+          <label style="margin-top:0">Toplam Sabit Maliyet (₺)</label>
+          <input type="number" id="bepSabitMaliyet" value="0" min="0" step="any"
+            oninput="renderBasaBasGrafik()" placeholder="Ör: 50.000">
+          <button class="btn btn-ghost btn-sm" style="margin-top:6px;width:100%;font-size:11px"
+            onclick="bepMaliyetiOtoDoldur()">↑ Hesaplanan Toplam Maliyeti Kullan</button>
+        </div>
+      </div>
+      <div id="bepKpiGrid" style="display:none;margin-bottom:16px"></div>
+      <div class="chart-container" style="height:300px"><canvas id="chartBep"></canvas></div>
+    </div>
+
+    <div class="card mt20">
+      <div class="card-title"><span>💹</span> ROI &amp; Geri Ödeme Analizi</div>
+      <div class="grid2" style="gap:20px">
+        <div>
+          <label>İlk Yatırım / Sabit Gider (₺) <span style="font-size:11px;color:var(--muted)">(0 = toplam maliyet kullanılır)</span></label>
+          <input type="number" id="ilkYatirim" value="0" min="0" step="any" oninput="calculate()">
+          <label>Değerlendirme Süresi (Ay)</label>
+          <input type="number" id="degSure" value="12" min="1" max="120" oninput="calculate()">
+        </div>
+        <div id="roiPaneli" style="display:flex;flex-direction:column;gap:10px;justify-content:center">
+          <p style="color:var(--muted);font-size:13px">Hesaplama bekleniyor...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt20">
+      <div class="card-title"><span>🧾</span> KDV Raporu</div>
+      <div id="kdvRaporPaneli">
+        <p style="color:var(--muted);font-size:13px">Hesaplama bekleniyor...</p>
+      </div>
+    </div>
+
+    <!-- Enflasyon Maliyet Projeksiyonu -->
+    <div class="card mt20">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0"><span>📈</span> Enflasyon Maliyet Projeksiyonu</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text);font-weight:500">
+          <input type="checkbox" id="enflasyonAktif" onchange="calculate()"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+          Enflasyon analizini aktif et
+        </label>
+      </div>
+      <div id="enflasyonGirdiler" style="display:none">
+        <div class="grid3" style="gap:14px;margin-bottom:14px">
+          <div>
+            <label style="margin-top:0">Yıllık TÜFE / Maliyet Enflasyonu (%)</label>
+            <input type="number" id="enflasyonOrani" value="40" min="0" max="300" step="1" oninput="calculate()">
+          </div>
+          <div>
+            <label style="margin-top:0">Projeksiyon Süresi (Yıl)</label>
+            <input type="number" id="enflasyonYil" value="3" min="1" max="5" step="1" oninput="calculate()">
+          </div>
+          <div>
+            <label style="margin-top:0">Maliyetin Enflasyon Duyarlılığı (%)</label>
+            <input type="number" id="enflasyonDuyarlilik" value="100" min="0" max="100" step="5" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">100% → tüm maliyet enflasyonla artar</div>
+          </div>
+        </div>
+      </div>
+      <div id="enflasyonPaneli"></div>
+    </div>
+
+    <!-- Vade & Nakit Yük Analizi -->
+    <div class="card mt20">
+      <div class="flex items-center justify-between" style="margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0"><span>📅</span> Vade &amp; Nakit Yük Analizi</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text);font-weight:500">
+          <input type="checkbox" id="vadeAktif" onchange="calculate()"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+          Vade analizini aktif et
+        </label>
+      </div>
+
+      <div id="vadeGirdiler" style="display:none">
+        <div class="grid3" style="gap:16px;margin-bottom:16px">
+          <!-- Tahsilat vadesi slider -->
+          <div>
+            <label style="margin-top:0">Tahsilat Vadesi (Ay)</label>
+            <input type="range" id="tahsilatVadeAy" min="1" max="12" value="3"
+              style="width:100%;accent-color:var(--accent);margin:8px 0 2px;height:4px;cursor:pointer"
+              oninput="document.getElementById('tahsilatVadeLabel').textContent=this.value+' Ay';calculate()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+              <span>1 Ay</span>
+              <span id="tahsilatVadeLabel" style="font-weight:700;color:var(--accent)">3 Ay</span>
+              <span>12 Ay</span>
+            </div>
+          </div>
+          <!-- Ödeme vadesi slider -->
+          <div>
+            <label style="margin-top:0">Ödeme Vadesi (Ay) — Maliyetler</label>
+            <input type="range" id="odemeVadeAy" min="0" max="12" value="0"
+              style="width:100%;accent-color:var(--green);margin:8px 0 2px;height:4px;cursor:pointer"
+              oninput="document.getElementById('odemeVadeLabel').textContent=(+this.value===0?'Peşin':this.value+' Ay');calculate()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+              <span>Peşin</span>
+              <span id="odemeVadeLabel" style="font-weight:700;color:var(--green)">Peşin</span>
+              <span>12 Ay</span>
+            </div>
+          </div>
+          <!-- KDV beyan -->
+          <div>
+            <label style="margin-top:0">KDV Beyan Dönemi</label>
+            <select id="kdvBeyanDonem" onchange="calculate()" style="margin-top:6px">
+              <option value="aylik">Aylık Beyan</option>
+              <option value="ucaylik">3 Aylık Beyan</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid2" style="gap:16px;margin-bottom:16px">
+          <div>
+            <label style="margin-top:0">Yıllık Finansman / Kredi Maliyeti (%)</label>
+            <input type="number" id="vadeFinansmanOrani" value="30" min="0" max="300" step="0.5" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Banka kredi faizi veya fırsat maliyeti (yıllık)</div>
+          </div>
+          <div>
+            <label style="margin-top:0">Yıllık Beklenen Kur Artışı (%)</label>
+            <input type="number" id="vadeKurArtis" value="20" min="-50" max="300" step="0.5" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">TL'nin USD/EUR karşısındaki beklenen değer kaybı</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="vadeSonuclar">
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">
+          Analizi aktif etmek için yukarıdaki kutucuğu işaretleyin.
+        </p>
+      </div>
+    </div>
+
+    <div class="card mt20" id="ekipmanAmortisanKart">
+      <div class="card-title"><span>🖥️</span> Ekipman &amp; Amortisman Çizelgesi</div>
+      <div id="amortisanPaneli">
+        <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">
+          Cihaz eklenmemiş. Veri Girişi → Cihaz/Kit Kurulumu bölümünden ekleyin.
+        </div>
+      </div>
     </div>
 
     <div class="card mt20">
@@ -828,6 +1350,52 @@
         </thead>
         <tbody id="duyarlilikBody"></tbody>
       </table>
+    </div>
+
+    <!-- Monte Carlo Simülasyonu -->
+    <div class="card mt20">
+      <div class="flex items-center justify-between" style="margin-bottom:12px">
+        <div>
+          <div class="card-title" style="margin-bottom:2px"><span>🎲</span> Monte Carlo Simülasyonu</div>
+          <p style="font-size:12px;color:var(--muted)">Gelir ve maliyet belirsizliklerini olasılıksal olarak modelleyerek kâr dağılımını ve kâr etme olasılığını hesaplar.</p>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;margin-left:16px">
+          <input type="checkbox" id="mcAktif" onchange="calculate()"
+            style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+          Simülasyonu aktif et
+        </label>
+      </div>
+
+      <div id="mcGirdiler" style="display:none">
+        <div class="grid3" style="gap:14px;margin-bottom:16px">
+          <div>
+            <label style="margin-top:0">Gelir Belirsizliği (±%)</label>
+            <input type="number" id="mcGelirSigma" value="15" min="1" max="60" step="1" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Gelirin standart sapması — ör: ±15% normal dağılım</div>
+          </div>
+          <div>
+            <label style="margin-top:0">Maliyet Belirsizliği (±%)</label>
+            <input type="number" id="mcMaliyetSigma" value="10" min="1" max="60" step="1" oninput="calculate()">
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Maliyetin standart sapması</div>
+          </div>
+          <div>
+            <label style="margin-top:0">Simülasyon Sayısı</label>
+            <select id="mcIterasyon" onchange="calculate()">
+              <option value="500">500</option>
+              <option value="1000" selected>1.000</option>
+              <option value="5000">5.000</option>
+              <option value="10000">10.000</option>
+            </select>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Daha fazla = daha hassas sonuç</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="mcSonuclar">
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">
+          Simülasyonu aktif etmek için kutucuğu işaretleyin.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -931,1813 +1499,61 @@
   </div>
 </div>
 
-<script>
-// ──────────────────────────────────────────────
-// STATE
-// ──────────────────────────────────────────────
-let maliyetRows = [];
-let gelirRows = [];
-let rowCounter = 0;
-let chartMaliyet = null, chartKarlilik = null, chartSenaryo = null, chartDuyarlilik = null;
-
-const TIP_LABELS = { malzeme: '📦 Malzeme', iscilik: '👷 İşçilik', gider: '🏢 Genel Gider' };
-const TIP_COLORS = { malzeme: '#4f7dff', iscilik: '#22c55e', gider: '#f59e0b' };
-
-// ──────────────────────────────────────────────
-// INIT
-// ──────────────────────────────────────────────
-window.addEventListener('load', () => {
-  document.getElementById('tarih').value = new Date().toISOString().split('T')[0];
-  addRow('malzeme');
-  addRow('iscilik');
-  addRow('gider');
-  addGelirRow();
-  addRakip();
-  loadLocal();
-  calculate();
-});
-
-window.addEventListener('beforeunload', saveLocal);
-
-// ──────────────────────────────────────────────
-// TABS
-// ──────────────────────────────────────────────
-function showTab(id, btnEl) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  const btn = btnEl || (event && event.target);
-  if (btn) btn.classList.add('active');
-  if (id === 'katalog') renderKatalog();
-  else if (id !== 'veri') calculate();
-}
-
-// ──────────────────────────────────────────────
-// ROW MANAGEMENT
-// ──────────────────────────────────────────────
-function addRow(tip) {
-  const id = ++rowCounter;
-  maliyetRows.push({ id, tip, ad: '', miktar: 1, birim: 'Adet', birimFiyat: 0, doviz: 'TL', kdv: true });
-  renderMaliyetTable();
-  calculate();
-}
-
-function removeRow(id) {
-  maliyetRows = maliyetRows.filter(r => r.id !== id);
-  renderMaliyetTable();
-  calculate();
-}
-
-function updateRow(id, field, val) {
-  const r = maliyetRows.find(r => r.id === id);
-  if (!r) return;
-  if (field === 'kdv') r.kdv = val;
-  else if (['miktar', 'birimFiyat'].includes(field)) r[field] = parseFloat(val) || 0;
-  else r[field] = val;
-  if (field === 'doviz') { renderRowTotal(id); return; }
-  if (field !== 'ad' && field !== 'birim') calculate();
-  renderRowTotal(id);
-}
-
-function getKur(doviz) {
-  if (doviz === 'USD') return parseFloat(document.getElementById('kurUSD').value) || 1;
-  if (doviz === 'EUR') return parseFloat(document.getElementById('kurEUR').value) || 1;
-  return 1;
-}
-
-function rowTotalTL(r) {
-  return r.miktar * r.birimFiyat * getKur(r.doviz || 'TL');
-}
-
-function renderRowTotal(id) {
-  const r = maliyetRows.find(r => r.id === id);
-  if (!r) return;
-  const el = document.getElementById('rowTotal-' + id);
-  if (el) {
-    const tl = rowTotalTL(r);
-    const doviz = r.doviz || 'TL';
-    const orijinal = r.miktar * r.birimFiyat;
-    el.innerHTML = doviz !== 'TL'
-      ? `<span style="color:var(--text)">₺${fmt(tl)}</span><br><span style="font-size:10px;color:var(--muted)">${doviz === 'USD' ? '$' : '€'}${fmt(orijinal)}</span>`
-      : `₺${fmt(tl)}`;
-  }
-}
-
-function renderMaliyetTable() {
-  const tbody = document.getElementById('maliyetBody');
-  tbody.innerHTML = maliyetRows.map((r, i) => {
-    const doviz = r.doviz || 'TL';
-    const dovizColor = doviz === 'USD' ? 'var(--green)' : doviz === 'EUR' ? 'var(--cyan)' : 'var(--muted)';
-    const dovizSym = doviz === 'USD' ? '$' : doviz === 'EUR' ? '€' : '₺';
-    const tl = rowTotalTL(r);
-    const orijinal = r.miktar * r.birimFiyat;
-    const totalHTML = doviz !== 'TL'
-      ? `<span style="color:var(--text);font-weight:600">₺${fmt(tl)}</span><br><span style="font-size:10px;color:${dovizColor}">${dovizSym}${fmt(orijinal)}</span>`
-      : `₺${fmt(tl)}`;
-    return `
-    <tr style="${doviz !== 'TL' ? 'background:rgba(34,197,94,.03)' : ''}">
-      <td style="color:var(--muted)">${i + 1}</td>
-      <td><span style="font-size:11px">${TIP_LABELS[r.tip] || r.tip}</span></td>
-      <td><input type="text" value="${r.ad}" onchange="updateRow(${r.id},'ad',this.value)" placeholder="Kalem adı"></td>
-      <td><input type="number" value="${r.miktar}" min="0" step="any" oninput="updateRow(${r.id},'miktar',this.value)"></td>
-      <td><input type="text" value="${r.birim}" onchange="updateRow(${r.id},'birim',this.value)" placeholder="Adet"></td>
-      <td>
-        <select onchange="updateRow(${r.id},'doviz',this.value);calculate()"
-          style="padding:5px 4px;font-size:12px;font-weight:600;color:${dovizColor};border-color:${doviz!=='TL'?dovizColor:'var(--border)'}">
-          <option value="TL"  ${doviz==='TL' ?'selected':''}>₺ TL</option>
-          <option value="USD" ${doviz==='USD'?'selected':''}>$ USD</option>
-          <option value="EUR" ${doviz==='EUR'?'selected':''}>€ EUR</option>
-        </select>
-      </td>
-      <td><input type="number" value="${r.birimFiyat}" min="0" step="any" oninput="updateRow(${r.id},'birimFiyat',this.value)"
-        placeholder="${dovizSym}0.00"></td>
-      <td class="font-mono" id="rowTotal-${r.id}" style="line-height:1.4">${totalHTML}</td>
-      <td style="text-align:center"><input type="checkbox" ${r.kdv ? 'checked' : ''} onchange="updateRow(${r.id},'kdv',this.checked)" title="KDV Dahil Et"></td>
-      <td><button class="btn btn-danger" onclick="removeRow(${r.id})">✕</button></td>
-    </tr>`;
-  }).join('');
-}
-
-function addGelirRow() {
-  const id = ++rowCounter;
-  gelirRows.push({ id, ad: '', miktar: 1, birim: 'Adet', birimFiyat: 0 });
-  renderGelirTable();
-  calculate();
-}
-
-function removeGelirRow(id) {
-  gelirRows = gelirRows.filter(r => r.id !== id);
-  renderGelirTable();
-  calculate();
-}
-
-function updateGelirRow(id, field, val) {
-  const r = gelirRows.find(r => r.id === id);
-  if (!r) return;
-  if (['miktar', 'birimFiyat'].includes(field)) r[field] = parseFloat(val) || 0;
-  else r[field] = val;
-  if (field !== 'ad' && field !== 'birim') {
-    calculate();
-    const el = document.getElementById('gelirRowTotal-' + id);
-    if (el) el.textContent = fmt(r.miktar * r.birimFiyat);
-  }
-}
-
-function renderGelirTable() {
-  const tbody = document.getElementById('gelirBody');
-  tbody.innerHTML = gelirRows.map((r, i) => `
-    <tr>
-      <td style="color:var(--muted)">${i + 1}</td>
-      <td><input type="text" value="${r.ad}" onchange="updateGelirRow(${r.id},'ad',this.value)" placeholder="Gelir kalemi adı"></td>
-      <td><input type="number" value="${r.miktar}" min="0" step="any" oninput="updateGelirRow(${r.id},'miktar',this.value)"></td>
-      <td><input type="text" value="${r.birim}" onchange="updateGelirRow(${r.id},'birim',this.value)" placeholder="Adet"></td>
-      <td><input type="number" value="${r.birimFiyat}" min="0" step="any" oninput="updateGelirRow(${r.id},'birimFiyat',this.value)"></td>
-      <td class="font-mono" id="gelirRowTotal-${r.id}">${fmt(r.miktar * r.birimFiyat)}</td>
-      <td><button class="btn btn-danger" onclick="removeGelirRow(${r.id})">✕</button></td>
-    </tr>
-  `).join('');
-}
-
-// ──────────────────────────────────────────────
-// CORE CALCULATION
-// ──────────────────────────────────────────────
-function calculate() {
-  const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) / 100 || 0;
-  const paraBirimi = document.getElementById('paraBirimi').value;
-  const hedefMarj = parseFloat(document.getElementById('hedefMarj').value) || 20;
-  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
-
-  // Maliyet hesapla
-  let toplamMaliyetNet = 0;
-  let toplamKdv = 0;
-  const tipTotals = { malzeme: 0, iscilik: 0, gider: 0 };
-
-  maliyetRows.forEach(r => {
-    const net = rowTotalTL(r);           // kur dönüşümlü TL tutar
-    const kdv = r.kdv ? net * kdvOrani : 0;
-    toplamMaliyetNet += net;
-    toplamKdv += kdv;
-    tipTotals[r.tip] = (tipTotals[r.tip] || 0) + net;
-  });
-  const toplamMaliyetKDV = toplamMaliyetNet + toplamKdv;
-
-  // Gelir hesapla
-  const gelirKalemToplam = gelirRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
-  const teklifFiyati = parseFloat(document.getElementById('teklifFiyati').value) || 0;
-  const toplamGelir = gelirKalemToplam > 0 ? gelirKalemToplam : teklifFiyati;
-
-  // KPI
-  const netKar = toplamGelir - toplamMaliyetNet;
-  const karMarji = toplamGelir > 0 ? (netKar / toplamGelir) * 100 : 0;
-  const roi = toplamMaliyetNet > 0 ? (netKar / toplamMaliyetNet) * 100 : 0;
-
-  // Footer totals
-  document.getElementById('toplamMaliyet').textContent = sym + fmt(toplamMaliyetNet);
-  document.getElementById('toplamGelir').textContent = sym + fmt(toplamGelir);
-
-  // KPI cards
-  setKPI('k-gelir', sym + fmt(toplamGelir), toplamGelir >= 0 ? 'text-green' : 'text-red');
-  setKPI('k-maliyet', sym + fmt(toplamMaliyetNet), 'text-red');
-  setKPI('k-kar', sym + fmt(netKar), netKar >= 0 ? 'text-green' : 'text-red');
-  setKPI('k-kdv', sym + fmt(toplamMaliyetKDV), 'text-yellow');
-  const vergi = calcVergi(netKar);
-  setKPI('k-netkar', sym + fmt(vergi.gercekNet), vergi.gercekNet >= 0 ? 'text-green' : 'text-red');
-  const kvO = parseFloat(document.getElementById('kvOrani').value) || 0;
-  document.getElementById('k-netkar-sub').textContent = 'KV %' + kvO + ' düşüldükten sonra';
-
-  const marjEl = document.getElementById('k-marj');
-  marjEl.textContent = karMarji.toFixed(1) + '%';
-  marjEl.className = 'kpi-value ' + marjColor(karMarji);
-  document.getElementById('k-marj-sub').textContent = 'Hedef: %' + hedefMarj + ' | ' + (karMarji >= hedefMarj ? 'Hedef aşıldı ✓' : 'Hedefe ' + (hedefMarj - karMarji).toFixed(1) + '% kaldı');
-
-  const roiEl = document.getElementById('k-roi');
-  roiEl.textContent = roi.toFixed(1) + '%';
-  roiEl.className = 'kpi-value ' + marjColor(roi);
-
-  // Döviz kırılım özeti
-  const kurUSD = parseFloat(document.getElementById('kurUSD').value) || 38;
-  const kurEUR = parseFloat(document.getElementById('kurEUR').value) || 41;
-  const dovizToplam = { USD: 0, EUR: 0, TL: 0 };
-  maliyetRows.forEach(r => { dovizToplam[r.doviz || 'TL'] += r.miktar * r.birimFiyat; });
-  const dovizEl = document.getElementById('dovizOzet');
-  const hasDoviz = dovizToplam.USD > 0 || dovizToplam.EUR > 0;
-  const dovizKart = document.getElementById('dovizKart');
-  if (dovizKart) dovizKart.style.display = hasDoviz ? 'block' : 'none';
-  if (dovizEl && hasDoviz) {
-    const parts = [];
-    if (dovizToplam.USD > 0) parts.push(
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(34,197,94,.07);border-radius:6px;margin-bottom:6px">
-        <span><span style="color:var(--green);font-weight:700">$ USD</span> — $${fmt(dovizToplam.USD)} × ₺${fmt(kurUSD)}</span>
-        <span class="font-mono font-bold">₺${fmt(dovizToplam.USD * kurUSD)}</span>
-      </div>`);
-    if (dovizToplam.EUR > 0) parts.push(
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(6,182,212,.07);border-radius:6px;margin-bottom:6px">
-        <span><span style="color:var(--cyan);font-weight:700">€ EUR</span> — €${fmt(dovizToplam.EUR)} × ₺${fmt(kurEUR)}</span>
-        <span class="font-mono font-bold">₺${fmt(dovizToplam.EUR * kurEUR)}</span>
-      </div>`);
-    if (dovizToplam.TL > 0) parts.push(
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface2);border-radius:6px;margin-bottom:6px">
-        <span><span style="color:var(--muted)">₺ TL kalemleri</span></span>
-        <span class="font-mono">₺${fmt(dovizToplam.TL)}</span>
-      </div>`);
-    parts.push(
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-top:1px solid var(--border);margin-top:4px">
-        <span style="font-weight:700">Toplam Maliyet (TL)</span>
-        <span class="font-mono font-bold text-red">₺${fmt(toplamMaliyetNet)}</span>
-      </div>`);
-    dovizEl.innerHTML = parts.join('');
-  }
-
-  // Hızlı özet
-  const riskLevel = karMarji < 0 ? 'Zarar' : karMarji < 10 ? 'Düşük' : karMarji < 20 ? 'Orta' : 'İyi';
-  const riskBadge = karMarji < 0 ? 'badge-red' : karMarji < 10 ? 'badge-red' : karMarji < 20 ? 'badge-yellow' : 'badge-green';
-  document.getElementById('hizliOzet').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div class="flex justify-between"><span style="color:var(--muted)">Gelir</span><span class="text-green font-mono">${sym}${fmt(toplamGelir)}</span></div>
-      <div class="flex justify-between"><span style="color:var(--muted)">Maliyet</span><span class="text-red font-mono">${sym}${fmt(toplamMaliyetNet)}</span></div>
-      <div class="flex justify-between"><span style="color:var(--muted)">Net Kar</span><span class="${netKar>=0?'text-green':'text-red'} font-mono font-bold">${sym}${fmt(netKar)}</span></div>
-      <div class="flex justify-between"><span style="color:var(--muted)">Kar Marjı</span><span class="font-bold ${marjColor(karMarji)}">${karMarji.toFixed(1)}%</span></div>
-      <div class="flex justify-between"><span style="color:var(--muted)">Risk Seviyesi</span><span class="badge ${riskBadge}">${riskLevel}</span></div>
-    </div>`;
-
-  // Detay tablosu
-  renderDetayTable(sym, kdvOrani, toplamMaliyetNet);
-
-  // Başa baş
-  const basaBasFiyat = toplamMaliyetNet;
-  _simMaliyet = toplamMaliyetNet;
-  const hedefFiyat = toplamMaliyetNet / (1 - hedefMarj / 100);
-  document.getElementById('basabas').innerHTML = `
-    <div class="kpi"><div class="kpi-label">Başa Baş Noktası</div><div class="kpi-value text-yellow font-mono">${sym}${fmt(basaBasFiyat)}</div><div class="kpi-sub">Bu fiyatın altında zarar</div></div>
-    <div class="kpi"><div class="kpi-label">Hedef Marj İçin Min. Fiyat</div><div class="kpi-value text-accent font-mono">${sym}${fmt(hedefFiyat)}</div><div class="kpi-sub">%${hedefMarj} kar için gerekli</div></div>
-    <div class="kpi"><div class="kpi-label">Mevcut Güvenlik Payı</div><div class="kpi-value ${netKar>=0?'text-green':'text-red'} font-mono">${sym}${fmt(netKar)}</div><div class="kpi-sub">Başa başın ${netKar>=0?'üzerinde':'altında'}</div></div>
-  `;
-
-  // Senaryolar
-  const kotGelir = parseFloat(document.getElementById('kotumserGelir').value) / 100 || -0.2;
-  const kotMal = parseFloat(document.getElementById('kotumserMaliyet').value) / 100 || 0.2;
-  const iyiGelir = parseFloat(document.getElementById('iyimserGelir').value) / 100 || 0.1;
-  const iyiMal = parseFloat(document.getElementById('iyimserMaliyet').value) / 100 || -0.1;
-
-  const sc = {
-    kotumser: calc_scenario(toplamGelir, toplamMaliyetNet, kotGelir, kotMal, sym),
-    gercekci: calc_scenario(toplamGelir, toplamMaliyetNet, 0, 0, sym),
-    iyimser: calc_scenario(toplamGelir, toplamMaliyetNet, iyiGelir, iyiMal, sym)
-  };
-
-  renderScenario('sc-kotumser', sc.kotumser, sym);
-  renderScenario('sc-gercekci', sc.gercekci, sym);
-  renderScenario('sc-iyimser', sc.iyimser, sym);
-
-  // Risk göstergesi
-  renderRiskGosterge(karMarji, netKar, toplamGelir, sym);
-
-  // Duyarlılık tablosu
-  const duyTbody = document.getElementById('duyarlilikBody');
-  if (duyTbody) {
-    const duyArtislar = [-30, -20, -10, 0, 10, 20, 30, 40, 50];
-    duyTbody.innerHTML = duyArtislar.map(a => {
-      const ym = toplamMaliyetNet * (1 + a / 100);
-      const duyKar = toplamGelir - ym;
-      const duyMarj = toplamGelir > 0 ? (duyKar / toplamGelir) * 100 : 0;
-      const duyRoi = ym > 0 ? (duyKar / ym) * 100 : 0;
-      const durum = duyMarj < 0 ? '<span class="badge badge-red">Zarar</span>' : duyMarj < 10 ? '<span class="badge badge-yellow">Düşük</span>' : '<span class="badge badge-green">İyi</span>';
-      const color = duyMarj < 0 ? 'var(--red)' : duyMarj < 10 ? 'var(--yellow)' : 'var(--green)';
-      const isBase = a === 0;
-      return `<tr style="${isBase ? 'background:rgba(79,125,255,.06)' : ''}">
-        <td style="font-weight:${isBase?'700':'400'}">${isBase ? '0% (Baz)' : (a > 0 ? '+' : '') + a + '%'}</td>
-        <td class="text-right font-mono">${sym}${fmt(ym)}</td>
-        <td class="text-right font-mono">${sym}${fmt(toplamGelir)}</td>
-        <td class="text-right font-mono" style="color:${color};font-weight:700">${sym}${fmt(duyKar)}</td>
-        <td class="text-right font-mono" style="color:${color};font-weight:700">${duyMarj.toFixed(1)}%</td>
-        <td class="text-right font-mono">${duyRoi.toFixed(1)}%</td>
-        <td>${durum}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  // Rapor
-  renderRapor(sym, toplamGelir, toplamMaliyetNet, toplamMaliyetKDV, netKar, karMarji, roi, sc, hedefMarj, basaBasFiyat);
-
-  // Charts
-  updateCharts(tipTotals, toplamGelir, toplamMaliyetNet, netKar, sc, toplamMaliyetNet, sym);
-  updateWaterfall(toplamGelir, tipTotals, netKar, sym);
-  calcNakit();
-
-  // Vergi tablosu
-  renderVergiTablosu(netKar, sym);
-
-  // Güven skoru
-  updateGuvenSkoru(karMarji, roi, netKar, toplamMaliyetNet, sc);
-
-  // Otomatik yorum + rakip güncelle
-  generateYorum(toplamGelir, toplamMaliyetNet, netKar, karMarji, roi, sc, tipTotals);
-  updateRakipChart();
-
-
-  saveLocal();
-}
-
-function calc_scenario(gelir, maliyet, gelirDelta, maliyetDelta, sym) {
-  const g = gelir * (1 + gelirDelta);
-  const m = maliyet * (1 + maliyetDelta);
-  const kar = g - m;
-  const marj = g > 0 ? (kar / g) * 100 : 0;
-  return { gelir: g, maliyet: m, kar, marj };
-}
-
-function renderScenario(id, sc, sym) {
-  const par = document.getElementById('id');
-  const color = sc.kar >= 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById(id).innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
-      <div class="flex justify-between"><span style="color:var(--muted)">Gelir</span><span class="font-mono">${sym}${fmt(sc.gelir)}</span></div>
-      <div class="flex justify-between"><span style="color:var(--muted)">Maliyet</span><span class="font-mono">${sym}${fmt(sc.maliyet)}</span></div>
-      <div class="flex justify-between" style="border-top:1px solid var(--border);padding-top:6px;margin-top:2px">
-        <span style="font-weight:700">Net Kar</span>
-        <span class="font-mono font-bold" style="color:${color}">${sym}${fmt(sc.kar)}</span>
+<!-- Excel Paste Modal -->
+<div class="modal-overlay" id="excelPasteModal" onclick="if(event.target===this)excelPasteKapat()" style="display:none">
+  <div class="modal" style="max-width:680px;width:95%;max-height:90vh;overflow:auto">
+    <div class="modal-header">
+      <div>
+        <h2 style="font-size:16px;font-weight:700">📋 Excel'den İçe Aktar</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px">Excel veya Google Sheets'ten kopyaladığınız hücreleri yapıştırın</p>
       </div>
-      <div class="flex justify-between"><span style="color:var(--muted)">Kar Marjı</span><span style="font-weight:700;color:${color}">${sc.marj.toFixed(1)}%</span></div>
-    </div>`;
-}
-
-function renderRiskGosterge(marj, kar, gelir, sym) {
-  const items = [
-    { label: 'Karlılık Riski', val: Math.min(100, Math.max(0, marj + 50)), color: marjColor(marj), desc: marj < 0 ? 'Zarar var' : marj < 10 ? 'Düşük marj' : marj < 25 ? 'Kabul edilebilir' : 'İyi marj' },
-    { label: 'Güvenlik Payı', val: gelir > 0 ? Math.min(100, (kar / gelir + 0.5) * 100) : 50, color: kar >= 0 ? 'var(--green)' : 'var(--red)', desc: sym + fmt(kar) },
-  ];
-  document.getElementById('riskGosterge').innerHTML = items.map(i => `
-    <div style="margin-bottom:16px">
-      <div class="flex justify-between" style="margin-bottom:4px">
-        <span style="font-size:13px">${i.label}</span>
-        <span style="font-size:12px;color:var(--muted)">${i.desc}</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${i.val}%;background:${i.color}"></div></div>
+      <button class="btn btn-ghost" onclick="excelPasteKapat()" style="font-size:18px;padding:4px 10px">✕</button>
     </div>
-  `).join('');
-}
-
-function renderDetayTable(sym, kdvOrani, totalNet) {
-  document.getElementById('detayBody').innerHTML = maliyetRows.map(r => {
-    const net = rowTotalTL(r);
-    const kdv = r.kdv ? net * kdvOrani : 0;
-    const pay = totalNet > 0 ? (net / totalNet * 100).toFixed(1) : '0.0';
-    const doviz = r.doviz || 'TL';
-    const dovizBadge = doviz !== 'TL'
-      ? `<span style="font-size:10px;color:${doviz==='USD'?'var(--green)':'var(--cyan)'};margin-left:4px">${doviz}</span>` : '';
-    return `<tr>
-      <td>${r.ad || '(İsimsiz)'}</td>
-      <td><span style="font-size:12px">${TIP_LABELS[r.tip] || r.tip}</span></td>
-      <td class="text-right font-mono">${sym}${fmt(net)}</td>
-      <td class="text-right font-mono" style="color:var(--yellow)">${sym}${fmt(kdv)}</td>
-      <td class="text-right font-mono">${sym}${fmt(net + kdv)}</td>
-      <td class="text-right"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
-        ${pay}%
-        <div style="width:40px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden">
-          <div style="width:${pay}%;height:100%;background:var(--accent);border-radius:3px"></div>
-        </div>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function renderRapor(sym, gelir, maliyet, maliyetKDV, kar, marj, roi, sc, hedefMarj, basabas) {
-  const projeAdi = document.getElementById('projeAdi').value || 'Belirtilmemiş';
-  const musteri = document.getElementById('musteri').value || '-';
-  const tarih = document.getElementById('tarih').value || '-';
-  const notlar = document.getElementById('notlar').value || '-';
-  const riskSev = marj < 0 ? 'Yüksek Risk (Zarar)' : marj < 10 ? 'Yüksek Risk' : marj < 20 ? 'Orta Risk' : 'Düşük Risk';
-  const riskBadge = marj < 0 ? 'badge-red' : marj < 10 ? 'badge-red' : marj < 20 ? 'badge-yellow' : 'badge-green';
-
-  document.getElementById('raporIcerik').innerHTML = `
-    <div style="max-width:800px;margin:0 auto">
-      <div style="text-align:center;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)">
-        <h2 style="font-size:22px;margin-bottom:4px">FİZİBİLİTE ANALİZ RAPORU</h2>
-        <p style="color:var(--muted)">${projeAdi}</p>
+    <div style="padding:16px 20px">
+      <div style="background:var(--surface2);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7">
+        💡 <strong style="color:var(--text)">Beklenen sütun sırası</strong> (başlık satırı varsa otomatik algılanır):<br>
+        <code style="font-size:11px;color:var(--accent);background:rgba(79,125,255,.08);padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px">
+          Kalem Adı &nbsp;→&nbsp; Miktar &nbsp;→&nbsp; Birim &nbsp;→&nbsp; Birim Fiyat &nbsp;→&nbsp; [Tip] &nbsp;→&nbsp; [Döviz]
+        </code><br>
+        <span style="font-size:11px">Tip: malzeme / işçilik / gider &nbsp;|&nbsp; Döviz: TL / USD / EUR &nbsp;|&nbsp; Ondalık: virgül veya nokta desteklenir</span>
       </div>
-      <div class="grid2" style="margin-bottom:20px">
-        <div><span style="color:var(--muted);font-size:12px">Proje</span><p>${projeAdi}</p></div>
-        <div><span style="color:var(--muted);font-size:12px">Müşteri</span><p>${musteri}</p></div>
-        <div><span style="color:var(--muted);font-size:12px">Tarih</span><p>${tarih}</p></div>
-        <div><span style="color:var(--muted);font-size:12px">Risk Seviyesi</span><p><span class="badge ${riskBadge}">${riskSev}</span></p></div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px">
-        <tr style="background:var(--surface2)"><th style="padding:10px;text-align:left;font-size:12px;color:var(--muted)">KALEM</th><th style="padding:10px;text-align:right;font-size:12px;color:var(--muted)">TUTAR</th></tr>
-        <tr><td style="padding:10px;border-bottom:1px solid var(--border)">Toplam Gelir (Teklif Fiyatı)</td><td style="padding:10px;text-align:right;border-bottom:1px solid var(--border);color:var(--green);font-weight:700">${sym}${fmt(gelir)}</td></tr>
-        <tr><td style="padding:10px;border-bottom:1px solid var(--border)">Toplam Maliyet (KDV Hariç)</td><td style="padding:10px;text-align:right;border-bottom:1px solid var(--border);color:var(--red)">${sym}${fmt(maliyet)}</td></tr>
-        <tr><td style="padding:10px;border-bottom:1px solid var(--border)">KDV Tutarı</td><td style="padding:10px;text-align:right;border-bottom:1px solid var(--border);color:var(--yellow)">${sym}${fmt(maliyetKDV - maliyet)}</td></tr>
-        <tr><td style="padding:10px;border-bottom:1px solid var(--border)">Toplam Maliyet (KDV Dahil)</td><td style="padding:10px;text-align:right;border-bottom:1px solid var(--border);color:var(--yellow)">${sym}${fmt(maliyetKDV)}</td></tr>
-        <tr style="background:var(--surface2)"><td style="padding:10px;font-weight:700">Net Kar</td><td style="padding:10px;text-align:right;font-weight:700;color:${kar>=0?'var(--green)':'var(--red)'}">${sym}${fmt(kar)}</td></tr>
-        <tr><td style="padding:10px;border-bottom:1px solid var(--border)">Kar Marjı</td><td style="padding:10px;text-align:right;border-bottom:1px solid var(--border);font-weight:700;color:${marjColor(marj)}">${marj.toFixed(2)}%</td></tr>
-        <tr><td style="padding:10px;border-bottom:1px solid var(--border)">ROI</td><td style="padding:10px;text-align:right;border-bottom:1px solid var(--border);font-weight:700;color:${marjColor(roi)}">${roi.toFixed(2)}%</td></tr>
-        <tr><td style="padding:10px">Başa Baş Fiyatı</td><td style="padding:10px;text-align:right;color:var(--yellow)">${sym}${fmt(basabas)}</td></tr>
-      </table>
-      <div class="scenario-grid" style="margin-bottom:20px">
-        <div style="border:1px solid var(--red);border-radius:8px;padding:14px">
-          <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px">KÖTÜMSER</div>
-          <div style="font-size:13px">Gelir: ${sym}${fmt(sc.kotumser.gelir)}</div>
-          <div style="font-size:13px">Maliyet: ${sym}${fmt(sc.kotumser.maliyet)}</div>
-          <div style="font-size:14px;font-weight:700;color:${sc.kotumser.kar>=0?'var(--green)':'var(--red)'};margin-top:6px">Kar: ${sym}${fmt(sc.kotumser.kar)} (${sc.kotumser.marj.toFixed(1)}%)</div>
-        </div>
-        <div style="border:1px solid var(--accent);border-radius:8px;padding:14px">
-          <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px">GERÇEKÇI (BAZ)</div>
-          <div style="font-size:13px">Gelir: ${sym}${fmt(sc.gercekci.gelir)}</div>
-          <div style="font-size:13px">Maliyet: ${sym}${fmt(sc.gercekci.maliyet)}</div>
-          <div style="font-size:14px;font-weight:700;color:${sc.gercekci.kar>=0?'var(--green)':'var(--red)'};margin-top:6px">Kar: ${sym}${fmt(sc.gercekci.kar)} (${sc.gercekci.marj.toFixed(1)}%)</div>
-        </div>
-        <div style="border:1px solid var(--green);border-radius:8px;padding:14px">
-          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:8px">İYİMSER</div>
-          <div style="font-size:13px">Gelir: ${sym}${fmt(sc.iyimser.gelir)}</div>
-          <div style="font-size:13px">Maliyet: ${sym}${fmt(sc.iyimser.maliyet)}</div>
-          <div style="font-size:14px;font-weight:700;color:${sc.iyimser.kar>=0?'var(--green)':'var(--red)'};margin-top:6px">Kar: ${sym}${fmt(sc.iyimser.kar)} (${sc.iyimser.marj.toFixed(1)}%)</div>
-        </div>
-      </div>
-      ${notlar !== '-' ? `<div style="border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface2)"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">NOTLAR</div><p style="font-size:13px">${notlar}</p></div>` : ''}
-    </div>`;
-}
-
-// ──────────────────────────────────────────────
-// CHARTS
-// ──────────────────────────────────────────────
-function updateCharts(tipTotals, gelir, maliyet, kar, sc, totalMal, sym) {
-  // Maliyet dağılımı pasta
-  const labels = Object.keys(tipTotals).filter(k => tipTotals[k] > 0).map(k => TIP_LABELS[k]);
-  const data = Object.keys(tipTotals).filter(k => tipTotals[k] > 0).map(k => tipTotals[k]);
-  const colors = Object.keys(tipTotals).filter(k => tipTotals[k] > 0).map(k => TIP_COLORS[k]);
-
-  if (chartMaliyet) chartMaliyet.destroy();
-  const ctx1 = document.getElementById('chartMaliyet');
-  if (ctx1) {
-    chartMaliyet = new Chart(ctx1, {
-      type: 'doughnut',
-      data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'right', labels: { color: '#8892a4', font: { size: 12 } } } }
-      }
-    });
-  }
-
-  // Karlılık bar
-  if (chartKarlilik) chartKarlilik.destroy();
-  const ctx2 = document.getElementById('chartKarlilik');
-  if (ctx2) {
-    chartKarlilik = new Chart(ctx2, {
-      type: 'bar',
-      data: {
-        labels: ['Gelir', 'Maliyet', 'Net Kar'],
-        datasets: [{
-          data: [gelir, maliyet, kar],
-          backgroundColor: [
-            'rgba(34,197,94,.7)', 'rgba(239,68,68,.7)',
-            kar >= 0 ? 'rgba(79,125,255,.7)' : 'rgba(239,68,68,.7)'
-          ],
-          borderRadius: 6, borderSkipped: false
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4' } },
-          y: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4', callback: v => sym + fmt(v) } }
-        }
-      }
-    });
-  }
-
-  // Senaryo karşılaştırması
-  if (chartSenaryo) chartSenaryo.destroy();
-  const ctx3 = document.getElementById('chartSenaryo');
-  if (ctx3) {
-    chartSenaryo = new Chart(ctx3, {
-      type: 'bar',
-      data: {
-        labels: ['Kötümser', 'Gerçekçi', 'İyimser'],
-        datasets: [
-          { label: 'Gelir', data: [sc.kotumser.gelir, sc.gercekci.gelir, sc.iyimser.gelir], backgroundColor: 'rgba(34,197,94,.6)', borderRadius: 4 },
-          { label: 'Maliyet', data: [sc.kotumser.maliyet, sc.gercekci.maliyet, sc.iyimser.maliyet], backgroundColor: 'rgba(239,68,68,.6)', borderRadius: 4 },
-          { label: 'Kar', data: [sc.kotumser.kar, sc.gercekci.kar, sc.iyimser.kar], backgroundColor: 'rgba(79,125,255,.8)', borderRadius: 4 }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: '#8892a4', font: { size: 12 } } } },
-        scales: {
-          x: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4' } },
-          y: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4', callback: v => sym + fmt(v) } }
-        }
-      }
-    });
-  }
-
-  // Duyarlılık analizi
-  if (chartDuyarlilik) chartDuyarlilik.destroy();
-  const ctx4 = document.getElementById('chartDuyarlilik');
-  const artislar = [-30, -20, -10, 0, 10, 20, 30, 40, 50];
-  const marjlar = artislar.map(a => {
-    const yeniMaliyet = totalMal * (1 + a / 100);
-    return gelir > 0 ? ((gelir - yeniMaliyet) / gelir) * 100 : 0;
-  });
-  if (ctx4) {
-    chartDuyarlilik = new Chart(ctx4, {
-      type: 'line',
-      data: {
-        labels: artislar.map(a => (a >= 0 ? '+' : '') + a + '%'),
-        datasets: [{
-          label: 'Kar Marjı (%)',
-          data: marjlar,
-          borderColor: '#4f7dff',
-          backgroundColor: 'rgba(79,125,255,.1)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: marjlar.map(m => m >= 0 ? '#22c55e' : '#ef4444'),
-          pointRadius: 5
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: '#8892a4' } } },
-        scales: {
-          x: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4' }, title: { display: true, text: 'Maliyet Değişimi', color: '#8892a4' } },
-          y: { grid: { color: 'rgba(46,51,82,.5)' }, ticks: { color: '#8892a4', callback: v => v.toFixed(1) + '%' }, title: { display: true, text: 'Kar Marjı', color: '#8892a4' } }
-        }
-      }
-    });
-  }
-
-  // Fiyat öneri aracı güncelle
-  updateOneri();
-  // Simülatör sınırlarını güncelle
-  updateSimLimits(totalMal, sym);
-}
-
-// ──────────────────────────────────────────────
-// UTILS
-// ──────────────────────────────────────────────
-function fmt(n) {
-  return (parseFloat(n) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function marjColor(m) {
-  return m < 0 ? 'text-red' : m < 10 ? 'text-red' : m < 20 ? 'text-yellow' : 'text-green';
-}
-
-function setKPI(id, val, cls) {
-  const el = document.getElementById(id);
-  el.textContent = val;
-  el.className = 'kpi-value ' + cls;
-}
-
-// ──────────────────────────────────────────────
-// ÜRÜN KATALOĞU
-// ──────────────────────────────────────────────
-let urunler = [];
-let urunCounter = 0;
-let katalogSiralaKey = 'ad';
-let katalogSiralaDuz = true;
-
-const TIP_RENKLER = { malzeme: 'var(--accent)', hizmet: 'var(--cyan)', urun: 'var(--green)', diger: 'var(--muted)' };
-const TIP_ETIKET  = { malzeme: '📦 Malzeme', hizmet: '🛠 Hizmet', urun: '🏷 Ürün', diger: '📎 Diğer' };
-
-function katalogEkle(veri) {
-  const id = ++urunCounter;
-  urunler.push({
-    id, secili: false,
-    ad: veri?.ad || '',
-    tip: veri?.tip || 'urun',
-    birim: veri?.birim || 'Adet',
-    alisDoviz: veri?.alisDoviz || 'TL',
-    alisFiyat: veri?.alisFiyat || 0,
-    satisFiyat: veri?.satisFiyat || 0,
-    kdv: veri?.kdv ?? 20,
-    notlar: veri?.notlar || '',
-  });
-  renderKatalog();
-  saveLocal();
-  // Yeni eklenen satırın ilk input'una focus
-  setTimeout(() => {
-    const inp = document.querySelector(`#krow-${id} .ks-input`);
-    if (inp) inp.focus();
-  }, 50);
-}
-
-function katalogSil(id) {
-  urunler = urunler.filter(u => u.id !== id);
-  renderKatalog();
-  saveLocal();
-}
-
-function katalogGuncelle(id, field, val) {
-  const u = urunler.find(u => u.id === id);
-  if (!u) return;
-  if (['alisFiyat','satisFiyat','kdv'].includes(field)) u[field] = parseFloat(val) || 0;
-  else u[field] = val;
-  renderKatalogSatirHesap(id);
-  katalogStatsGuncelle();
-  saveLocal();
-}
-
-function katalogSecToggle(id, checked) {
-  const u = urunler.find(u => u.id === id);
-  if (u) u.secili = checked;
-  katalogButonGuncelle();
-}
-
-function katalogHepsiniSec(checked) {
-  const gorunen = katalogGorunenler();
-  gorunen.forEach(u => { u.secili = checked; });
-  renderKatalog();
-  katalogButonGuncelle();
-}
-
-function katalogButonGuncelle() {
-  const secSayi = urunler.filter(u => u.secili).length;
-  const mb = document.getElementById('btnCokluMaliyet');
-  const gb = document.getElementById('btnCokluGelir');
-  if (mb) { mb.disabled = secSayi === 0; mb.textContent = secSayi > 0 ? `↓ ${secSayi} Kalemi Maliyet'e Ekle` : '↓ Seçilenleri Maliyet\'e Ekle'; }
-  if (gb) { gb.disabled = secSayi === 0; gb.textContent = secSayi > 0 ? `↑ ${secSayi} Kalemi Gelir'e Ekle`   : '↑ Seçilenleri Gelir\'e Ekle'; }
-}
-
-function katalogGorunenler() {
-  const arama = (document.getElementById('katalogArama')?.value || '').toLowerCase();
-  const filtre = document.getElementById('katalogFiltreTip')?.value || '';
-  return urunler.filter(u =>
-    (!arama  || u.ad.toLowerCase().includes(arama) || (u.notlar||'').toLowerCase().includes(arama)) &&
-    (!filtre || u.tip === filtre)
-  );
-}
-
-function katalogSirala(key) {
-  if (katalogSiralaKey === key) katalogSiralaDuz = !katalogSiralaDuz;
-  else { katalogSiralaKey = key; katalogSiralaDuz = true; }
-  renderKatalog();
-}
-
-function urunAlisTL(u) {
-  const kur = u.alisDoviz === 'USD' ? (parseFloat(document.getElementById('kurUSD')?.value) || 38)
-            : u.alisDoviz === 'EUR' ? (parseFloat(document.getElementById('kurEUR')?.value) || 41) : 1;
-  return u.alisFiyat * kur;
-}
-
-function urunKar(u)  { return u.satisFiyat - urunAlisTL(u); }
-function urunMarj(u) { return u.satisFiyat > 0 ? (urunKar(u) / u.satisFiyat * 100) : 0; }
-
-function renderKatalogSatirHesap(id) {
-  const u = urunler.find(u => u.id === id);
-  if (!u) return;
-  const alisTL = urunAlisTL(u);
-  const kar = urunKar(u);
-  const marj = urunMarj(u);
-  const alisTLEl = document.getElementById(`kalisTL-${id}`);
-  const karEl    = document.getElementById(`kkar-${id}`);
-  const marjEl   = document.getElementById(`kmarj-${id}`);
-  if (alisTLEl) alisTLEl.textContent = '₺' + fmt(alisTL);
-  if (karEl) { karEl.textContent = '₺' + fmt(kar); karEl.style.color = kar >= 0 ? 'var(--green)' : 'var(--red)'; }
-  if (marjEl) {
-    const cls = marj < 0 ? 'badge-red' : marj < 10 ? 'badge-yellow' : 'badge-green';
-    marjEl.innerHTML = `<span class="marj-chip ${cls}">${marj.toFixed(1)}%</span>`;
-  }
-}
-
-function renderKatalog() {
-  const tbody = document.getElementById('katalogBody');
-  if (!tbody) return;
-  let liste = katalogGorunenler();
-
-  // Sıralama
-  const key = katalogSiralaKey;
-  liste = liste.sort((a, b) => {
-    let va, vb;
-    if (key === 'alisTL') { va = urunAlisTL(a); vb = urunAlisTL(b); }
-    else if (key === 'kar')  { va = urunKar(a);  vb = urunKar(b);  }
-    else if (key === 'marj') { va = urunMarj(a); vb = urunMarj(b); }
-    else { va = a[key] ?? ''; vb = b[key] ?? ''; }
-    if (typeof va === 'string') return katalogSiralaDuz ? va.localeCompare(vb,'tr') : vb.localeCompare(va,'tr');
-    return katalogSiralaDuz ? va - vb : vb - va;
-  });
-
-  tbody.innerHTML = liste.map(u => {
-    const alisTL = urunAlisTL(u);
-    const kar = urunKar(u);
-    const marj = urunMarj(u);
-    const marjCls = marj < 0 ? 'badge-red' : marj < 10 ? 'badge-yellow' : 'badge-green';
-    const dovizColor = u.alisDoviz === 'USD' ? 'var(--green)' : u.alisDoviz === 'EUR' ? 'var(--cyan)' : 'var(--muted)';
-    const dovizSym   = u.alisDoviz === 'USD' ? '$' : u.alisDoviz === 'EUR' ? '€' : '₺';
-    return `
-    <tr class="kstr${u.secili?' selected':''}" id="krow-${u.id}">
-      <td style="text-align:center">
-        <input type="checkbox" ${u.secili?'checked':''} style="width:14px;height:14px;cursor:pointer"
-          onchange="katalogSecToggle(${u.id},this.checked)">
-      </td>
-      <td><input class="ks-input" value="${u.ad}" placeholder="Ürün / Hizmet adı"
-        onchange="katalogGuncelle(${u.id},'ad',this.value)"
-        onkeydown="katalogKeyNav(event,${u.id},'ad')"></td>
-      <td>
-        <select class="ks-select" onchange="katalogGuncelle(${u.id},'tip',this.value)">
-          ${['malzeme','hizmet','urun','diger'].map(t=>`<option value="${t}" ${u.tip===t?'selected':''}>${TIP_ETIKET[t]}</option>`).join('')}
-        </select>
-      </td>
-      <td><input class="ks-input" value="${u.birim}" placeholder="Adet"
-        onchange="katalogGuncelle(${u.id},'birim',this.value)" style="width:60px"></td>
-      <td>
-        <select class="ks-select" onchange="katalogGuncelle(${u.id},'alisDoviz',this.value);renderKatalog()"
-          style="color:${dovizColor};font-weight:600">
-          <option value="TL"  ${u.alisDoviz==='TL' ?'selected':''}>₺ TL</option>
-          <option value="USD" ${u.alisDoviz==='USD'?'selected':''}>$ USD</option>
-          <option value="EUR" ${u.alisDoviz==='EUR'?'selected':''}>€ EUR</option>
-        </select>
-      </td>
-      <td>
-        <div style="display:flex;align-items:center;gap:3px">
-          <span style="color:${dovizColor};font-size:12px">${dovizSym}</span>
-          <input class="ks-input" type="number" value="${u.alisFiyat}" min="0" step="any" placeholder="0.00"
-            oninput="katalogGuncelle(${u.id},'alisFiyat',this.value)"
-            onkeydown="katalogKeyNav(event,${u.id},'alisFiyat')" style="width:85px">
-        </div>
-      </td>
-      <td>
-        <div style="display:flex;align-items:center;gap:3px">
-          <span style="color:var(--muted);font-size:12px">₺</span>
-          <input class="ks-input" type="number" value="${u.satisFiyat}" min="0" step="any" placeholder="0.00"
-            oninput="katalogGuncelle(${u.id},'satisFiyat',this.value)"
-            onkeydown="katalogKeyNav(event,${u.id},'satisFiyat')" style="width:85px">
-        </div>
-      </td>
-      <td><input class="ks-input" type="number" value="${u.kdv}" min="0" max="100"
-        oninput="katalogGuncelle(${u.id},'kdv',this.value)" style="width:48px"></td>
-      <td class="font-mono" id="kalisTL-${u.id}" style="color:var(--muted)">₺${fmt(alisTL)}</td>
-      <td class="font-mono" id="kkar-${u.id}"  style="color:${kar>=0?'var(--green)':'var(--red)'};font-weight:600">₺${fmt(kar)}</td>
-      <td id="kmarj-${u.id}"><span class="marj-chip ${marjCls}">${marj.toFixed(1)}%</span></td>
-      <td><input class="ks-input" value="${u.notlar||''}" placeholder="Not..."
-        onchange="katalogGuncelle(${u.id},'notlar',this.value)"></td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-ghost" style="padding:3px 7px;font-size:11px;margin-right:2px"
-          onclick="katalogAnalizEkle(${u.id},'maliyet')" title="Maliyet'e Ekle">↓ M</button>
-        <button class="btn btn-ghost" style="padding:3px 7px;font-size:11px;margin-right:2px"
-          onclick="katalogAnalizEkle(${u.id},'gelir')" title="Gelir'e Ekle">↑ G</button>
-        <button class="btn btn-danger" onclick="katalogSil(${u.id})">✕</button>
-      </td>
-    </tr>`;
-  }).join('');
-
-  katalogStatsGuncelle();
-  katalogButonGuncelle();
-
-  const altEl = document.getElementById('katalogAltBilgi');
-  if (altEl) altEl.textContent = `${liste.length} kayıt gösteriliyor · ${urunler.length} toplam`;
-  const hepsi = document.getElementById('katalogHepsiniSec');
-  if (hepsi) hepsi.checked = liste.length > 0 && liste.every(u => u.secili);
-}
-
-function katalogStatsGuncelle() {
-  const el = document.getElementById('katalogStats');
-  if (!el || urunler.length === 0) { if(el) el.innerHTML=''; return; }
-  const ortalamMarj = urunler.reduce((s,u) => s + urunMarj(u), 0) / urunler.length;
-  const enYuksekMarj = urunler.reduce((m,u) => urunMarj(u) > urunMarj(m) ? u : m, urunler[0]);
-  const enDusukMarj  = urunler.reduce((m,u) => urunMarj(u) < urunMarj(m) ? u : m, urunler[0]);
-  const zararliSayi  = urunler.filter(u => urunKar(u) < 0).length;
-  const stats = [
-    { label: 'Toplam Ürün', val: urunler.length, color: 'var(--accent)' },
-    { label: 'Ort. Kâr Marjı', val: '%' + ortalamMarj.toFixed(1), color: ortalamMarj >= 20 ? 'var(--green)' : ortalamMarj >= 10 ? 'var(--yellow)' : 'var(--red)' },
-    { label: 'En Yüksek Marj', val: enYuksekMarj.ad ? enYuksekMarj.ad.substring(0,14) + ' %' + urunMarj(enYuksekMarj).toFixed(1) : '—', color: 'var(--green)' },
-    { label: 'En Düşük Marj',  val: enDusukMarj.ad  ? enDusukMarj.ad.substring(0,14)  + ' %' + urunMarj(enDusukMarj).toFixed(1)  : '—', color: 'var(--yellow)' },
-    { label: 'Zararlı Kalem',  val: zararliSayi + ' kalem', color: zararliSayi > 0 ? 'var(--red)' : 'var(--green)' },
-  ];
-  el.innerHTML = stats.map(s => `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">${s.label}</div>
-      <div style="font-size:15px;font-weight:700;color:${s.color}">${s.val}</div>
-    </div>`).join('');
-}
-
-function katalogAnalizEkle(id, hedef) {
-  const u = urunler.find(u => u.id === id);
-  if (!u) return;
-  if (hedef === 'maliyet') {
-    maliyetRows.push({ id: ++rowCounter, tip: u.tip === 'hizmet' ? 'iscilik' : 'malzeme',
-      ad: u.ad, miktar: 1, birim: u.birim, birimFiyat: u.alisFiyat,
-      doviz: u.alisDoviz, kdv: u.kdv > 0 });
-    renderMaliyetTable();
-  } else {
-    gelirRows.push({ id: ++rowCounter, ad: u.ad, miktar: 1, birim: u.birim, birimFiyat: u.satisFiyat });
-    renderGelirTable();
-  }
-  calculate();
-  showTab('veri', document.querySelector('.tab-btn[onclick*="veri"]'));
-  showToast(`"${u.ad}" → ${hedef === 'maliyet' ? 'Maliyet' : 'Gelir'} kalemine eklendi`);
-}
-
-function katalogCokluEkle(hedef) {
-  const secili = urunler.filter(u => u.secili);
-  secili.forEach(u => katalogAnalizEkle(u.id, hedef));
-  if (secili.length) showToast(`${secili.length} kalem ${hedef === 'maliyet' ? 'Maliyet' : 'Gelir'}'e eklendi`);
-}
-
-function katalogKeyNav(e, id, field) {
-  if (e.key === 'Enter' || e.key === 'Tab') {
-    const idx = urunler.findIndex(u => u.id === id);
-    if (e.key === 'Enter' && idx === urunler.length - 1) katalogEkle();
-  }
-}
-
-function katalogCSVIndir() {
-  let csv = '﻿sep=;\n';
-  csv += 'Ad;Tip;Birim;Alış Dövizi;Alış Fiyatı;Satış Fiyatı (TL);KDV %;Alış TL;Kâr;Marj %;Notlar\n';
-  urunler.forEach(u => {
-    csv += `${u.ad};${u.tip};${u.birim};${u.alisDoviz};${u.alisFiyat};${u.satisFiyat};${u.kdv};${fmt(urunAlisTL(u))};${fmt(urunKar(u))};${urunMarj(u).toFixed(2)};${u.notlar||''}\n`;
-  });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = 'urun_katalogu_' + new Date().toISOString().split('T')[0] + '.csv';
-  a.click();
-}
-
-function katalogCSVYukle() {
-  const input = document.createElement('input');
-  input.type = 'file'; input.accept = '.csv';
-  input.onchange = e => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const lines = ev.target.result.split('\n').filter(l => l.trim());
-      const start = lines[0].startsWith('sep') ? 2 : 1;
-      let eklenen = 0;
-      for (let i = start; i < lines.length; i++) {
-        const [ad,tip,birim,alisDoviz,alisFiyat,satisFiyat,kdv,,,,notlar] = lines[i].split(/[;,]/);
-        if (!ad || ad === 'Ad') continue;
-        katalogEkle({ ad: ad.trim(), tip: tip?.trim()||'urun', birim: birim?.trim()||'Adet',
-          alisDoviz: alisDoviz?.trim()||'TL', alisFiyat: parseFloat(alisFiyat)||0,
-          satisFiyat: parseFloat(satisFiyat)||0, kdv: parseFloat(kdv)||20,
-          notlar: notlar?.trim()||'' });
-        eklenen++;
-      }
-      showToast(`${eklenen} ürün CSV'den yüklendi.`);
-    };
-    reader.readAsText(e.target.files[0], 'UTF-8');
-  };
-  input.click();
-}
-
-// ──────────────────────────────────────────────
-// ŞABLONLAR
-// ──────────────────────────────────────────────
-const TEMPLATES = {
-  insaat: {
-    ad: 'İnşaat / İhale Projesi',
-    rows: [
-      { tip: 'malzeme', ad: 'Çimento / Beton', miktar: 100, birim: 'Ton', birimFiyat: 3500 },
-      { tip: 'malzeme', ad: 'Demir / Donatı', miktar: 50, birim: 'Ton', birimFiyat: 28000 },
-      { tip: 'malzeme', ad: 'Kum / Mıcır', miktar: 200, birim: 'Ton', birimFiyat: 450 },
-      { tip: 'iscilik', ad: 'Ustabaşı', miktar: 200, birim: 'Saat', birimFiyat: 350 },
-      { tip: 'iscilik', ad: 'İşçi', miktar: 800, birim: 'Saat', birimFiyat: 180 },
-      { tip: 'gider', ad: 'İş Makinesi Kirası', miktar: 30, birim: 'Gün', birimFiyat: 5000 },
-      { tip: 'gider', ad: 'Nakliye', miktar: 1, birim: 'Götürü', birimFiyat: 25000 },
-    ]
-  },
-  it: {
-    ad: 'IT / Yazılım Projesi',
-    rows: [
-      { tip: 'iscilik', ad: 'Kıdemli Geliştirici', miktar: 320, birim: 'Saat', birimFiyat: 1200 },
-      { tip: 'iscilik', ad: 'Orta Seviye Geliştirici', miktar: 480, birim: 'Saat', birimFiyat: 700 },
-      { tip: 'iscilik', ad: 'UI/UX Tasarımcı', miktar: 120, birim: 'Saat', birimFiyat: 800 },
-      { tip: 'iscilik', ad: 'Test Mühendisi', miktar: 160, birim: 'Saat', birimFiyat: 500 },
-      { tip: 'malzeme', ad: 'Yazılım Lisansları', miktar: 1, birim: 'Paket', birimFiyat: 50000 },
-      { tip: 'gider', ad: 'Sunucu / Hosting (1 yıl)', miktar: 12, birim: 'Ay', birimFiyat: 8000 },
-      { tip: 'gider', ad: 'Proje Yönetimi', miktar: 1, birim: 'Götürü', birimFiyat: 40000 },
-    ]
-  },
-  danismanlik: {
-    ad: 'Danışmanlık / Hizmet',
-    rows: [
-      { tip: 'iscilik', ad: 'Kıdemli Danışman', miktar: 160, birim: 'Saat', birimFiyat: 2500 },
-      { tip: 'iscilik', ad: 'Uzman', miktar: 240, birim: 'Saat', birimFiyat: 1500 },
-      { tip: 'iscilik', ad: 'Analist', miktar: 200, birim: 'Saat', birimFiyat: 800 },
-      { tip: 'gider', ad: 'Seyahat / Konaklama', miktar: 1, birim: 'Götürü', birimFiyat: 20000 },
-      { tip: 'gider', ad: 'Rapor / Doküman Hazırlama', miktar: 1, birim: 'Götürü', birimFiyat: 15000 },
-    ]
-  },
-  nakliye: {
-    ad: 'Nakliye / Lojistik',
-    rows: [
-      { tip: 'malzeme', ad: 'Yakıt', miktar: 2000, birim: 'Litre', birimFiyat: 52 },
-      { tip: 'iscilik', ad: 'Şoför', miktar: 20, birim: 'Gün', birimFiyat: 2000 },
-      { tip: 'iscilik', ad: 'Yardımcı Personel', miktar: 20, birim: 'Gün', birimFiyat: 1200 },
-      { tip: 'gider', ad: 'Araç Amortismanı', miktar: 20, birim: 'Gün', birimFiyat: 3000 },
-      { tip: 'gider', ad: 'Sigorta / Ruhsat', miktar: 1, birim: 'Götürü', birimFiyat: 8000 },
-      { tip: 'gider', ad: 'Yükleme / Boşaltma', miktar: 1, birim: 'Götürü', birimFiyat: 5000 },
-    ]
-  },
-  temizlik: {
-    ad: 'Temizlik / Bakım Hizmeti',
-    rows: [
-      { tip: 'iscilik', ad: 'Temizlik Personeli', miktar: 22, birim: 'Gün', birimFiyat: 800 },
-      { tip: 'malzeme', ad: 'Temizlik Malzemesi', miktar: 1, birim: 'Ay', birimFiyat: 3000 },
-      { tip: 'malzeme', ad: 'Ekipman / Makine', miktar: 1, birim: 'Ay', birimFiyat: 2000 },
-      { tip: 'gider', ad: 'Ulaşım', miktar: 22, birim: 'Gün', birimFiyat: 200 },
-      { tip: 'gider', ad: 'Yönetim Gideri', miktar: 1, birim: 'Ay', birimFiyat: 2500 },
-    ]
-  },
-  imalat: {
-    ad: 'İmalat / Üretim',
-    rows: [
-      { tip: 'malzeme', ad: 'Hammadde A', miktar: 500, birim: 'kg', birimFiyat: 150 },
-      { tip: 'malzeme', ad: 'Hammadde B', miktar: 200, birim: 'kg', birimFiyat: 380 },
-      { tip: 'malzeme', ad: 'Ambalaj Malzemesi', miktar: 1000, birim: 'Adet', birimFiyat: 12 },
-      { tip: 'iscilik', ad: 'Üretim İşçisi', miktar: 480, birim: 'Saat', birimFiyat: 200 },
-      { tip: 'iscilik', ad: 'Kalite Kontrol', miktar: 80, birim: 'Saat', birimFiyat: 350 },
-      { tip: 'gider', ad: 'Enerji / Elektrik', miktar: 1, birim: 'Dönem', birimFiyat: 20000 },
-      { tip: 'gider', ad: 'Makine Bakım', miktar: 1, birim: 'Dönem', birimFiyat: 8000 },
-    ]
-  }
-};
-
-function loadTemplate(key) {
-  const tpl = TEMPLATES[key];
-  if (!tpl) return;
-  if (!confirm(`"${tpl.ad}" şablonu yüklensin mi? Mevcut maliyet kalemleri silinecek.`)) return;
-  maliyetRows = tpl.rows.map(r => ({ ...r, id: ++rowCounter, kdv: true, doviz: r.doviz || 'TL' }));
-  document.getElementById('projeAdi').value = tpl.ad;
-  renderMaliyetTable();
-  calculate();
-}
-
-// ──────────────────────────────────────────────
-// GÜVEN SKORU
-// ──────────────────────────────────────────────
-function calcGuvenSkoru(marj, roi, netKar, toplamMaliyet, sc) {
-  // 4 bileşen: marj (0-40), roi (0-25), tampon (0-20), senaryo dayanıklılığı (0-15)
-  const marjPuan = Math.min(40, Math.max(0, marj * 1.5));
-  const roiPuan = Math.min(25, Math.max(0, roi * 0.6));
-  const tamponPuan = toplamMaliyet > 0 ? Math.min(20, Math.max(0, (netKar / toplamMaliyet) * 40)) : 0;
-  const senaryoPuan = sc.kotumser.kar >= 0 ? 15 : sc.kotumser.marj > -5 ? 8 : 0;
-  const toplam = Math.round(marjPuan + roiPuan + tamponPuan + senaryoPuan);
-  return {
-    toplam: Math.min(100, toplam),
-    parcalar: [
-      { ad: 'Kar Marjı', puan: Math.round(marjPuan), maks: 40 },
-      { ad: 'ROI', puan: Math.round(roiPuan), maks: 25 },
-      { ad: 'Güvenlik Tamponu', puan: Math.round(tamponPuan), maks: 20 },
-      { ad: 'Senaryo Dayanıklılığı', puan: Math.round(senaryoPuan), maks: 15 },
-    ]
-  };
-}
-
-function updateGuvenSkoru(marj, roi, netKar, toplamMaliyet, sc) {
-  const skor = calcGuvenSkoru(marj, roi, netKar, toplamMaliyet, sc);
-  const pct = skor.toplam / 100;
-  const dashLen = 314;
-  const offset = dashLen - dashLen * pct;
-  const arc = document.getElementById('skorArc');
-  const numEl = document.getElementById('skorNum');
-  const etiket = document.getElementById('skorEtiket');
-  const detay = document.getElementById('skorDetay');
-  if (!arc) return;
-
-  const color = skor.toplam < 30 ? '#ef4444' : skor.toplam < 55 ? '#f59e0b' : skor.toplam < 75 ? '#4f7dff' : '#22c55e';
-  arc.setAttribute('stroke', color);
-  arc.setAttribute('stroke-dashoffset', offset.toFixed(1));
-  numEl.textContent = skor.toplam;
-  numEl.style.color = color;
-
-  const etiketler = [
-    [0, 'Yüksek Risk'], [30, 'Riskli'], [55, 'Kabul Edilebilir'], [75, 'İyi'], [85, 'Mükemmel']
-  ];
-  const e = etiketler.reduce((a, b) => skor.toplam >= b[0] ? b : a);
-  etiket.textContent = e[1];
-  etiket.style.color = color;
-
-  detay.innerHTML = skor.parcalar.map(p => `
-    <div>
-      <div class="flex justify-between" style="margin-bottom:3px">
-        <span style="font-size:12px;color:var(--muted)">${p.ad}</span>
-        <span style="font-size:12px;font-weight:600">${p.puan}/${p.maks}</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width:${(p.puan/p.maks*100).toFixed(0)}%;background:${color}"></div>
-      </div>
+      <textarea id="excelPasteArea" rows="8"
+        style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+               padding:12px;color:var(--text);font-family:'Menlo',monospace;font-size:12px;
+               resize:vertical;outline:none;line-height:1.6;transition:border-color .15s"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+        placeholder="Buraya yapıştırın (Ctrl+V / Cmd+V)…"
+        oninput="excelPasteOnizle(this.value)"></textarea>
+      <div id="excelOnizlePanel" style="margin-top:12px"></div>
     </div>
-  `).join('');
-}
-
-// ──────────────────────────────────────────────
-// RAKİP ANALİZİ
-// ──────────────────────────────────────────────
-let rakipRows = [];
-let rakipCounter = 0;
-
-function addRakip() {
-  if (rakipRows.length >= 4) return;
-  const id = ++rakipCounter;
-  rakipRows.push({ id, ad: 'Rakip ' + id, fiyat: 0 });
-  renderRakipRows();
-}
-
-function removeRakip(id) {
-  rakipRows = rakipRows.filter(r => r.id !== id);
-  renderRakipRows();
-  updateRakipChart();
-}
-
-function updateRakipRow(id, field, val) {
-  const r = rakipRows.find(r => r.id === id);
-  if (!r) return;
-  r[field] = field === 'fiyat' ? parseFloat(val) || 0 : val;
-  updateRakipChart();
-}
-
-function renderRakipRows() {
-  document.getElementById('rakipRows').innerHTML = rakipRows.map(r => `
-    <div class="flex items-center gap8">
-      <input type="text" value="${r.ad}" onchange="updateRakipRow(${r.id},'ad',this.value)"
-        style="flex:1" placeholder="Rakip adı">
-      <input type="number" value="${r.fiyat}" oninput="updateRakipRow(${r.id},'fiyat',this.value)"
-        style="width:140px" placeholder="Fiyat">
-      <button class="btn btn-danger" onclick="removeRakip(${r.id})">✕</button>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--muted);flex:1">Mevcut kalemlerin sonuna eklenir.</span>
+      <button class="btn btn-ghost" onclick="excelPasteKapat()">İptal</button>
+      <button class="btn btn-primary" id="excelPasteUygulaBtn" onclick="excelPasteUygula()" disabled>İçe Aktar</button>
     </div>
-  `).join('');
-}
+  </div>
+</div>
 
-function updateRakipChart() {
-  const paraBirimi = document.getElementById('paraBirimi').value;
-  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
-  const bizimFiyat = parseFloat(document.getElementById('teklifFiyati').value) || 0;
-
-  document.getElementById('bizimFiyatDisplay').textContent = sym + fmt(bizimFiyat);
-
-  const tumFiyatlar = [...rakipRows.map(r => r.fiyat), bizimFiyat].filter(f => f > 0);
-  if (tumFiyatlar.length === 0) {
-    document.getElementById('rakipChart').innerHTML = '<p style="color:var(--muted);font-size:13px">Fiyat girisi bekleniyor...</p>';
-    return;
-  }
-  const maks = Math.max(...tumFiyatlar) * 1.1;
-  const sirali = [...rakipRows.map(r => ({ ad: r.ad, fiyat: r.fiyat, bizim: false })),
-    { ad: '⭐ Sizin Teklifiniz', fiyat: bizimFiyat, bizim: true }]
-    .filter(r => r.fiyat > 0)
-    .sort((a, b) => a.fiyat - b.fiyat);
-
-  const html = sirali.map((r, i) => {
-    const pct = (r.fiyat / maks * 100).toFixed(1);
-    const color = r.bizim ? 'var(--accent)' : 'var(--muted)';
-    const rank = i + 1;
-    return `
-      <div class="rakip-card" style="border:1px solid ${r.bizim ? 'var(--accent)' : 'var(--border)'}">
-        <div class="flex justify-between items-center">
-          <span style="font-size:12px;font-weight:${r.bizim?'700':'400'};color:${color}">${rank}. ${r.ad}</span>
-          <span class="font-mono" style="color:${color};font-weight:700">${sym}${fmt(r.fiyat)}</span>
-        </div>
-        <div class="rakip-bar"><div class="rakip-fill" style="width:${pct}%;background:${color}"></div></div>
-      </div>`;
-  }).join('');
-
-  document.getElementById('rakipChart').innerHTML = html;
-
-  // Yorum
-  const bizimSira = sirali.findIndex(r => r.bizim) + 1;
-  const toplam = sirali.length;
-  const pozisyon = bizimSira === 1 ? 'en düşük teklif' : bizimSira === toplam ? 'en yüksek teklif' : `${bizimSira}. sıra`;
-  const ucuzRakip = sirali.filter(r => !r.bizim && r.fiyat < bizimFiyat);
-  const pahalıRakip = sirali.filter(r => !r.bizim && r.fiyat > bizimFiyat);
-
-  let yorumHtml = `<div style="font-size:13px;line-height:1.7">
-    Teklifiniz <strong style="color:var(--accent)">${toplam} aday arasında ${pozisyon}</strong> konumunda.`;
-  if (ucuzRakip.length > 0) yorumHtml += ` ${ucuzRakip.length} rakip daha düşük fiyat veriyor.`;
-  if (pahalıRakip.length > 0) yorumHtml += ` ${pahalıRakip.length} rakip daha yüksek fiyat veriyor.`;
-  yorumHtml += '</div>';
-  document.getElementById('rakipYorum').innerHTML = yorumHtml;
-}
-
-// ──────────────────────────────────────────────
-// OTOMATİK YORUM ÜRETECİ
-// ──────────────────────────────────────────────
-function generateYorum(gelir, maliyet, netKar, marj, roi, sc, tipTotals) {
-  const sym = document.getElementById('paraBirimi').value === 'TL' ? '₺' : '$';
-  const items = [];
-
-  // Genel değerlendirme
-  if (gelir === 0) {
-    items.push('⚠️ Henüz teklif fiyatı girilmemiş. Analiz için Veri Girişi sekmesinden teklif fiyatı belirleyin.');
-    document.getElementById('otomatikYorum').innerHTML = `<div class="yorum-box">${items.join('<br>')}</div>`;
-    return;
-  }
-
-  if (marj < 0) items.push(`🔴 <strong>Zarar uyarısı:</strong> Mevcut fiyatlamada ${sym}${fmt(Math.abs(netKar))} zarar edilecek. Teklif fiyatını en az ${sym}${fmt(maliyet)} üzerine çekmeniz gerekiyor.`);
-  else if (marj < 8) items.push(`🟡 Kar marjı oldukça düşük (%${marj.toFixed(1)}). Beklenmedik bir maliyet artışı bu projeyi zarara sokabilir.`);
-  else if (marj > 30) items.push(`🟢 Güçlü kar marjı (%${marj.toFixed(1)}). Rekabetçi fiyatlama açısından teklifin biraz düşürülmesi ihale kazanma şansını artırabilir.`);
-  else items.push(`🟢 Kar marjı (%${marj.toFixed(1)}) makul aralıkta.`);
-
-  // Maliyet yapısı analizi
-  const totalM = Object.values(tipTotals).reduce((a,b) => a+b, 0);
-  if (totalM > 0) {
-    const iscilikPct = ((tipTotals.iscilik || 0) / totalM * 100).toFixed(0);
-    const malzemePct = ((tipTotals.malzeme || 0) / totalM * 100).toFixed(0);
-    if (tipTotals.iscilik > tipTotals.malzeme && tipTotals.iscilik > (tipTotals.gider || 0))
-      items.push(`👷 Maliyet yapısının %${iscilikPct}'i işçilikten oluşuyor. İşçilik kaynaklı projelerde verimlilik ve devamsızlık riski gözetilmeli.`);
-    else if (tipTotals.malzeme > tipTotals.iscilik)
-      items.push(`📦 Malzeme maliyetleri toplam maliyetin %${malzemePct}'ini oluşturuyor. Tedarik fiyatlarındaki dalgalanmalar projeyi etkiler — sabit fiyatlı tedarikçi anlaşması yapılması önerilir.`);
-  }
-
-  // Senaryo analizi
-  if (sc.kotumser.kar < 0)
-    items.push(`⚠️ Kötümser senaryoda proje zarar ediyor (${sym}${fmt(sc.kotumser.kar)}). Acil durum bütçesi veya esnek fiyat maddesi eklenebilir.`);
-  else
-    items.push(`✅ Kötümser senaryoda bile proje karlı kalıyor (${sym}${fmt(sc.kotumser.kar)}). Risk tamponu yeterli.`);
-
-  // ROI değerlendirmesi
-  if (roi > 25) items.push(`📈 ROI %${roi.toFixed(1)} ile yüksek — bu projeye sermaye tahsis etmek verimli.`);
-  else if (roi < 10) items.push(`📉 ROI %${roi.toFixed(1)} ile düşük. Alternatif projelerin getirisiyle karşılaştırılması önerilir.`);
-
-  // Rakip konumu
-  const bizimFiyat = parseFloat(document.getElementById('teklifFiyati').value) || 0;
-  if (rakipRows.length > 0 && bizimFiyat > 0) {
-    const daha_ucuz = rakipRows.filter(r => r.fiyat > 0 && r.fiyat < bizimFiyat).length;
-    if (daha_ucuz > 0) items.push(`🏁 ${daha_ucuz} rakip daha düşük fiyat veriyor. Fiyat düşürmek yerine değer önerinizi (garanti, süre, deneyim) ön plana çıkarın.`);
-    else if (rakipRows.filter(r => r.fiyat > 0).length > 0) items.push(`🏆 Tüm rakiplerden düşük fiyat veriyorsunuz. Kazanma olasılığınız yüksek, ancak bıraktığınız marjı tekrar değerlendirin.`);
-  }
-
-  const html = `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
-  const el = document.getElementById('otomatikYorum');
-  if (el) el.innerHTML = html;
-}
-
-// ──────────────────────────────────────────────
-// VERGİ HESAPLAMASI
-// ──────────────────────────────────────────────
-function calcVergi(netKar) {
-  const kvOrani = parseFloat(document.getElementById('kvOrani').value) / 100 || 0;
-  const stopajOrani = parseFloat(document.getElementById('stopajOrani').value) / 100 || 0;
-  const kvTutar = netKar > 0 ? netKar * kvOrani : 0;
-  const karSonrasiKV = netKar - kvTutar;
-  const stopajTutar = karSonrasiKV > 0 ? karSonrasiKV * stopajOrani : 0;
-  const gercekNet = karSonrasiKV - stopajTutar;
-  return { kvTutar, stopajTutar, gercekNet, karSonrasiKV };
-}
-
-function renderVergiTablosu(netKar, sym) {
-  const v = calcVergi(netKar);
-  const el = document.getElementById('vergiTablosu');
-  if (!el) return;
-  const kvOrani = parseFloat(document.getElementById('kvOrani').value) || 0;
-  const stopajOrani = parseFloat(document.getElementById('stopajOrani').value) || 0;
-  el.innerHTML = `
-    <div class="vergi-satir">
-      <span style="color:var(--muted)">Brüt Kâr (KDV hariç)</span>
-      <span class="font-mono">${sym}${fmt(netKar)}</span>
-    </div>
-    <div class="vergi-satir">
-      <span style="color:var(--yellow)">— Kurumlar Vergisi (%${kvOrani})</span>
-      <span class="font-mono text-yellow">- ${sym}${fmt(v.kvTutar)}</span>
-    </div>
-    ${stopajOrani > 0 ? `
-    <div class="vergi-satir">
-      <span style="color:var(--yellow)">— Stopaj (%${stopajOrani})</span>
-      <span class="font-mono text-yellow">- ${sym}${fmt(v.stopajTutar)}</span>
-    </div>` : ''}
-    <div class="vergi-satir toplam">
-      <span>Vergi Sonrası Gerçek Net Kâr</span>
-      <span class="font-mono ${v.gercekNet >= 0 ? 'text-green' : 'text-red'}">${sym}${fmt(v.gercekNet)}</span>
-    </div>
-    <div style="margin-top:10px;font-size:12px;color:var(--muted)">
-      Efektif vergi yükü: %${netKar > 0 ? (((v.kvTutar + v.stopajTutar) / netKar) * 100).toFixed(1) : '0'}
-    </div>`;
-}
-
-// ──────────────────────────────────────────────
-// PROJE YÖNETİMİ
-// ──────────────────────────────────────────────
-function getAllProjects() {
-  try { return JSON.parse(localStorage.getItem('fizibilite_projeler') || '[]'); }
-  catch(e) { return []; }
-}
-function saveAllProjects(list) {
-  localStorage.setItem('fizibilite_projeler', JSON.stringify(list));
-}
-
-function projeKaydet() {
-  const ad = document.getElementById('projeAdi').value.trim() || 'İsimsiz Proje';
-  const list = getAllProjects();
-  const id = Date.now().toString();
-  const state = buildState();
-  const toplamMaliyet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
-  const gelirKalem = gelirRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
-  const gelir = gelirKalem > 0 ? gelirKalem : parseFloat(document.getElementById('teklifFiyati').value) || 0;
-  const kar = gelir - toplamMaliyet;
-  const marj = gelir > 0 ? (kar / gelir * 100).toFixed(1) : 0;
-
-  // Aynı adlı proje varsa güncelle
-  const mevcutIdx = list.findIndex(p => p.ad === ad);
-  const kayit = { id: mevcutIdx >= 0 ? list[mevcutIdx].id : id, ad, tarih: new Date().toLocaleDateString('tr-TR'), marj, gelir, maliyet: toplamMaliyet, state };
-  if (mevcutIdx >= 0) list[mevcutIdx] = kayit;
-  else list.unshift(kayit);
-
-  saveAllProjects(list);
-  renderProjeListesi();
-  showToast(`"${ad}" kaydedildi.`);
-}
-
-function projeSil(id, e) {
-  e.stopPropagation();
-  const list = getAllProjects().filter(p => p.id !== id);
-  saveAllProjects(list);
-  renderProjeListesi();
-}
-
-function projeYukle(id) {
-  const p = getAllProjects().find(p => p.id === id);
-  if (!p) return;
-  if (!confirm(`"${p.ad}" projesini yüklemek istiyor musunuz? Kaydedilmemiş değişiklikler kaybolur.`)) return;
-  const s = p.state;
-  Object.keys(s).forEach(k => {
-    const el = document.getElementById(k);
-    if (el && typeof s[k] === 'string') el.value = s[k];
-  });
-  maliyetRows = s.maliyetRows || [];
-  gelirRows = s.gelirRows || [];
-  rakipRows = s.rakipRows || [];
-  rowCounter = s.rowCounter || 0;
-  rakipCounter = s.rakipCounter || 0;
-  renderMaliyetTable();
-  renderGelirTable();
-  renderRakipRows();
-  calculate();
-  closeProjeModal();
-  showToast(`"${p.ad}" yüklendi.`);
-}
-
-function projeCopla(id, e) {
-  e.stopPropagation();
-  const list = getAllProjects();
-  const p = list.find(p => p.id === id);
-  if (!p) return;
-  const kopya = { ...p, id: Date.now().toString(), ad: p.ad + ' (Kopya)', tarih: new Date().toLocaleDateString('tr-TR') };
-  list.unshift(kopya);
-  saveAllProjects(list);
-  renderProjeListesi();
-  showToast('Proje kopyalandı.');
-}
-
-function renderProjeListesi() {
-  const arama = (document.getElementById('projeArama')?.value || '').toLowerCase();
-  const list = getAllProjects().filter(p => p.ad.toLowerCase().includes(arama));
-  const el = document.getElementById('projeListesi');
-  if (!el) return;
-  if (list.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">Henüz kayıtlı proje yok.<br>Mevcut projeyi "Kaydet" ile saklayın.</div>';
-    return;
-  }
-  const paraBirimi = document.getElementById('paraBirimi')?.value || 'TL';
-  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
-  el.innerHTML = list.map(p => {
-    const marjColor = p.marj < 0 ? 'var(--red)' : p.marj < 10 ? 'var(--yellow)' : 'var(--green)';
-    return `
-    <div class="proje-item" onclick="projeYukle('${p.id}')">
-      <div style="font-size:28px">📋</div>
-      <div class="proje-item-info">
-        <div class="proje-item-name">${p.ad}</div>
-        <div class="proje-item-meta">${p.tarih} · Gelir: ${sym}${fmt(p.gelir)} · Maliyet: ${sym}${fmt(p.maliyet)}</div>
-      </div>
-      <div style="text-align:right;min-width:70px">
-        <div style="font-size:16px;font-weight:700;color:${marjColor}">%${p.marj}</div>
-        <div style="font-size:11px;color:var(--muted)">kar marjı</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <button class="btn btn-ghost btn-sm" onclick="projeCopla('${p.id}',event)" title="Kopyala">⎘</button>
-        <button class="btn btn-danger" onclick="projeSil('${p.id}',event)" title="Sil">✕</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openProjeModal() {
-  renderProjeListesi();
-  document.getElementById('projeModal').classList.add('open');
-}
-function closeProjeModal() {
-  document.getElementById('projeModal').classList.remove('open');
-}
-
-function buildState() {
-  return {
-    projeAdi: document.getElementById('projeAdi').value,
-    musteri: document.getElementById('musteri').value,
-    tarih: document.getElementById('tarih').value,
-    paraBirimi: document.getElementById('paraBirimi').value,
-    kdvOrani: document.getElementById('kdvOrani').value,
-    teklifFiyati: document.getElementById('teklifFiyati').value,
-    notlar: document.getElementById('notlar').value,
-    hedefMarj: document.getElementById('hedefMarj').value,
-    kotumserGelir: document.getElementById('kotumserGelir').value,
-    kotumserMaliyet: document.getElementById('kotumserMaliyet').value,
-    iyimserGelir: document.getElementById('iyimserGelir').value,
-    iyimserMaliyet: document.getElementById('iyimserMaliyet').value,
-    kvOrani: document.getElementById('kvOrani').value,
-    stopajOrani: document.getElementById('stopajOrani').value,
-    kurUSD: document.getElementById('kurUSD').value,
-    kurEUR: document.getElementById('kurEUR').value,
-    nakitSure: document.getElementById('nakitSure').value,
-    nkAvans: document.getElementById('nkAvans').value,
-    nkAraOran: document.getElementById('nkAraOran').value,
-    nkAraAy: document.getElementById('nkAraAy').value,
-    nkKabulOran: document.getElementById('nkKabulOran').value,
-    nkKabulAy: document.getElementById('nkKabulAy').value,
-    nkMalBaslangic: document.getElementById('nkMalBaslangic').value,
-    maliyetRows, gelirRows, rowCounter, rakipRows, rakipCounter,
-    urunler, urunCounter
-  };
-}
-
-// Toast bildirimi
-function showToast(msg) {
-  let t = document.getElementById('toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toast';
-    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:2000;opacity:0;transition:opacity .3s;pointer-events:none';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
-}
-
-// ──────────────────────────────────────────────
-// ŞELALE (WATERFALL) GRAFİĞİ
-// ──────────────────────────────────────────────
-let chartWaterfall = null;
-
-function updateWaterfall(gelir, tipTotals, netKar, sym) {
-  const ctx = document.getElementById('chartWaterfall');
-  if (!ctx) return;
-  if (chartWaterfall) { chartWaterfall.destroy(); chartWaterfall = null; }
-
-  const malzeme = tipTotals.malzeme || 0;
-  const iscilik = tipTotals.iscilik || 0;
-  const gider   = tipTotals.gider   || 0;
-
-  // Floating bar data: each = [bottom, top]
-  const bars = [];
-  let seviye = gelir;
-
-  const push = (label, val, color, isTotal) => {
-    if (!isTotal) {
-      bars.push({ label, bottom: seviye - val, top: seviye, color, val });
-      seviye -= val;
-    } else {
-      bars.push({ label, bottom: 0, top: seviye, color, val: seviye });
-    }
-  };
-
-  bars.push({ label: 'Gelir', bottom: 0, top: gelir, color: 'rgba(34,197,94,.85)', val: gelir, isStart: true });
-
-  if (malzeme > 0) push('Malzeme', malzeme, 'rgba(239,68,68,.75)');
-  if (iscilik > 0) push('İşçilik', iscilik, 'rgba(251,113,133,.75)');
-  if (gider   > 0) push('Genel Gider', gider, 'rgba(245,158,11,.75)');
-
-  // Net Kâr bar
-  const netColor = netKar >= 0 ? 'rgba(79,125,255,.85)' : 'rgba(239,68,68,.85)';
-  bars.push({ label: 'Net Kâr', bottom: 0, top: netKar, color: netColor, val: netKar, isEnd: true });
-
-  chartWaterfall = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: bars.map(b => b.label),
-      datasets: [{
-        label: 'Tutar',
-        data: bars.map(b => [b.bottom, b.top]),
-        backgroundColor: bars.map(b => b.color),
-        borderRadius: 5,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const b = bars[ctx.dataIndex];
-              const sign = b.isStart ? '' : b.isEnd ? '' : '- ';
-              return `  ${sign}${sym}${fmt(Math.abs(b.val))}`;
-            }
-          }
-        },
-        // inline değer etiketleri
-        datalabels: false
-      },
-      scales: {
-        x: { grid: { color: 'rgba(46,51,82,.4)' }, ticks: { color: '#8892a4' } },
-        y: {
-          grid: { color: 'rgba(46,51,82,.4)' },
-          ticks: { color: '#8892a4', callback: v => sym + fmt(v) }
-        }
-      }
-    },
-    plugins: [{
-      id: 'waterfall-labels',
-      afterDatasetsDraw(chart) {
-        const { ctx: c, scales: { x, y } } = chart;
-        c.save();
-        bars.forEach((b, i) => {
-          const bar = chart.getDatasetMeta(0).data[i];
-          const midX = bar.x;
-          const midY = (y.getPixelForValue(b.top) + y.getPixelForValue(b.bottom)) / 2;
-          const label = `${sym}${fmt(Math.abs(b.val))}`;
-          c.font = 'bold 11px -apple-system, sans-serif';
-          c.textAlign = 'center';
-          c.textBaseline = 'middle';
-          c.fillStyle = '#fff';
-          const barHeight = Math.abs(y.getPixelForValue(b.bottom) - y.getPixelForValue(b.top));
-          if (barHeight > 20) c.fillText(label, midX, midY);
-        });
-        c.restore();
-      }
-    }]
-  });
-}
-
-// ──────────────────────────────────────────────
-// NAKİT AKIŞI TAKVİMİ
-// ──────────────────────────────────────────────
-let chartNakit = null;
-
-function calcNakit() {
-  const paraBirimi = document.getElementById('paraBirimi').value;
-  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
-  const sure = parseInt(document.getElementById('nakitSure').value) || 6;
-  const toplamGelir = (() => {
-    const g = gelirRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
-    return g > 0 ? g : parseFloat(document.getElementById('teklifFiyati').value) || 0;
-  })();
-  const toplamMaliyet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
-
-  const avansOran   = (parseFloat(document.getElementById('nkAvans').value)      || 0) / 100;
-  const araOran     = (parseFloat(document.getElementById('nkAraOran').value)     || 0) / 100;
-  const araAy       = parseInt(document.getElementById('nkAraAy').value)          || Math.ceil(sure / 2);
-  const kabulOran   = (parseFloat(document.getElementById('nkKabulOran').value)   || 0) / 100;
-  const kabulAy     = parseInt(document.getElementById('nkKabulAy').value)        || sure;
-  const malBaslOran = (parseFloat(document.getElementById('nkMalBaslangic').value)|| 0) / 100;
-
-  // Gelir akışı
-  const gelirAkis = Array(sure + 1).fill(0);
-  gelirAkis[1] = toplamGelir * avansOran;
-  if (araAy >= 1 && araAy <= sure) gelirAkis[araAy] += toplamGelir * araOran;
-  const kAy = Math.min(kabulAy, sure);
-  gelirAkis[kAy] += toplamGelir * kabulOran;
-  // Kalan oran eşit dağıt
-  const dagitilan = avansOran + araOran + kabulOran;
-  const kalan = Math.max(0, 1 - dagitilan);
-  if (kalan > 0 && sure > 1) {
-    const aylik = (toplamGelir * kalan) / (sure - 1);
-    for (let i = 2; i <= sure; i++) gelirAkis[i] += aylik;
-  }
-
-  // Maliyet akışı
-  const maliyetAkis = Array(sure + 1).fill(0);
-  maliyetAkis[1] = toplamMaliyet * malBaslOran;
-  const kalanMal = toplamMaliyet * (1 - malBaslOran);
-  if (sure > 1) {
-    const aylikMal = kalanMal / (sure - 1);
-    for (let i = 2; i <= sure; i++) maliyetAkis[i] = aylikMal;
-  }
-
-  // Kümülatif
-  const aylar = [];
-  let kumulatif = 0;
-  let maxAcik = 0;
-  let breakEvenAy = null;
-  const rows = [];
-  for (let i = 1; i <= sure; i++) {
-    const net = gelirAkis[i] - maliyetAkis[i];
-    kumulatif += net;
-    if (kumulatif < maxAcik) maxAcik = kumulatif;
-    if (breakEvenAy === null && kumulatif >= 0) breakEvenAy = i;
-    aylar.push({ ay: i, gelir: gelirAkis[i], maliyet: maliyetAkis[i], net, kumulatif });
-    rows.push({ ay: i, gelir: gelirAkis[i], maliyet: maliyetAkis[i], net, kumulatif });
-  }
-
-  // KPI
-  const kpiEl = document.getElementById('nakitKpi');
-  if (kpiEl) {
-    const items = [
-      { label: 'Maks. Nakit Açığı', val: sym + fmt(maxAcik), color: maxAcik < 0 ? 'var(--red)' : 'var(--green)', sub: 'En kötü kümülatif nakit pozisyonu' },
-      { label: 'Nakit Denge Noktası', val: breakEvenAy ? breakEvenAy + '. Ay' : 'Ulaşılamıyor', color: breakEvenAy ? 'var(--green)' : 'var(--red)', sub: 'Kümülatifin sıfırı geçtiği ay' },
-      { label: 'Son Kümülatif', val: sym + fmt(kumulatif), color: kumulatif >= 0 ? 'var(--green)' : 'var(--red)', sub: 'Proje bitişindeki nakit durumu' },
-      { label: 'Gerekli Finansman', val: sym + fmt(Math.abs(Math.min(0, maxAcik))), color: 'var(--yellow)', sub: 'Negatif dip için gereken öz/kredi kaynak' }
-    ];
-    kpiEl.innerHTML = items.map(it => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--surface2);border-radius:8px">
-        <div>
-          <div style="font-size:12px;color:var(--muted)">${it.label}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${it.sub}</div>
-        </div>
-        <div style="font-size:18px;font-weight:700;font-family:Menlo,monospace;color:${it.color}">${it.val}</div>
-      </div>`).join('');
-  }
-
-  // Tablo
-  const tbody = document.getElementById('nakitBody');
-  if (tbody) {
-    tbody.innerHTML = rows.map(r => {
-      const kColor = r.kumulatif >= 0 ? 'var(--green)' : 'var(--red)';
-      const nColor = r.net >= 0 ? 'var(--green)' : 'var(--red)';
-      const durum = r.kumulatif >= 0
-        ? '<span class="badge badge-green">Pozitif</span>'
-        : '<span class="badge badge-red">Negatif</span>';
-      return `<tr>
-        <td style="font-weight:600">${r.ay}. Ay</td>
-        <td class="text-right font-mono text-green">${sym}${fmt(r.gelir)}</td>
-        <td class="text-right font-mono text-red">${sym}${fmt(r.maliyet)}</td>
-        <td class="text-right font-mono" style="color:${nColor};font-weight:600">${sym}${fmt(r.net)}</td>
-        <td class="text-right font-mono" style="color:${kColor};font-weight:700">${sym}${fmt(r.kumulatif)}</td>
-        <td>${durum}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  // Grafik
-  if (chartNakit) { chartNakit.destroy(); chartNakit = null; }
-  const ctx = document.getElementById('chartNakit');
-  if (!ctx) return;
-  const labels = rows.map(r => r.ay + '. Ay');
-  chartNakit = new Chart(ctx, {
-    data: {
-      labels,
-      datasets: [
-        {
-          type: 'bar', label: 'Gelen Nakit', data: rows.map(r => r.gelir),
-          backgroundColor: 'rgba(34,197,94,.6)', borderRadius: 4, yAxisID: 'y'
-        },
-        {
-          type: 'bar', label: 'Giden Nakit', data: rows.map(r => -r.maliyet),
-          backgroundColor: 'rgba(239,68,68,.6)', borderRadius: 4, yAxisID: 'y'
-        },
-        {
-          type: 'line', label: 'Kümülatif Nakit', data: rows.map(r => r.kumulatif),
-          borderColor: '#4f7dff', backgroundColor: 'rgba(79,125,255,.1)',
-          fill: true, tension: 0.4, pointRadius: 4,
-          pointBackgroundColor: rows.map(r => r.kumulatif >= 0 ? '#22c55e' : '#ef4444'),
-          yAxisID: 'y2', borderWidth: 2.5
-        }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { labels: { color: '#8892a4', font: { size: 12 } } },
-        tooltip: { callbacks: { label: ctx => `  ${ctx.dataset.label}: ${sym}${fmt(ctx.raw)}` } }
-      },
-      scales: {
-        x: { grid: { color: 'rgba(46,51,82,.4)' }, ticks: { color: '#8892a4' } },
-        y: {
-          type: 'linear', position: 'left',
-          grid: { color: 'rgba(46,51,82,.4)' },
-          ticks: { color: '#8892a4', callback: v => sym + fmt(v) }
-        },
-        y2: {
-          type: 'linear', position: 'right',
-          grid: { drawOnChartArea: false },
-          ticks: { color: '#4f7dff', callback: v => sym + fmt(v) }
-        }
-      }
-    }
-  });
-}
-
-// ──────────────────────────────────────────────
-// PERSIST
-// ──────────────────────────────────────────────
-function saveLocal() {
-  try { localStorage.setItem('fizibilite_state', JSON.stringify(buildState())); } catch(e) {}
-}
-
-function loadLocal() {
-  try {
-    const raw = localStorage.getItem('fizibilite_state');
-    if (!raw) return;
-    const s = JSON.parse(raw);
-    ['projeAdi','musteri','tarih','paraBirimi','kdvOrani','teklifFiyati','notlar','hedefMarj',
-     'kotumserGelir','kotumserMaliyet','iyimserGelir','iyimserMaliyet','kvOrani','stopajOrani',
-     'kurUSD','kurEUR','nakitSure','nkAvans','nkAraOran','nkAraAy','nkKabulOran','nkKabulAy','nkMalBaslangic'].forEach(k => {
-      const el = document.getElementById(k);
-      if (el && s[k] !== undefined) el.value = s[k];
-    });
-    if (s.maliyetRows && s.maliyetRows.length) { maliyetRows = s.maliyetRows; renderMaliyetTable(); }
-    if (s.gelirRows && s.gelirRows.length) { gelirRows = s.gelirRows; renderGelirTable(); }
-    if (s.rowCounter) rowCounter = s.rowCounter;
-    if (s.rakipRows && s.rakipRows.length) { rakipRows = s.rakipRows; renderRakipRows(); }
-    if (s.rakipCounter) rakipCounter = s.rakipCounter;
-    if (s.urunler && s.urunler.length) { urunler = s.urunler; renderKatalog(); }
-    if (s.urunCounter) urunCounter = s.urunCounter;
-  } catch(e) {}
-}
-
-function clearAll() {
-  if (!confirm('Tüm verileri temizlemek istiyor musunuz?')) return;
-  localStorage.removeItem('fizibilite_state');
-  maliyetRows = []; gelirRows = []; rakipRows = []; rowCounter = 0; rakipCounter = 0;
-  // Katalog temizlenmez — projeden bağımsız kalır
-  ['projeAdi','musteri','notlar','teklifFiyati'].forEach(k => document.getElementById(k).value = '');
-  document.getElementById('kdvOrani').value = 20;
-  document.getElementById('hedefMarj').value = 20;
-  document.getElementById('kvOrani').value = 25;
-  document.getElementById('stopajOrani').value = 0;
-  document.getElementById('tarih').value = new Date().toISOString().split('T')[0];
-  addRow('malzeme'); addRow('iscilik'); addRow('gider');
-  addGelirRow(); addRakip();
-  calculate();
-}
-
-// ──────────────────────────────────────────────
-// FİYAT ÖNERİ & SİMÜLATÖR
-// ──────────────────────────────────────────────
-function updateOneri() {
-  const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) / 100 || 0;
-  const paraBirimi = document.getElementById('paraBirimi').value;
-  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
-  const toplamMaliyetNet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
-
-  const marj = parseFloat(document.getElementById('oneriMarj').value) / 100 || 0;
-  const markup = parseFloat(document.getElementById('oneriMarkup').value) / 100 || 0;
-
-  const marjFiyat = marj < 1 ? toplamMaliyetNet / (1 - marj) : 0;
-  const markupFiyat = toplamMaliyetNet * (1 + markup);
-
-  const mEl = document.getElementById('oneriMarjFiyat');
-  const kEl = document.getElementById('oneriMarkupFiyat');
-  if (mEl) mEl.textContent = sym + fmt(marjFiyat);
-  if (kEl) kEl.textContent = sym + fmt(markupFiyat);
-}
-
-function kullanFiyat(tip) {
-  const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) / 100 || 0;
-  const toplamMaliyetNet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
-  let fiyat;
-  if (tip === 'marj') {
-    const marj = parseFloat(document.getElementById('oneriMarj').value) / 100 || 0;
-    fiyat = marj < 1 ? toplamMaliyetNet / (1 - marj) : 0;
-  } else {
-    const markup = parseFloat(document.getElementById('oneriMarkup').value) / 100 || 0;
-    fiyat = toplamMaliyetNet * (1 + markup);
-  }
-  document.getElementById('teklifFiyati').value = fiyat.toFixed(2);
-  calculate();
-}
-
-let _simMaliyet = 0;
-function updateSimLimits(maliyet, sym) {
-  _simMaliyet = maliyet;
-  const slider = document.getElementById('simSlider');
-  if (!slider) return;
-  const min = Math.max(0, maliyet * 0.5);
-  const max = maliyet * 2.5 || 1000000;
-  slider.min = min.toFixed(0);
-  slider.max = max.toFixed(0);
-  slider.step = Math.max(1, (max - min) / 500).toFixed(0);
-  const current = parseFloat(document.getElementById('teklifFiyati').value) || maliyet;
-  slider.value = Math.min(max, Math.max(min, current));
-  document.getElementById('simMin').textContent = sym + fmt(min);
-  document.getElementById('simMax').textContent = sym + fmt(max);
-  updateSim();
-}
-
-function updateSim() {
-  const paraBirimi = document.getElementById('paraBirimi').value;
-  const sym = paraBirimi === 'TL' ? '₺' : paraBirimi === 'USD' ? '$' : '€';
-  const slider = document.getElementById('simSlider');
-  if (!slider) return;
-  const fiyat = parseFloat(slider.value) || 0;
-  const maliyet = _simMaliyet;
-  const kar = fiyat - maliyet;
-  const marj = fiyat > 0 ? (kar / fiyat) * 100 : 0;
-  document.getElementById('simLabel').textContent = sym + fmt(fiyat);
-  const karEl = document.getElementById('simKar');
-  const marjEl = document.getElementById('simMarj');
-  const color = kar >= 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('simFiyat').textContent = sym + fmt(fiyat);
-  karEl.textContent = sym + fmt(kar);
-  karEl.style.color = color;
-  marjEl.textContent = marj.toFixed(1) + '%';
-  marjEl.style.color = color;
-}
-
-// ──────────────────────────────────────────────
-// CSV EXPORT
-// ──────────────────────────────────────────────
-function exportCSV() {
-  const paraBirimi = document.getElementById('paraBirimi').value;
-  const projeAdi = document.getElementById('projeAdi').value || 'proje';
-  const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) / 100 || 0;
-
-  let csv = 'sep=;\n';
-  csv += `Proje;${projeAdi}\n`;
-  csv += `Tarih;${document.getElementById('tarih').value}\n`;
-  csv += `Para Birimi;${paraBirimi}\n\n`;
-
-  csv += 'MALİYET KALEMLERİ\n';
-  csv += 'Tip;Kalem Adı;Miktar;Birim;Birim Fiyat;Toplam;KDV Dahil Toplam\n';
-  maliyetRows.forEach(r => {
-    const net = r.miktar * r.birimFiyat;
-    const kdv = r.kdv ? net * kdvOrani : 0;
-    csv += `${r.tip};${r.ad};${r.miktar};${r.birim};${r.birimFiyat.toFixed(2)};${net.toFixed(2)};${(net+kdv).toFixed(2)}\n`;
-  });
-  const toplamNet = maliyetRows.reduce((s, r) => s + r.miktar * r.birimFiyat, 0);
-  csv += `;;;;;;Toplam;${toplamNet.toFixed(2)}\n\n`;
-
-  csv += 'GELİR KALEMLERİ\n';
-  csv += 'Kalem Adı;Miktar;Birim;Birim Fiyat;Toplam\n';
-  gelirRows.forEach(r => {
-    csv += `${r.ad};${r.miktar};${r.birim};${r.birimFiyat.toFixed(2)};${(r.miktar*r.birimFiyat).toFixed(2)}\n`;
-  });
-  const teklifFiyati = parseFloat(document.getElementById('teklifFiyati').value) || 0;
-  const toplamGelir = gelirRows.reduce((s,r) => s + r.miktar*r.birimFiyat, 0) || teklifFiyati;
-  const netKar = toplamGelir - toplamNet;
-  const karMarji = toplamGelir > 0 ? (netKar / toplamGelir) * 100 : 0;
-  csv += `\nANALİZ SONUÇLARI\n`;
-  csv += `Toplam Gelir;${toplamGelir.toFixed(2)}\n`;
-  csv += `Toplam Maliyet;${toplamNet.toFixed(2)}\n`;
-  csv += `Net Kar;${netKar.toFixed(2)}\n`;
-  csv += `Kar Marjı (%);${karMarji.toFixed(2)}\n`;
-
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'fizibilite_' + projeAdi.replace(/\s+/g,'_') + '_' + new Date().toISOString().split('T')[0] + '.csv';
-  a.click();
-}
-
-function exportJSON() {
-  saveLocal();
-  const raw = localStorage.getItem('fizibilite_state') || '{}';
-  const blob = new Blob([raw], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'fizibilite_' + (document.getElementById('projeAdi').value || 'proje').replace(/\s+/g,'_') + '_' + new Date().toISOString().split('T')[0] + '.json';
-  a.click();
-}
-
-function importJSON() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = e => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        localStorage.setItem('fizibilite_state', ev.target.result);
-        maliyetRows = []; gelirRows = []; rowCounter = 0;
-        loadLocal();
-        renderMaliyetTable();
-        renderGelirTable();
-        calculate();
-        alert('Veriler yüklendi.');
-      } catch(err) { alert('Geçersiz dosya.'); }
-    };
-    reader.readAsText(e.target.files[0]);
-  };
-  input.click();
-}
-</script>
+<script src="src/state.js"></script>
+<script src="src/utils.js"></script>
+<script src="src/validate.js"></script>
+<script src="src/rows.js"></script>
+<script src="src/templates.js"></script>
+<script src="src/katalog.js"></script>
+<script src="src/charts.js"></script>
+<script src="src/calculate.js"></script>
+<script src="src/nakit.js"></script>
+<script src="src/rakip.js"></script>
+<script src="src/simulators.js"></script>
+<script src="src/projeler.js"></script>
+<script src="src/ekipman.js"></script>
+<script src="src/vade.js"></script>
+<script src="src/doviz_riski.js"></script>
+<script src="src/montecarlo.js"></script>
+<script src="src/basabas.js"></script>
+<script src="src/tcmb.js"></script>
+<script src="src/enflasyon.js"></script>
+<script src="src/hedging.js"></script>
+<script src="src/init.js"></script>
 </body>
 </html>
