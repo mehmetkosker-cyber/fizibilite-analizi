@@ -232,10 +232,74 @@ function katalogCokluEkle(hedef) {
 }
 
 function katalogKeyNav(e, id, field) {
-  if (e.key === 'Enter' || e.key === 'Tab') {
-    const idx = urunler.findIndex(u => u.id === id);
-    if (e.key === 'Enter' && idx === urunler.length - 1) katalogEkle();
+  if (e.key === 'Enter') {
+    const tr = e.target.closest('tr');
+    const nextTr = tr?.nextElementSibling;
+    if (nextTr) {
+      const first = nextTr.querySelector('.ks-input');
+      if (first) { e.preventDefault(); first.focus(); return; }
+    }
+    e.preventDefault();
+    katalogEkle();
   }
+}
+
+// ── E-Tablo: Toplu satır + direkt yapıştır ────────────
+function addMultipleKatalogRows() {
+  const n = Math.max(1, Math.min(100, parseInt(document.getElementById('katalogSatirSayisi')?.value) || 5));
+  const startIdx = urunler.length;
+  for (let i = 0; i < n; i++) katalogEkle();
+  showToast(`${n} boş satır eklendi.`, 'success');
+  requestAnimationFrame(() => {
+    const rows = document.querySelectorAll('#katalogBody tr');
+    const targetRow = rows[startIdx];
+    if (targetRow) {
+      const first = targetRow.querySelector('.ks-input');
+      if (first) first.focus();
+    }
+  });
+}
+
+function _pasteToKatalog(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return;
+  const first = lines[0].split('\t').map(c => c.toLowerCase().trim());
+  const isHeader = first.some(c => /^(ad|item|name|ürün|hizmet|birim|fiyat|price)/.test(c));
+  const dataLines = isHeader ? lines.slice(1) : lines;
+  let colAd=0, colTip=-1, colBirim=2, colDoviz=-1, colAlis=3, colSatis=4, colKdv=-1, colNot=-1;
+  if (isHeader) {
+    first.forEach((h, i) => {
+      if (/^(ad|item|name|ürün|hizmet)/.test(h)) colAd = i;
+      else if (/tip|type|kategori/.test(h)) colTip = i;
+      else if (/birim|unit/.test(h)) colBirim = i;
+      else if (/döviz|para|currency/.test(h)) colDoviz = i;
+      else if (/alış|alis|cost|purchase/.test(h)) colAlis = i;
+      else if (/satış|satis|sale|sell/.test(h)) colSatis = i;
+      else if (/kdv|vat|tax/.test(h)) colKdv = i;
+      else if (/not|note/.test(h)) colNot = i;
+    });
+  }
+  const rows = dataLines.map(l => {
+    const c = l.split('\t').map(x => x.trim().replace(/^["']|["']$/g, ''));
+    const tipRaw = colTip >= 0 ? (c[colTip] || '').toLowerCase() : '';
+    const tip = /hizmet|service/.test(tipRaw) ? 'hizmet'
+              : /malzeme|material/.test(tipRaw) ? 'malzeme'
+              : /diger|other/.test(tipRaw) ? 'diger' : 'urun';
+    const dovizRaw = colDoviz >= 0 ? (c[colDoviz] || '').toUpperCase().trim() : 'TL';
+    return {
+      ad: c[colAd] || '',
+      tip,
+      birim: c[colBirim] || 'Adet',
+      alisDoviz: ['USD','EUR'].includes(dovizRaw) ? dovizRaw : 'TL',
+      alisFiyat: _parseNum(c[colAlis] || '0'),
+      satisFiyat: _parseNum(c[colSatis] || '0'),
+      kdv: colKdv >= 0 ? (parseFloat(c[colKdv]) || 20) : 20,
+      notlar: colNot >= 0 ? (c[colNot] || '') : '',
+    };
+  }).filter(r => r.ad || r.alisFiyat > 0 || r.satisFiyat > 0);
+  if (!rows.length) { showToast('Geçerli satır bulunamadı.', 'error'); return; }
+  rows.forEach(r => katalogEkle(r));
+  showToast(`✓ ${rows.length} ürün yapıştırıldı.`, 'success');
 }
 
 function katalogCSVIndir() {
