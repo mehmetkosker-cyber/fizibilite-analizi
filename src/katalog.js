@@ -195,11 +195,11 @@ function renderKatalog() {
         const label = katalogKolNames[k] || k;
         const isSorted = katalogSiralaKey === cfg.sortKey;
         const sortInd = cfg.sortKey ? (isSorted ? (katalogSiralaDuz ? ' ↑' : ' ↓') : '') : '';
-        return `<th class="ksth ksth-notion" style="${cfg.w}">
+        return `<th class="ksth ksth-notion" style="${cfg.w}" data-kol="${k}">
           <div class="ksth-inner">
             ${cfg.sortKey
-              ? `<span class="ksth-label" onclick="katalogSirala('${cfg.sortKey}')" title="${escHtml(label)} — sırala">${escHtml(label)}${sortInd}</span>`
-              : `<span class="ksth-label" style="cursor:default">${escHtml(label)}</span>`
+              ? `<span class="ksth-label" onclick="katalogSirala('${cfg.sortKey}')" ondblclick="katalogKolYenidenInline('${k}',this)" title="Tıkla: sırala · Çift tıkla: yeniden adlandır">${escHtml(label)}${sortInd}</span>`
+              : `<span class="ksth-label" ondblclick="katalogKolYenidenInline('${k}',this)" title="Çift tıkla: yeniden adlandır" style="cursor:default">${escHtml(label)}</span>`
             }
             <button class="ksth-menu-btn" onclick="katalogKolMenuShow('${k}',this,event)" title="Sütun ayarları">⋯</button>
           </div>
@@ -221,29 +221,44 @@ function renderKatalog() {
     return katalogSiralaDuz ? va - vb : vb - va;
   });
 
-  tbody.innerHTML = liste.map(u => {
-    const alisTL  = urunAlisTL(u);
-    const kar     = urunKar(u);
-    const marj    = urunMarj(u);
-    const marjCls = marj < 0 ? 'badge-red' : marj < 10 ? 'badge-yellow' : 'badge-green';
-    const dovizColor = u.alisDoviz === 'USD' ? 'var(--green)' : u.alisDoviz === 'EUR' ? 'var(--cyan)' : 'var(--muted)';
-    const dovizSym   = u.alisDoviz === 'USD' ? '$' : u.alisDoviz === 'EUR' ? '€' : '₺';
-    return `
-    <tr class="kstr${u.secili?' selected':''}" id="krow-${u.id}">
-      <td style="text-align:center;padding:6px 8px">
-        <input type="checkbox" ${u.secili?'checked':''} style="width:14px;height:14px;cursor:pointer"
-          onchange="katalogSecToggle(${u.id},this.checked)">
-      </td>
-      ${visOrder.map(k => _renderKatalogCell(k, u, alisTL, kar, marj, marjCls, dovizColor, dovizSym)).join('')}
-      <td style="white-space:nowrap;padding:4px 6px">
-        <button class="btn btn-ghost" style="padding:3px 7px;font-size:11px;margin-right:2px"
-          onclick="katalogAnalizEkle(${u.id},'maliyet')" title="Maliyet'e Ekle">↓ M</button>
-        <button class="btn btn-ghost" style="padding:3px 7px;font-size:11px;margin-right:2px"
-          onclick="katalogAnalizEkle(${u.id},'gelir')" title="Gelir'e Ekle">↑ G</button>
-        <button class="btn btn-danger" onclick="katalogSil(${u.id})">✕</button>
-      </td>
-    </tr>`;
-  }).join('');
+  if (liste.length === 0) {
+    const isFiltered = !!(document.getElementById('katalogArama')?.value || document.getElementById('katalogFiltreTip')?.value);
+    tbody.innerHTML = `<tr><td colspan="${visOrder.length + 2}" style="text-align:center;padding:52px 20px;color:var(--muted)">
+      ${isFiltered
+        ? `<div style="font-size:28px;margin-bottom:10px">🔍</div>
+           <div style="font-size:14px;font-weight:600;margin-bottom:4px">Sonuç bulunamadı</div>
+           <div style="font-size:12px">Arama kriterini değiştirin</div>`
+        : `<div style="font-size:36px;margin-bottom:12px">📦</div>
+           <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">Katalog boş</div>
+           <div style="font-size:13px;margin-bottom:18px">Ürün veya hizmet eklemek için aşağıdaki butonu kullanın</div>
+           <button class="btn btn-primary" onclick="katalogEkle()">+ İlk Ürünü Ekle</button>`
+      }
+    </td></tr>`;
+  } else {
+    tbody.innerHTML = liste.map(u => {
+      const alisTL  = urunAlisTL(u);
+      const kar     = urunKar(u);
+      const marj    = urunMarj(u);
+      const marjCls = marj < 0 ? 'badge-red' : marj < 10 ? 'badge-yellow' : 'badge-green';
+      const dovizColor = u.alisDoviz === 'USD' ? 'var(--green)' : u.alisDoviz === 'EUR' ? 'var(--cyan)' : 'var(--muted)';
+      const dovizSym   = u.alisDoviz === 'USD' ? '$' : u.alisDoviz === 'EUR' ? '€' : '₺';
+      return `
+      <tr class="kstr${u.secili?' selected':''}" id="krow-${u.id}">
+        <td style="text-align:center;padding:6px 8px">
+          <input type="checkbox" ${u.secili?'checked':''} style="width:14px;height:14px;cursor:pointer"
+            onchange="katalogSecToggle(${u.id},this.checked)">
+        </td>
+        ${visOrder.map(k => _renderKatalogCell(k, u, alisTL, kar, marj, marjCls, dovizColor, dovizSym)).join('')}
+        <td style="white-space:nowrap;padding:4px 6px">
+          <button class="btn btn-ghost" style="padding:3px 7px;font-size:11px;margin-right:2px"
+            onclick="katalogAnalizEkle(${u.id},'maliyet')" title="Maliyet'e Ekle">↓ M</button>
+          <button class="btn btn-ghost" style="padding:3px 7px;font-size:11px;margin-right:2px"
+            onclick="katalogAnalizEkle(${u.id},'gelir')" title="Gelir'e Ekle">↑ G</button>
+          <button class="btn btn-danger" onclick="katalogSil(${u.id})">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
 
   katalogStatsGuncelle();
   katalogButonGuncelle();
@@ -350,7 +365,7 @@ function katalogKolMenuShow(key, btn, ev) {
       </div>
       <div class="ks-menu-sep"></div>
     ` : ''}
-    <div class="ks-menu-item" onclick="katalogKolYeniden('${key}')">
+    <div class="ks-menu-item" onclick="katalogKolYenidenViaMenu('${key}')">
       ✏ &nbsp;Yeniden Adlandır
     </div>
     ${canLeft  ? `<div class="ks-menu-item" onclick="katalogKolTasi('${key}',-1)">← &nbsp;Sola Taşı</div>` : ''}
@@ -413,6 +428,17 @@ function katalogKolTasi(key, dir) {
   renderKatalog();
 }
 
+function katalogKolYenidenViaMenu(key) {
+  const menu = document.getElementById('ks-kol-menu');
+  if (!menu) { return; }
+  menu.remove();
+  _katalogMenuKey = null;
+  // Trigger inline rename on the actual header cell
+  const th = document.querySelector(`th[data-kol="${key}"]`);
+  const labelEl = th?.querySelector('.ksth-label');
+  if (labelEl) { katalogKolYenidenInline(key, labelEl); return; }
+}
+
 function katalogKolYeniden(key) {
   const menu = document.getElementById('ks-kol-menu');
   if (!menu) return;
@@ -444,6 +470,30 @@ function katalogKolRenameConfirm(key) {
   document.getElementById('ks-kol-menu')?.remove();
   _katalogMenuKey = null;
   renderKatalog();
+}
+
+// Çift tıkla başlık inline düzenleme
+function katalogKolYenidenInline(key, labelEl) {
+  if (document.getElementById('ks-kol-inline-' + key)) return;
+  const current = katalogKolNames[key] || key;
+  const inp = document.createElement('input');
+  inp.id = 'ks-kol-inline-' + key;
+  inp.className = 'ks-input';
+  inp.value = current;
+  inp.style.cssText = 'width:100%;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:1px 4px;background:var(--surface2)';
+  labelEl.replaceWith(inp);
+  inp.focus(); inp.select();
+  const confirm = () => {
+    const name = inp.value.trim();
+    if (name) katalogKolNames[key] = name;
+    renderKatalog();
+  };
+  inp.addEventListener('blur', confirm);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); confirm(); }
+    if (e.key === 'Escape') renderKatalog();
+    e.stopPropagation();
+  });
 }
 
 // ── "⚙ Sütunlar" panel (dinamik) ──────────────────────
