@@ -416,12 +416,23 @@ function setupSpreadsheetBehavior() {
     const inGelir   = target.closest && target.closest('#gelirBody');
     const inKatalog = target.closest && target.closest('#katalogBody');
     // Tablo içindeki bir input'ta: sadece çok satırlı TSV'yi yakala
-    if ((inMaliyet || inGelir || inKatalog) && lines.length <= 1) return;
+    if ((inMaliyet || inGelir) && lines.length <= 1) return;
     // Tablo dışı bir INPUT'ta: yakalama
     if (!inMaliyet && !inGelir && !inKatalog && target.tagName === 'INPUT') return;
     e.preventDefault();
     if (inGelir)   _pasteToGelir(text);
-    else if (inKatalog) _pasteToKatalog(text);
+    else if (inKatalog) {
+      // Hücre bazlı range paste: odaklanan hücreden başla
+      const tr = target.closest('tr');
+      if (tr) {
+        const rows = [...document.querySelectorAll('#katalogBody tr')];
+        const rowIdx = rows.indexOf(tr);
+        const inputs = [...tr.querySelectorAll('.ks-input, .ks-select')];
+        const colIdx = inputs.indexOf(target);
+        if (rowIdx >= 0 && colIdx >= 0) { _pasteRangeToKatalog(text, rowIdx, colIdx); return; }
+      }
+      _pasteToKatalog(text); // fallback: satır sonu ekle
+    }
     else           _pasteToMaliyet(text);
   });
 

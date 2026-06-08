@@ -678,6 +678,24 @@
         <option value="urun">Ürün</option>
         <option value="diger">Diğer</option>
       </select>
+      <!-- Sütun menüsü -->
+      <div style="position:relative">
+        <button class="btn btn-ghost btn-sm" id="katalogKolBtn" onclick="katalogKolToggle()">⚙ Sütunlar ▾</button>
+        <div id="katalogKolPanel" style="display:none;position:absolute;right:0;top:36px;
+          background:var(--surface);border:1px solid var(--border);border-radius:8px;
+          padding:10px 14px;z-index:300;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.35)">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Görünür Sütunlar</div>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.birim=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Birim</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.doviz=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Döviz</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.alisFiyat=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Alış Fiyatı</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.satisFiyat=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Satış Fiyatı</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.kdv=this.checked;renderKatalog()" style="accent-color:var(--accent)"> KDV %</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.alisTL=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Alış TL</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.kar=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Kâr</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.marj=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Marj %</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.notlar=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Notlar</label>
+        </div>
+      </div>
       <button class="btn btn-ghost btn-sm" onclick="katalogCSVIndir()">CSV İndir</button>
       <button class="btn btn-ghost btn-sm" onclick="katalogCSVYukle()">CSV Yükle</button>
     </div>
@@ -687,27 +705,8 @@
 
     <!-- Tablo wrapper -->
     <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px">
-      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:1100px" id="katalogTable">
-        <thead>
-          <tr style="background:var(--surface2);position:sticky;top:0;z-index:2">
-            <th style="width:36px;padding:9px 8px;border-bottom:1px solid var(--border)">
-              <input type="checkbox" id="katalogHepsiniSec" onchange="katalogHepsiniSec(this.checked)"
-                style="width:14px;height:14px;cursor:pointer">
-            </th>
-            <th class="ksth" onclick="katalogSirala('ad')" style="min-width:180px">Ürün / Hizmet Adı ↕</th>
-            <th class="ksth" onclick="katalogSirala('tip')" style="width:100px">Tip ↕</th>
-            <th class="ksth" style="width:70px">Birim</th>
-            <th class="ksth" onclick="katalogSirala('alisDoviz')" style="width:70px">Döviz</th>
-            <th class="ksth" onclick="katalogSirala('alisFiyat')" style="width:120px">Alış Fiyatı ↕</th>
-            <th class="ksth" onclick="katalogSirala('satisFiyat')" style="width:120px">Satış Fiyatı (TL) ↕</th>
-            <th class="ksth" style="width:60px">KDV %</th>
-            <th class="ksth" onclick="katalogSirala('alisTL')" style="width:120px">Alış TL ↕</th>
-            <th class="ksth" onclick="katalogSirala('kar')" style="width:100px">Kâr ↕</th>
-            <th class="ksth" onclick="katalogSirala('marj')" style="width:80px">Marj % ↕</th>
-            <th class="ksth" style="width:80px">Notlar</th>
-            <th style="width:110px;padding:9px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px">İşlemler</th>
-          </tr>
-        </thead>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:800px" id="katalogTable">
+        <thead id="katalogHead"></thead>
         <tbody id="katalogBody"></tbody>
       </table>
     </div>
