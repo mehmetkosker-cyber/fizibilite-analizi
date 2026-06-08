@@ -1,10 +1,37 @@
 // ── ÜRÜN KATALOĞU ─────────────────────────────────
 
-// Görünür sütunlar
+// Column config: widths, sort keys, hideable flag
+const _KOLS = {
+  ad:         { w: 'min-width:160px', sortKey: 'ad',         hideable: false },
+  tip:        { w: 'width:100px',     sortKey: 'tip',        hideable: false },
+  birim:      { w: 'width:70px',      sortKey: null,         hideable: true  },
+  doviz:      { w: 'width:70px',      sortKey: 'alisDoviz',  hideable: true  },
+  alisFiyat:  { w: 'width:110px',     sortKey: 'alisFiyat',  hideable: true  },
+  satisFiyat: { w: 'width:110px',     sortKey: 'satisFiyat', hideable: true  },
+  kdv:        { w: 'width:55px',      sortKey: null,         hideable: true  },
+  alisTL:     { w: 'width:110px',     sortKey: 'alisTL',     hideable: true  },
+  kar:        { w: 'width:90px',      sortKey: 'kar',        hideable: true  },
+  marj:       { w: 'width:75px',      sortKey: 'marj',       hideable: true  },
+  notlar:     { w: 'width:80px',      sortKey: null,         hideable: true  },
+};
+
+// Sütun sırası (taşınabilir)
+let katalogKolOrder = ['ad','tip','birim','doviz','alisFiyat','satisFiyat','kdv','alisTL','kar','marj','notlar'];
+
+// Özel sütun isimleri
+let katalogKolNames = {
+  ad:'Ürün / Hizmet Adı', tip:'Tip', birim:'Birim', doviz:'Döviz',
+  alisFiyat:'Alış Fiyatı', satisFiyat:'Satış Fiyatı', kdv:'KDV %',
+  alisTL:'Alış TL', kar:'Kâr', marj:'Marj %', notlar:'Notlar',
+};
+
+// Görünür sütunlar (hideable olanlar için false = gizli)
 let katalogKolVis = {
   birim: true, doviz: true, alisFiyat: true, satisFiyat: true,
   kdv: true, alisTL: true, kar: true, marj: true, notlar: true
 };
+
+let _katalogMenuKey = null;
 
 function katalogEkle(veri) {
   const id = ++urunCounter;
@@ -105,31 +132,79 @@ function renderKatalogSatirHesap(id) {
   }
 }
 
+// ── Sütun hücresi renderlayıcı ────────────────────────
+function _renderKatalogCell(k, u, alisTL, kar, marj, marjCls, dovizColor, dovizSym) {
+  switch (k) {
+    case 'ad': return `<td style="padding:3px 6px"><input class="ks-input" value="${escHtml(u.ad)}" placeholder="Ürün / Hizmet adı"
+      onchange="katalogGuncelle(${u.id},'ad',this.value)"
+      onkeydown="katalogKeyNav(event,${u.id},'ad')"></td>`;
+    case 'tip': return `<td style="padding:3px 6px">
+      <select class="ks-select" onchange="katalogGuncelle(${u.id},'tip',this.value)">
+        ${['malzeme','hizmet','urun','diger'].map(t=>`<option value="${t}" ${u.tip===t?'selected':''}>${TIP_ETIKET[t]}</option>`).join('')}
+      </select></td>`;
+    case 'birim': return `<td style="padding:3px 4px"><input class="ks-input" value="${escHtml(u.birim)}" placeholder="Adet"
+      onchange="katalogGuncelle(${u.id},'birim',this.value)" style="width:60px"></td>`;
+    case 'doviz': return `<td style="padding:3px 4px">
+      <select class="ks-select" onchange="katalogGuncelle(${u.id},'alisDoviz',this.value);renderKatalog()"
+        style="color:${dovizColor};font-weight:600">
+        <option value="TL"  ${u.alisDoviz==='TL' ?'selected':''}>₺ TL</option>
+        <option value="USD" ${u.alisDoviz==='USD'?'selected':''}>$ USD</option>
+        <option value="EUR" ${u.alisDoviz==='EUR'?'selected':''}>€ EUR</option>
+      </select></td>`;
+    case 'alisFiyat': return `<td style="padding:3px 4px">
+      <div style="display:flex;align-items:center;gap:3px">
+        <span style="color:${dovizColor};font-size:12px">${dovizSym}</span>
+        <input class="ks-input" type="number" value="${u.alisFiyat}" min="0" step="any" placeholder="0.00"
+          oninput="katalogGuncelle(${u.id},'alisFiyat',this.value)"
+          onkeydown="katalogKeyNav(event,${u.id},'alisFiyat')" style="width:80px">
+      </div></td>`;
+    case 'satisFiyat': return `<td style="padding:3px 4px">
+      <div style="display:flex;align-items:center;gap:3px">
+        <span style="color:var(--muted);font-size:12px">₺</span>
+        <input class="ks-input" type="number" value="${u.satisFiyat}" min="0" step="any" placeholder="0.00"
+          oninput="katalogGuncelle(${u.id},'satisFiyat',this.value)"
+          onkeydown="katalogKeyNav(event,${u.id},'satisFiyat')" style="width:80px">
+      </div></td>`;
+    case 'kdv': return `<td style="padding:3px 4px"><input class="ks-input" type="number" value="${u.kdv}" min="0" max="100"
+      oninput="katalogGuncelle(${u.id},'kdv',this.value)" style="width:48px"></td>`;
+    case 'alisTL': return `<td class="font-mono" id="kalisTL-${u.id}" style="color:var(--muted);text-align:right;padding:6px 8px">₺${fmt(alisTL)}</td>`;
+    case 'kar': return `<td class="font-mono" id="kkar-${u.id}" style="color:${kar>=0?'var(--green)':'var(--red)'};font-weight:600;text-align:right;padding:6px 8px">₺${fmt(kar)}</td>`;
+    case 'marj': return `<td id="kmarj-${u.id}" style="text-align:center;padding:6px 4px"><span class="marj-chip ${marjCls}">${marj.toFixed(1)}%</span></td>`;
+    case 'notlar': return `<td style="padding:3px 4px"><input class="ks-input" value="${escHtml(u.notlar||'')}" placeholder="Not..."
+      onchange="katalogGuncelle(${u.id},'notlar',this.value)"></td>`;
+    default: return '';
+  }
+}
+
 function renderKatalog() {
   const thead = document.getElementById('katalogHead');
   const tbody = document.getElementById('katalogBody');
   if (!tbody) return;
 
-  const kol = katalogKolVis;
+  const visOrder = katalogKolOrder.filter(k => katalogKolVis[k] !== false);
 
-  // Dinamik thead
+  // Dinamik thead — her başlık tıklanınca Notion dropdown açılır
   if (thead) {
     thead.innerHTML = `<tr style="background:var(--surface2);position:sticky;top:0;z-index:2">
       <th style="width:36px;padding:9px 8px;border-bottom:1px solid var(--border)">
         <input type="checkbox" id="katalogHepsiniSec" onchange="katalogHepsiniSec(this.checked)"
           style="width:14px;height:14px;cursor:pointer">
       </th>
-      <th class="ksth" onclick="katalogSirala('ad')" style="min-width:160px">Ürün / Hizmet Adı ↕</th>
-      <th class="ksth" onclick="katalogSirala('tip')" style="width:100px">Tip ↕</th>
-      ${kol.birim ? '<th class="ksth" style="width:70px">Birim</th>' : ''}
-      ${kol.doviz ? '<th class="ksth" onclick="katalogSirala(\'alisDoviz\')" style="width:70px">Döviz</th>' : ''}
-      ${kol.alisFiyat ? '<th class="ksth" onclick="katalogSirala(\'alisFiyat\')" style="width:110px">Alış Fiyatı ↕</th>' : ''}
-      ${kol.satisFiyat ? '<th class="ksth" onclick="katalogSirala(\'satisFiyat\')" style="width:110px">Satış Fiyatı ↕</th>' : ''}
-      ${kol.kdv ? '<th class="ksth" style="width:55px">KDV %</th>' : ''}
-      ${kol.alisTL ? '<th class="ksth" onclick="katalogSirala(\'alisTL\')" style="width:110px">Alış TL ↕</th>' : ''}
-      ${kol.kar ? '<th class="ksth" onclick="katalogSirala(\'kar\')" style="width:90px">Kâr ↕</th>' : ''}
-      ${kol.marj ? '<th class="ksth" onclick="katalogSirala(\'marj\')" style="width:75px">Marj % ↕</th>' : ''}
-      ${kol.notlar ? '<th class="ksth" style="width:80px">Notlar</th>' : ''}
+      ${visOrder.map(k => {
+        const cfg = _KOLS[k];
+        const label = katalogKolNames[k] || k;
+        const isSorted = katalogSiralaKey === cfg.sortKey;
+        const sortInd = cfg.sortKey ? (isSorted ? (katalogSiralaDuz ? ' ↑' : ' ↓') : '') : '';
+        return `<th class="ksth ksth-notion" style="${cfg.w}">
+          <div class="ksth-inner">
+            ${cfg.sortKey
+              ? `<span class="ksth-label" onclick="katalogSirala('${cfg.sortKey}')" title="${escHtml(label)} — sırala">${escHtml(label)}${sortInd}</span>`
+              : `<span class="ksth-label" style="cursor:default">${escHtml(label)}</span>`
+            }
+            <button class="ksth-menu-btn" onclick="katalogKolMenuShow('${k}',this,event)" title="Sütun ayarları">⋯</button>
+          </div>
+        </th>`;
+      }).join('')}
       <th style="width:110px;padding:9px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px">İşlemler</th>
     </tr>`;
   }
@@ -147,9 +222,9 @@ function renderKatalog() {
   });
 
   tbody.innerHTML = liste.map(u => {
-    const alisTL = urunAlisTL(u);
-    const kar = urunKar(u);
-    const marj = urunMarj(u);
+    const alisTL  = urunAlisTL(u);
+    const kar     = urunKar(u);
+    const marj    = urunMarj(u);
     const marjCls = marj < 0 ? 'badge-red' : marj < 10 ? 'badge-yellow' : 'badge-green';
     const dovizColor = u.alisDoviz === 'USD' ? 'var(--green)' : u.alisDoviz === 'EUR' ? 'var(--cyan)' : 'var(--muted)';
     const dovizSym   = u.alisDoviz === 'USD' ? '$' : u.alisDoviz === 'EUR' ? '€' : '₺';
@@ -159,47 +234,7 @@ function renderKatalog() {
         <input type="checkbox" ${u.secili?'checked':''} style="width:14px;height:14px;cursor:pointer"
           onchange="katalogSecToggle(${u.id},this.checked)">
       </td>
-      <td style="padding:3px 6px"><input class="ks-input" value="${escHtml(u.ad)}" placeholder="Ürün / Hizmet adı"
-        onchange="katalogGuncelle(${u.id},'ad',this.value)"
-        onkeydown="katalogKeyNav(event,${u.id},'ad')"></td>
-      <td style="padding:3px 6px">
-        <select class="ks-select" onchange="katalogGuncelle(${u.id},'tip',this.value)">
-          ${['malzeme','hizmet','urun','diger'].map(t=>`<option value="${t}" ${u.tip===t?'selected':''}>${TIP_ETIKET[t]}</option>`).join('')}
-        </select>
-      </td>
-      ${kol.birim ? `<td style="padding:3px 4px"><input class="ks-input" value="${escHtml(u.birim)}" placeholder="Adet"
-        onchange="katalogGuncelle(${u.id},'birim',this.value)" style="width:60px"></td>` : ''}
-      ${kol.doviz ? `<td style="padding:3px 4px">
-        <select class="ks-select" onchange="katalogGuncelle(${u.id},'alisDoviz',this.value);renderKatalog()"
-          style="color:${dovizColor};font-weight:600">
-          <option value="TL"  ${u.alisDoviz==='TL' ?'selected':''}>₺ TL</option>
-          <option value="USD" ${u.alisDoviz==='USD'?'selected':''}>$ USD</option>
-          <option value="EUR" ${u.alisDoviz==='EUR'?'selected':''}>€ EUR</option>
-        </select>
-      </td>` : ''}
-      ${kol.alisFiyat ? `<td style="padding:3px 4px">
-        <div style="display:flex;align-items:center;gap:3px">
-          <span style="color:${dovizColor};font-size:12px">${dovizSym}</span>
-          <input class="ks-input" type="number" value="${u.alisFiyat}" min="0" step="any" placeholder="0.00"
-            oninput="katalogGuncelle(${u.id},'alisFiyat',this.value)"
-            onkeydown="katalogKeyNav(event,${u.id},'alisFiyat')" style="width:80px">
-        </div>
-      </td>` : ''}
-      ${kol.satisFiyat ? `<td style="padding:3px 4px">
-        <div style="display:flex;align-items:center;gap:3px">
-          <span style="color:var(--muted);font-size:12px">₺</span>
-          <input class="ks-input" type="number" value="${u.satisFiyat}" min="0" step="any" placeholder="0.00"
-            oninput="katalogGuncelle(${u.id},'satisFiyat',this.value)"
-            onkeydown="katalogKeyNav(event,${u.id},'satisFiyat')" style="width:80px">
-        </div>
-      </td>` : ''}
-      ${kol.kdv ? `<td style="padding:3px 4px"><input class="ks-input" type="number" value="${u.kdv}" min="0" max="100"
-        oninput="katalogGuncelle(${u.id},'kdv',this.value)" style="width:48px"></td>` : ''}
-      ${kol.alisTL ? `<td class="font-mono" id="kalisTL-${u.id}" style="color:var(--muted);text-align:right;padding:6px 8px">₺${fmt(alisTL)}</td>` : ''}
-      ${kol.kar ? `<td class="font-mono" id="kkar-${u.id}" style="color:${kar>=0?'var(--green)':'var(--red)'};font-weight:600;text-align:right;padding:6px 8px">₺${fmt(kar)}</td>` : ''}
-      ${kol.marj ? `<td id="kmarj-${u.id}" style="text-align:center;padding:6px 4px"><span class="marj-chip ${marjCls}">${marj.toFixed(1)}%</span></td>` : ''}
-      ${kol.notlar ? `<td style="padding:3px 4px"><input class="ks-input" value="${escHtml(u.notlar||'')}" placeholder="Not..."
-        onchange="katalogGuncelle(${u.id},'notlar',this.value)"></td>` : ''}
+      ${visOrder.map(k => _renderKatalogCell(k, u, alisTL, kar, marj, marjCls, dovizColor, dovizSym)).join('')}
       <td style="white-space:nowrap;padding:4px 6px">
         <button class="btn btn-ghost" style="padding:3px 7px;font-size:11px;margin-right:2px"
           onclick="katalogAnalizEkle(${u.id},'maliyet')" title="Maliyet'e Ekle">↓ M</button>
@@ -276,35 +311,179 @@ function katalogKeyNav(e, id, field) {
   }
 }
 
-// ── Sütun menüsü ─────────────────────────────────────
+// ── Notion sütun başlık dropdown ──────────────────────
+
+function katalogKolMenuShow(key, btn, ev) {
+  ev.stopPropagation();
+  const existing = document.getElementById('ks-kol-menu');
+  if (existing) { existing.remove(); if (_katalogMenuKey === key) { _katalogMenuKey = null; return; } }
+  _katalogMenuKey = key;
+
+  const cfg = _KOLS[key];
+  const label = katalogKolNames[key] || key;
+  const rect = btn.getBoundingClientRect();
+
+  // Determine move eligibility based on visible order
+  const visOrder = katalogKolOrder.filter(k => katalogKolVis[k] !== false);
+  const visIdx = visOrder.indexOf(key);
+  const canLeft  = visIdx > 0;
+  const canRight = visIdx < visOrder.length - 1;
+
+  const menu = document.createElement('div');
+  menu.id = 'ks-kol-menu';
+  menu.style.cssText = `position:fixed;top:${rect.bottom + 4}px;left:${rect.left - 130}px;
+    min-width:190px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:10px;padding:4px;z-index:9999;
+    box-shadow:0 8px 28px rgba(0,0,0,.5);font-size:13px`;
+
+  menu.innerHTML = `
+    <div style="padding:6px 12px 5px;font-size:11px;color:var(--muted);font-weight:700;
+      text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);margin-bottom:4px">
+      ${escHtml(label)}
+    </div>
+    ${cfg.sortKey ? `
+      <div class="ks-menu-item" onclick="katalogSirala('${cfg.sortKey}');document.getElementById('ks-kol-menu')?.remove()">
+        ↑ &nbsp;Artan Sırala
+      </div>
+      <div class="ks-menu-item" onclick="katalogSiralaAzalan('${cfg.sortKey}')">
+        ↓ &nbsp;Azalan Sırala
+      </div>
+      <div class="ks-menu-sep"></div>
+    ` : ''}
+    <div class="ks-menu-item" onclick="katalogKolYeniden('${key}')">
+      ✏ &nbsp;Yeniden Adlandır
+    </div>
+    ${canLeft  ? `<div class="ks-menu-item" onclick="katalogKolTasi('${key}',-1)">← &nbsp;Sola Taşı</div>` : ''}
+    ${canRight ? `<div class="ks-menu-item" onclick="katalogKolTasi('${key}',1)">→ &nbsp;Sağa Taşı</div>` : ''}
+    <div class="ks-menu-sep"></div>
+    ${cfg.hideable
+      ? `<div class="ks-menu-item ks-menu-danger" onclick="katalogKolGizle('${key}')">
+           <span style="opacity:.7">👁</span> &nbsp;Gizle
+         </div>`
+      : `<div class="ks-menu-item" style="opacity:.35;cursor:default">
+           <span style="opacity:.7">🔒</span> &nbsp;Gizlenemez
+         </div>`
+    }
+  `;
+
+  document.body.appendChild(menu);
+
+  // Keep within viewport horizontally
+  const mr = menu.getBoundingClientRect();
+  if (mr.right > window.innerWidth - 8) menu.style.left = (window.innerWidth - mr.width - 8) + 'px';
+  if (mr.left < 8) menu.style.left = '8px';
+
+  setTimeout(() => {
+    const close = e => {
+      if (!menu.contains(e.target) && e.target !== btn) {
+        menu.remove();
+        _katalogMenuKey = null;
+        document.removeEventListener('click', close);
+      }
+    };
+    document.addEventListener('click', close);
+  }, 10);
+}
+
+function katalogSiralaAzalan(sortKey) {
+  katalogSiralaKey = sortKey;
+  katalogSiralaDuz = false;
+  document.getElementById('ks-kol-menu')?.remove();
+  _katalogMenuKey = null;
+  renderKatalog();
+}
+
+function katalogKolGizle(key) {
+  katalogKolVis[key] = false;
+  document.getElementById('ks-kol-menu')?.remove();
+  _katalogMenuKey = null;
+  renderKatalog();
+}
+
+function katalogKolTasi(key, dir) {
+  const visOrder = katalogKolOrder.filter(k => katalogKolVis[k] !== false);
+  const visIdx = visOrder.indexOf(key);
+  const targetKey = visOrder[visIdx + dir];
+  if (!targetKey) return;
+  const i1 = katalogKolOrder.indexOf(key);
+  const i2 = katalogKolOrder.indexOf(targetKey);
+  [katalogKolOrder[i1], katalogKolOrder[i2]] = [katalogKolOrder[i2], katalogKolOrder[i1]];
+  document.getElementById('ks-kol-menu')?.remove();
+  _katalogMenuKey = null;
+  renderKatalog();
+}
+
+function katalogKolYeniden(key) {
+  const menu = document.getElementById('ks-kol-menu');
+  if (!menu) return;
+  const current = katalogKolNames[key] || key;
+  menu.innerHTML = `
+    <div style="padding:10px 12px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Sütun Adını Değiştir</div>
+      <input id="ksKolRenameInp" class="ks-input" value="${escHtml(current)}" style="width:100%;margin-bottom:8px"
+        onkeydown="if(event.key==='Enter')katalogKolRenameConfirm('${key}');else if(event.key==='Escape')document.getElementById('ks-kol-menu')?.remove()">
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-primary" style="flex:1;padding:5px 8px;font-size:12px"
+          onclick="katalogKolRenameConfirm('${key}')">Kaydet</button>
+        <button class="btn btn-ghost" style="padding:5px 8px;font-size:12px"
+          onclick="document.getElementById('ks-kol-menu')?.remove()">İptal</button>
+      </div>
+    </div>
+  `;
+  requestAnimationFrame(() => {
+    const inp = document.getElementById('ksKolRenameInp');
+    if (inp) { inp.focus(); inp.select(); }
+  });
+}
+
+function katalogKolRenameConfirm(key) {
+  const inp = document.getElementById('ksKolRenameInp');
+  if (!inp) return;
+  const name = inp.value.trim();
+  if (name) katalogKolNames[key] = name;
+  document.getElementById('ks-kol-menu')?.remove();
+  _katalogMenuKey = null;
+  renderKatalog();
+}
+
+// ── "⚙ Sütunlar" panel (dinamik) ──────────────────────
 function katalogKolToggle() {
   const panel = document.getElementById('katalogKolPanel');
   if (!panel) return;
   const open = panel.style.display !== 'none';
-  panel.style.display = open ? 'none' : 'block';
-  if (!open) {
-    const close = ev => {
-      const btn = document.getElementById('katalogKolBtn');
-      if (!panel.contains(ev.target) && ev.target !== btn && !btn?.contains(ev.target)) {
-        panel.style.display = 'none';
-        document.removeEventListener('click', close);
-      }
-    };
-    setTimeout(() => document.addEventListener('click', close), 50);
-  }
+  if (open) { panel.style.display = 'none'; return; }
+
+  // Render dinamik içerik
+  const hideableKeys = katalogKolOrder.filter(k => _KOLS[k]?.hideable);
+  panel.innerHTML = `
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.5px;margin-bottom:8px">Görünür Sütunlar</div>
+    ${hideableKeys.map(k => `
+      <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+        <input type="checkbox" ${katalogKolVis[k] !== false ? 'checked' : ''}
+          onchange="katalogKolVis['${k}']=this.checked;renderKatalog()"
+          style="accent-color:var(--accent)">
+        ${escHtml(katalogKolNames[k] || k)}
+      </label>`).join('')}
+  `;
+  panel.style.display = 'block';
+
+  const close = ev => {
+    const btn = document.getElementById('katalogKolBtn');
+    if (!panel.contains(ev.target) && ev.target !== btn && !btn?.contains(ev.target)) {
+      panel.style.display = 'none';
+      document.removeEventListener('click', close);
+    }
+  };
+  setTimeout(() => document.addEventListener('click', close), 50);
 }
 
 // ── E-Tablo: Hücre bazlı range paste ─────────────────
 function _getKatalogEditableFieldOrder() {
-  const kol = katalogKolVis;
-  const order = ['ad', 'tip'];
-  if (kol.birim)      order.push('birim');
-  if (kol.doviz)      order.push('alisDoviz');
-  if (kol.alisFiyat)  order.push('alisFiyat');
-  if (kol.satisFiyat) order.push('satisFiyat');
-  if (kol.kdv)        order.push('kdv');
-  if (kol.notlar)     order.push('notlar');
-  return order;
+  const fieldMap = { ad:'ad', tip:'tip', birim:'birim', doviz:'alisDoviz', alisFiyat:'alisFiyat', satisFiyat:'satisFiyat', kdv:'kdv', notlar:'notlar' };
+  return katalogKolOrder
+    .filter(k => katalogKolVis[k] !== false && fieldMap[k])
+    .map(k => fieldMap[k]);
 }
 
 function _pasteRangeToKatalog(text, rowIdx, colIdx) {
@@ -314,21 +493,16 @@ function _pasteRangeToKatalog(text, rowIdx, colIdx) {
   if (!grid.length) return;
 
   const fieldOrder = _getKatalogEditableFieldOrder();
-
-  // Get current DOM row order (may differ from urunler order due to sorting)
   const tbody = document.getElementById('katalogBody');
   const existingRows = [...(tbody?.querySelectorAll('tr') || [])];
 
-  // Add missing rows if paste extends beyond current rows
   const needed = rowIdx + grid.length - existingRows.length;
   for (let i = 0; i < needed; i++) {
     urunler.push({ id: ++urunCounter, secili: false, ad: '', tip: 'urun', birim: 'Adet', alisDoviz: 'TL', alisFiyat: 0, satisFiyat: 0, kdv: 20, notlar: '' });
   }
   if (needed > 0) renderKatalog();
 
-  // Now re-query rows (after potential re-render)
   const rows = [...(document.getElementById('katalogBody')?.querySelectorAll('tr') || [])];
-
   const tipMap = { malzeme:'malzeme', material:'malzeme', hizmet:'hizmet', service:'hizmet', ürün:'urun', urun:'urun', product:'urun', diğer:'diger', diger:'diger', other:'diger' };
 
   let filled = 0;
@@ -342,7 +516,6 @@ function _pasteRangeToKatalog(text, rowIdx, colIdx) {
     rowData.forEach((val, ci) => {
       const field = fieldOrder[colIdx + ci];
       if (!field || val === '') return;
-
       if (['alisFiyat', 'satisFiyat', 'kdv'].includes(field)) {
         u[field] = _parseNum(val) || 0;
       } else if (field === 'tip') {
