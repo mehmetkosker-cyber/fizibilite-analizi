@@ -155,7 +155,7 @@
 
   /* Katalog spreadsheet */
   .ksth {
-    padding: 9px 8px;
+    padding: 0;
     border-bottom: 1px solid var(--border);
     color: var(--muted);
     font-size: 11px;
@@ -163,10 +163,57 @@
     text-transform: uppercase;
     letter-spacing: .4px;
     text-align: left;
-    cursor: pointer;
     user-select: none;
     white-space: nowrap;
   }
+  .ksth-notion { position: relative; }
+  .ksth-inner {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 9px 8px;
+  }
+  .ksth-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .ksth-label:hover { color: var(--text); }
+  .ksth-menu-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1;
+    transition: opacity .15s, background .15s, color .15s;
+    flex-shrink: 0;
+  }
+  .ksth-notion:hover .ksth-menu-btn,
+  .ksth-menu-btn:focus { opacity: 1; }
+  .ksth-menu-btn:hover { background: var(--border); color: var(--text); }
+  /* Column dropdown menu */
+  .ks-menu-item {
+    display: block;
+    width: 100%;
+    padding: 7px 12px;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    border-radius: 6px;
+    transition: background .12s;
+    font-size: 13px;
+  }
+  .ks-menu-item:hover { background: rgba(79,125,255,.15); }
+  .ks-menu-danger:hover { background: rgba(239,68,68,.15); color: var(--red); }
+  .ks-menu-sep { height: 1px; background: var(--border); margin: 4px 0; }
   .ksth:hover { color: var(--text); }
   .kstr { transition: background .1s; }
   .kstr:hover { background: rgba(79,125,255,.05); }
@@ -683,17 +730,7 @@
         <button class="btn btn-ghost btn-sm" id="katalogKolBtn" onclick="katalogKolToggle()">⚙ Sütunlar ▾</button>
         <div id="katalogKolPanel" style="display:none;position:absolute;right:0;top:36px;
           background:var(--surface);border:1px solid var(--border);border-radius:8px;
-          padding:10px 14px;z-index:300;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.35)">
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Görünür Sütunlar</div>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.birim=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Birim</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.doviz=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Döviz</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.alisFiyat=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Alış Fiyatı</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.satisFiyat=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Satış Fiyatı</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.kdv=this.checked;renderKatalog()" style="accent-color:var(--accent)"> KDV %</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.alisTL=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Alış TL</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.kar=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Kâr</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.marj=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Marj %</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" checked onchange="katalogKolVis.notlar=this.checked;renderKatalog()" style="accent-color:var(--accent)"> Notlar</label>
+          padding:10px 14px;z-index:300;min-width:170px;box-shadow:0 8px 24px rgba(0,0,0,.35)">
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="katalogCSVIndir()">CSV İndir</button>
