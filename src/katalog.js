@@ -365,6 +365,10 @@ function _pasteRangeToKatalog(text, rowIdx, colIdx) {
   else showToast('Yapıştırılacak uygun alan bulunamadı.', 'error');
 }
 
+function _pasteToKatalog(text) {
+  _pasteRangeToKatalog(text, urunler.length, 0);
+}
+
 // ── E-Tablo: Toplu satır ekleme ───────────────────────
 function addMultipleKatalogRows() {
   const n = Math.max(1, Math.min(100, parseInt(document.getElementById('katalogSatirSayisi')?.value) || 5));
