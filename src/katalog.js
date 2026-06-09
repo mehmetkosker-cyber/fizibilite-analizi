@@ -279,8 +279,8 @@ function katalogStatsGuncelle() {
   const stats = [
     { label: 'Toplam Ürün', val: urunler.length, color: 'var(--accent)' },
     { label: 'Ort. Kâr Marjı', val: '%' + ortalamMarj.toFixed(1), color: ortalamMarj >= 20 ? 'var(--green)' : ortalamMarj >= 10 ? 'var(--yellow)' : 'var(--red)' },
-    { label: 'En Yüksek Marj', val: enYuksekMarj.ad ? enYuksekMarj.ad.substring(0,14) + ' %' + urunMarj(enYuksekMarj).toFixed(1) : '—', color: 'var(--green)' },
-    { label: 'En Düşük Marj',  val: enDusukMarj.ad  ? enDusukMarj.ad.substring(0,14)  + ' %' + urunMarj(enDusukMarj).toFixed(1)  : '—', color: 'var(--yellow)' },
+    { label: 'En Yüksek Marj', val: enYuksekMarj.ad ? escHtml(enYuksekMarj.ad.substring(0,14)) + ' %' + urunMarj(enYuksekMarj).toFixed(1) : '—', color: 'var(--green)' },
+    { label: 'En Düşük Marj',  val: enDusukMarj.ad  ? escHtml(enDusukMarj.ad.substring(0,14))  + ' %' + urunMarj(enDusukMarj).toFixed(1)  : '—', color: 'var(--yellow)' },
     { label: 'Zararlı Kalem',  val: zararliSayi + ' kalem', color: zararliSayi > 0 ? 'var(--red)' : 'var(--green)' },
   ];
   el.innerHTML = stats.map(s => `
@@ -357,7 +357,7 @@ function katalogKolMenuShow(key, btn, ev) {
       ${escHtml(label)}
     </div>
     ${cfg.sortKey ? `
-      <div class="ks-menu-item" onclick="katalogSirala('${cfg.sortKey}');document.getElementById('ks-kol-menu')?.remove()">
+      <div class="ks-menu-item" onclick="katalogSiralaArtan('${cfg.sortKey}')">
         ↑ &nbsp;Artan Sırala
       </div>
       <div class="ks-menu-item" onclick="katalogSiralaAzalan('${cfg.sortKey}')">
@@ -400,6 +400,14 @@ function katalogKolMenuShow(key, btn, ev) {
   }, 10);
 }
 
+function katalogSiralaArtan(sortKey) {
+  katalogSiralaKey = sortKey;
+  katalogSiralaDuz = true;
+  document.getElementById('ks-kol-menu')?.remove();
+  _katalogMenuKey = null;
+  renderKatalog();
+}
+
 function katalogSiralaAzalan(sortKey) {
   katalogSiralaKey = sortKey;
   katalogSiralaDuz = false;
@@ -413,6 +421,7 @@ function katalogKolGizle(key) {
   document.getElementById('ks-kol-menu')?.remove();
   _katalogMenuKey = null;
   renderKatalog();
+  saveLocal();
 }
 
 function katalogKolTasi(key, dir) {
@@ -426,6 +435,7 @@ function katalogKolTasi(key, dir) {
   document.getElementById('ks-kol-menu')?.remove();
   _katalogMenuKey = null;
   renderKatalog();
+  saveLocal();
 }
 
 function katalogKolYenidenViaMenu(key) {
@@ -439,28 +449,6 @@ function katalogKolYenidenViaMenu(key) {
   if (labelEl) { katalogKolYenidenInline(key, labelEl); return; }
 }
 
-function katalogKolYeniden(key) {
-  const menu = document.getElementById('ks-kol-menu');
-  if (!menu) return;
-  const current = katalogKolNames[key] || key;
-  menu.innerHTML = `
-    <div style="padding:10px 12px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Sütun Adını Değiştir</div>
-      <input id="ksKolRenameInp" class="ks-input" value="${escHtml(current)}" style="width:100%;margin-bottom:8px"
-        onkeydown="if(event.key==='Enter')katalogKolRenameConfirm('${key}');else if(event.key==='Escape')document.getElementById('ks-kol-menu')?.remove()">
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-primary" style="flex:1;padding:5px 8px;font-size:12px"
-          onclick="katalogKolRenameConfirm('${key}')">Kaydet</button>
-        <button class="btn btn-ghost" style="padding:5px 8px;font-size:12px"
-          onclick="document.getElementById('ks-kol-menu')?.remove()">İptal</button>
-      </div>
-    </div>
-  `;
-  requestAnimationFrame(() => {
-    const inp = document.getElementById('ksKolRenameInp');
-    if (inp) { inp.focus(); inp.select(); }
-  });
-}
 
 function katalogKolRenameConfirm(key) {
   const inp = document.getElementById('ksKolRenameInp');
@@ -470,6 +458,7 @@ function katalogKolRenameConfirm(key) {
   document.getElementById('ks-kol-menu')?.remove();
   _katalogMenuKey = null;
   renderKatalog();
+  saveLocal();
 }
 
 // Çift tıkla başlık inline düzenleme
@@ -511,7 +500,7 @@ function katalogKolToggle() {
     ${hideableKeys.map(k => `
       <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
         <input type="checkbox" ${katalogKolVis[k] !== false ? 'checked' : ''}
-          onchange="katalogKolVis['${k}']=this.checked;renderKatalog()"
+          onchange="katalogKolVis['${k}']=this.checked;renderKatalog();saveLocal()"
           style="accent-color:var(--accent)">
         ${escHtml(katalogKolNames[k] || k)}
       </label>`).join('')}
@@ -612,11 +601,15 @@ function addMultipleKatalogRows() {
   });
 }
 
+function _csvEsc(v) { const s = String(v ?? ''); return '"' + s.replace(/"/g, '""') + '"'; }
+
 function katalogCSVIndir() {
   let csv = '﻿sep=;\n';
   csv += 'Ad;Tip;Birim;Alış Dövizi;Alış Fiyatı;Satış Fiyatı (TL);KDV %;Alış TL;Kâr;Marj %;Notlar\n';
   urunler.forEach(u => {
-    csv += `${u.ad};${u.tip};${u.birim};${u.alisDoviz};${u.alisFiyat};${u.satisFiyat};${u.kdv};${fmt(urunAlisTL(u))};${fmt(urunKar(u))};${urunMarj(u).toFixed(2)};${u.notlar||''}\n`;
+    csv += [u.ad, u.tip, u.birim, u.alisDoviz, u.alisFiyat, u.satisFiyat, u.kdv,
+            fmt(urunAlisTL(u)), fmt(urunKar(u)), urunMarj(u).toFixed(2), u.notlar||'']
+           .map(_csvEsc).join(';') + '\n';
   });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
