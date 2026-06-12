@@ -581,6 +581,28 @@ function _pasteToKatalog(text) {
   _pasteRangeToKatalog(text, urunler.length, 0);
 }
 
+// Tek sütun yapıştırma: her satır → yeni ürün adı
+function _pasteSingleColToKatalog(text) {
+  const names = text.trim().split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (!names.length) return;
+  names.forEach(name => {
+    urunler.push({ id: ++urunCounter, secili: false, ad: name, tip: 'urun', birim: 'Adet', alisDoviz: 'TL', alisFiyat: 0, satisFiyat: 0, kdv: 20, notlar: '' });
+  });
+  renderKatalog();
+  saveLocal();
+  showToast(`✓ ${names.length} ürün adı yapıştırıldı`, 'success');
+}
+
+function katalogTemizle() {
+  if (urunler.length === 0) return;
+  if (!confirm(`Katalogdaki ${urunler.length} ürün silinecek. Emin misiniz?`)) return;
+  urunler = [];
+  urunCounter = 0;
+  renderKatalog();
+  saveLocal();
+  showToast('Katalog temizlendi.', 'success');
+}
+
 // ── E-Tablo: Toplu satır ekleme ───────────────────────
 function addMultipleKatalogRows() {
   const n = Math.max(1, Math.min(100, parseInt(document.getElementById('katalogSatirSayisi')?.value) || 5));
