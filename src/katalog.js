@@ -532,10 +532,8 @@ function _pasteRangeToKatalog(text, rowIdx, colIdx) {
   if (!grid.length) return;
 
   const fieldOrder = _getKatalogEditableFieldOrder();
-  const tbody = document.getElementById('katalogBody');
-  const existingRows = [...(tbody?.querySelectorAll('tr') || [])];
 
-  const needed = rowIdx + grid.length - existingRows.length;
+  const needed = rowIdx + grid.length - urunler.length;
   for (let i = 0; i < needed; i++) {
     urunler.push({ id: ++urunCounter, secili: false, ad: '', tip: 'urun', birim: 'Adet', alisDoviz: 'TL', alisFiyat: 0, satisFiyat: 0, kdv: 20, notlar: '' });
   }
