@@ -715,6 +715,7 @@
       <button class="btn btn-primary btn-sm" onclick="katalogEkle()">+ Yeni Satır</button>
       <button class="btn btn-ghost btn-sm" onclick="katalogCokluEkle('maliyet')" id="btnCokluMaliyet" disabled>↓ Seçilenleri Maliyet'e Ekle</button>
       <button class="btn btn-ghost btn-sm" onclick="katalogCokluEkle('gelir')" id="btnCokluGelir" disabled>↑ Seçilenleri Gelir'e Ekle</button>
+      <button class="btn btn-ghost btn-sm" onclick="katalogTemizle()" title="Tüm satırları sil" style="color:var(--red)">🗑 Temizle</button>
       <div style="flex:1"></div>
       <input type="text" id="katalogArama" placeholder="🔍 Ara..." oninput="renderKatalog()"
         style="width:200px">

@@ -405,35 +405,53 @@ function _pasteToGelir(text) {
 
 // ── E-Tablo Davranışı Kurulumu ───────────────────────
 function setupSpreadsheetBehavior() {
-  // ① Ctrl+V: TSV verisini doğrudan tabloya yapıştır (modal açmadan)
+  // ① Ctrl+V: veriyi doğrudan tabloya yapıştır
   document.addEventListener('paste', function(e) {
     const target = e.target;
     if (target.tagName === 'TEXTAREA') return;
     const text = (e.clipboardData || window.clipboardData).getData('text');
-    if (!text || !text.includes('\t')) return;
-    const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+    if (!text || !text.trim()) return;
+
+    const hasTab  = text.includes('\t');
+    const lines   = text.trim().split(/\r?\n/).filter(l => l.trim());
     const inMaliyet = target.closest && target.closest('#maliyetBody');
     const inGelir   = target.closest && target.closest('#gelirBody');
     const inKatalog = target.closest && target.closest('#katalogBody');
-    // Tablo içindeki bir input'ta: sadece çok satırlı TSV'yi yakala
-    if ((inMaliyet || inGelir) && lines.length <= 1) return;
-    // Tablo dışı bir INPUT'ta: yakalama
-    if (!inMaliyet && !inGelir && !inKatalog && target.tagName === 'INPUT') return;
-    e.preventDefault();
-    if (inGelir)   _pasteToGelir(text);
-    else if (inKatalog) {
-      // Hücre bazlı range paste: odaklanan hücreden başla
-      const tr = target.closest('tr');
-      if (tr) {
-        const rows = [...document.querySelectorAll('#katalogBody tr')];
-        const rowIdx = rows.indexOf(tr);
-        const inputs = [...tr.querySelectorAll('.ks-input, .ks-select')];
-        const colIdx = inputs.indexOf(target);
-        if (rowIdx >= 0 && colIdx >= 0) { _pasteRangeToKatalog(text, rowIdx, colIdx); return; }
-      }
-      _pasteToKatalog(text); // fallback: satır sonu ekle
+    const katalogAktif = document.getElementById('tab-katalog')?.classList.contains('active');
+
+    // Maliyet / Gelir: yalnızca çok satırlı TSV
+    if (inMaliyet || inGelir) {
+      if (!hasTab || lines.length <= 1) return;
+      e.preventDefault();
+      if (inGelir) _pasteToGelir(text); else _pasteToMaliyet(text);
+      return;
     }
-    else           _pasteToMaliyet(text);
+
+    // Katalog: TSV veya tek sütun liste
+    if (inKatalog || katalogAktif) {
+      if (lines.length <= 1 && !hasTab) return; // tek hücre — tarayıcıya bırak
+      e.preventDefault();
+      if (inKatalog && hasTab) {
+        // Hücre bazlı range paste: odaklanan hücreden başla
+        const tr = target.closest('tr');
+        if (tr) {
+          const rows = [...document.querySelectorAll('#katalogBody tr')];
+          const rowIdx = rows.indexOf(tr);
+          const inputs = [...tr.querySelectorAll('.ks-input, .ks-select')];
+          const colIdx = inputs.indexOf(target);
+          if (rowIdx >= 0 && colIdx >= 0) { _pasteRangeToKatalog(text, rowIdx, colIdx); return; }
+        }
+      }
+      if (hasTab) _pasteToKatalog(text);
+      else        _pasteSingleColToKatalog(text); // tek sütun liste → ürün adı
+      return;
+    }
+
+    // Diğer INPUT'lar: dokunma
+    if (target.tagName === 'INPUT') return;
+    if (!hasTab) return;
+    e.preventDefault();
+    _pasteToMaliyet(text);
   });
 
   // ② Klavye navigasyonu: Enter / Arrow tuşları (maliyet, gelir, katalog)
