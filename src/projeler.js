@@ -133,7 +133,7 @@ function projeYukle(id) {
   rakipRows = s.rakipRows || [];
   rowCounter = s.rowCounter || 0;
   rakipCounter = s.rakipCounter || 0;
-  if (s.urunler) { urunler = s.urunler; urunCounter = s.urunCounter || 0; renderKatalog(); }
+  // katalog is loaded separately via loadKatalog() (Supabase)
   ekipmanRows = s.ekipmanRows || [];
   ekipmanCounter = s.ekipmanCounter || 0;
   renderMaliyetTable();

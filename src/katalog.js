@@ -1,35 +1,42 @@
 // ── ÜRÜN KATALOĞU ─────────────────────────────────
 
-// Katalog, projeye bağlı değil — ayrı localStorage anahtarında saklanır.
-
 function saveKatalog() {
   try {
-    localStorage.setItem('fizibilite_katalog', JSON.stringify({ urunler, urunCounter }));
+    localStorage.setItem('fizibilite_katalog', JSON.stringify(urunler));
   } catch(e) {}
 }
 
-function loadKatalog() {
+async function loadKatalog() {
+  try {
+    const deviceId = getDeviceId();
+    const { data, error } = await sb
+      .from('katalog')
+      .select('id, ad')
+      .eq('device_id', deviceId)
+      .order('created_at', { ascending: true });
+
+    if (!error && data) {
+      urunler = data.map(r => ({ id: r.id, ad: r.ad || '' }));
+      saveKatalog();
+    } else {
+      _loadKatalogFallback();
+    }
+  } catch(e) {
+    _loadKatalogFallback();
+  }
+  renderKatalog();
+}
+
+function _loadKatalogFallback() {
   try {
     const raw = localStorage.getItem('fizibilite_katalog');
-    if (raw) {
-      const k = JSON.parse(raw);
-      if (k.urunler?.length) {
-        urunler = k.urunler.map(u => ({ id: u.id, ad: u.ad || '' }));
-        urunCounter = k.urunCounter || urunler.length;
-      }
-    } else {
-      // Eski proje state'inden katalog verilerini taşı (tek seferlik)
-      const oldRaw = localStorage.getItem('fizibilite_state');
-      if (oldRaw) {
-        const s = JSON.parse(oldRaw);
-        if (s.urunler?.length) {
-          urunler = s.urunler.map(u => ({ id: u.id, ad: u.ad || '' }));
-          urunCounter = s.urunCounter || urunler.length;
-          saveKatalog();
-        }
-      }
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      urunler = parsed;
+    } else if (parsed?.urunler?.length) {
+      urunler = parsed.urunler.map(u => ({ id: String(u.id), ad: u.ad || '' }));
     }
-    renderKatalog();
   } catch(e) {}
 }
 
@@ -38,40 +45,85 @@ function _filterUrunler(q) {
   return urunler.filter(u => !lq || (u.ad || '').toLowerCase().includes(lq));
 }
 
-function katalogEkle(ad) {
-  const id = ++urunCounter;
-  urunler.push({ id, ad: ad || '' });
+async function katalogEkle(ad) {
+  const deviceId = getDeviceId();
+  const tempId = 'temp-' + Date.now();
+  urunler.push({ id: tempId, ad: ad || '' });
   renderKatalog();
-  saveKatalog();
+
   requestAnimationFrame(() => {
-    document.querySelector(`#krow-${id} .ks-input`)?.focus();
+    document.querySelector(`#krow-${tempId} .ks-input`)?.focus();
   });
+
+  try {
+    const { data, error } = await sb
+      .from('katalog')
+      .insert({ device_id: deviceId, ad: ad || '' })
+      .select('id, ad')
+      .single();
+
+    if (!error && data) {
+      const item = urunler.find(u => u.id === tempId);
+      if (item) {
+        item.id = data.id;
+        // Update row id in DOM so subsequent edits/deletes use the real UUID
+        const oldRow = document.getElementById(`krow-${tempId}`);
+        if (oldRow) {
+          oldRow.id = `krow-${data.id}`;
+          const inp = oldRow.querySelector('.ks-input');
+          if (inp) {
+            inp.setAttribute('onchange', `katalogGuncelle('${data.id}',this.value)`);
+            inp.setAttribute('onkeydown', `katalogKeyNav(event,'${data.id}')`);
+          }
+          const delBtn = oldRow.querySelector('.notion-del-btn');
+          if (delBtn) delBtn.setAttribute('onclick', `katalogSil('${data.id}')`);
+        }
+      }
+      saveKatalog();
+    }
+  } catch(e) {}
 }
 
-function katalogSil(id) {
+async function katalogSil(id) {
   urunler = urunler.filter(u => u.id !== id);
   renderKatalog();
   saveKatalog();
+
+  if (!String(id).startsWith('temp-')) {
+    try {
+      await sb.from('katalog').delete().eq('id', id);
+    } catch(e) {}
+  }
 }
 
-function katalogGuncelle(id, val) {
+async function katalogGuncelle(id, val) {
   const u = urunler.find(u => u.id === id);
   if (!u) return;
   u.ad = val;
   saveKatalog();
+
+  if (!String(id).startsWith('temp-')) {
+    try {
+      await sb.from('katalog').update({ ad: val, updated_at: new Date().toISOString() }).eq('id', id);
+    } catch(e) {}
+  }
 }
 
 function katalogGorunenler() {
   return _filterUrunler(document.getElementById('katalogArama')?.value);
 }
 
-function katalogTemizle() {
+async function katalogTemizle() {
   if (urunler.length === 0) return;
   if (!confirm(`Katalogdaki tüm ${urunler.length} ürün/hizmet silinecek. Emin misiniz?`)) return;
+  const deviceId = getDeviceId();
   urunler = [];
-  urunCounter = 0;
   renderKatalog();
   saveKatalog();
+
+  try {
+    await sb.from('katalog').delete().eq('device_id', deviceId);
+  } catch(e) {}
 }
 
 function renderKatalog() {
@@ -118,11 +170,11 @@ function renderKatalog() {
       <td style="color:var(--muted);font-size:11px;text-align:center;padding:8px 6px">${i + 1}</td>
       <td style="padding:4px 8px">
         <input class="ks-input" value="${escHtml(u.ad)}" placeholder="Ürün veya hizmet adı..."
-          onchange="katalogGuncelle(${u.id},this.value)" style="width:100%"
-          onkeydown="katalogKeyNav(event,${u.id})">
+          onchange="katalogGuncelle('${u.id}',this.value)" style="width:100%"
+          onkeydown="katalogKeyNav(event,'${u.id}')">
       </td>
       <td style="text-align:center;padding:4px 6px">
-        <button class="notion-del-btn" onclick="katalogSil(${u.id})" title="Sil">✕</button>
+        <button class="notion-del-btn" onclick="katalogSil('${u.id}')" title="Sil">✕</button>
       </td>
     </tr>
   `).join('');
@@ -179,7 +231,7 @@ function katalogSecFiltrele() {
 
 function _katalogSecSec() {
   return [...document.querySelectorAll('#katalogSecListe input[type="checkbox"]:checked')]
-    .map(cb => urunler.find(u => u.id === parseInt(cb.value)))
+    .map(cb => urunler.find(u => u.id === cb.value))
     .filter(Boolean);
 }
 
@@ -210,8 +262,6 @@ function _pasteToKatalog(text) {
     .map(l => l.split('\t')[0].trim().replace(/^["']|["']$/g, ''))
     .filter(Boolean);
   if (!names.length) return;
-  names.forEach(name => urunler.push({ id: ++urunCounter, ad: name }));
-  renderKatalog();
-  saveKatalog();
+  names.forEach(name => katalogEkle(name));
   showToast(`✓ ${names.length} ürün yapıştırıldı`, 'success');
 }
