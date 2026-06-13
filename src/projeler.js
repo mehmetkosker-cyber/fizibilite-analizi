@@ -52,7 +52,6 @@ function revizyonYukle(idx) {
   rakipRows = s.rakipRows || [];
   rowCounter = s.rowCounter || 0;
   rakipCounter = s.rakipCounter || 0;
-  if (s.urunler) { urunler = s.urunler; urunCounter = s.urunCounter || 0; }
   ekipmanRows = s.ekipmanRows || [];
   ekipmanCounter = s.ekipmanCounter || 0;
   renderMaliyetTable();
@@ -295,7 +294,6 @@ function buildState() {
     hedgingVade: document.getElementById('hedgingVade')?.value || '3',
     hedgingPrim: document.getElementById('hedgingPrim')?.value || '25',
     maliyetRows, gelirRows, rowCounter, rakipRows, rakipCounter,
-    urunler, urunCounter,
     ekipmanRows, ekipmanCounter,
   };
 }
@@ -358,11 +356,6 @@ function loadLocal() {
     if (s.rowCounter) rowCounter = s.rowCounter;
     if (s.rakipRows && s.rakipRows.length) { rakipRows = s.rakipRows; renderRakipRows(); }
     if (s.rakipCounter) rakipCounter = s.rakipCounter;
-    if (s.urunler && s.urunler.length) {
-      urunler = s.urunler.map(u => ({ id: u.id, ad: u.ad || '' }));
-    }
-    if (s.urunCounter) urunCounter = s.urunCounter;
-    renderKatalog();
     if (s.ekipmanRows && s.ekipmanRows.length) { ekipmanRows = s.ekipmanRows; renderEkipmanTable(); }
     if (s.ekipmanCounter) ekipmanCounter = s.ekipmanCounter;
   } catch(e) {}

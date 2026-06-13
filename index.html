@@ -716,37 +716,31 @@
   <!-- TAB: ÜRÜN KATALOĞU -->
   <div class="tab-panel" id="tab-katalog">
 
-    <!-- Toolbar -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-      <button class="btn btn-primary btn-sm" onclick="katalogEkle()">+ Yeni Ekle</button>
-      <button class="btn btn-ghost btn-sm" onclick="katalogTemizle()" title="Tüm satırları sil" style="color:var(--red)">🗑 Temizle</button>
-      <div style="flex:1"></div>
-      <span id="katalogSayac" style="display:none;font-size:12px;color:var(--muted);margin-right:4px"></span>
-      <input type="text" id="katalogArama" placeholder="🔍 Ara..." oninput="renderKatalog()" style="width:200px">
+    <!-- Başlık + araç çubuğu -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:160px">
+        <div style="font-size:17px;font-weight:700">📦 Ürün / Hizmet Kütüphanesi</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">
+          Tüm projelerde kullanılır · Ctrl+V ile Excel'den yapıştırın
+        </div>
+      </div>
+      <input type="text" id="katalogArama" placeholder="🔍 Ara..." oninput="renderKatalog()" style="width:180px">
+      <span id="katalogSayac" style="display:none;font-size:12px;color:var(--muted)"></span>
+      <button class="btn btn-primary btn-sm" onclick="katalogEkle()">+ Ekle</button>
+      <button class="btn btn-ghost btn-sm" onclick="katalogTemizle()" title="Tümünü sil" style="color:var(--red)">🗑</button>
     </div>
 
-    <!-- Bilgi kutusu -->
-    <div style="background:rgba(79,125,255,.08);border:1px solid rgba(79,125,255,.2);border-radius:8px;
-      padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px">
-      <span style="font-size:16px">💡</span>
-      <span>Ürün ve hizmetleri buraya ekleyin. Ardından <strong style="color:var(--text)">Veri Girişi</strong> sekmesinde
-        <strong style="color:var(--text)">📦 Katalogdan Ekle</strong> butonuyla maliyet veya gelir satırına dönüştürün.</span>
-    </div>
-
-    <!-- Tablo wrapper -->
-    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px">
+    <!-- Tablo -->
+    <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
       <table style="width:100%;border-collapse:collapse;font-size:13px" id="katalogTable">
         <thead id="katalogHead"></thead>
         <tbody id="katalogBody"></tbody>
       </table>
     </div>
-    <!-- Alt çubuk -->
-    <div class="satir-ekle-bar">
-      <input type="number" id="katalogSatirSayisi" value="5" min="1" max="100">
-      <span>boş satır ekle</span>
-      <button class="btn btn-ghost btn-sm" onclick="addMultipleKatalogRows()">+ Ekle</button>
-      <div style="flex:1"></div>
-      <span class="paste-hint">⌨️ Ctrl+V ile Excel / Sheets'ten direkt yapıştırın</span>
+
+    <!-- Alt ipucu -->
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);text-align:right">
+      Enter ile sonraki satıra geç · Son satırda Enter ile yeni satır ekle
     </div>
   </div>
 

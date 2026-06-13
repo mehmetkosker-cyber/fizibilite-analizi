@@ -33,6 +33,7 @@ window.addEventListener('load', () => {
     const tBtn = document.getElementById('temaBtn');
     if (tBtn) tBtn.textContent = '☀️';
   }
+  loadKatalog();
   loadLocal();
   calculate();
   setupSpreadsheetBehavior();

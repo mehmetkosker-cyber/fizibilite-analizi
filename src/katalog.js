@@ -1,5 +1,38 @@
 // ── ÜRÜN KATALOĞU ─────────────────────────────────
 
+// Katalog, projeye bağlı değil — ayrı localStorage anahtarında saklanır.
+
+function saveKatalog() {
+  try {
+    localStorage.setItem('fizibilite_katalog', JSON.stringify({ urunler, urunCounter }));
+  } catch(e) {}
+}
+
+function loadKatalog() {
+  try {
+    const raw = localStorage.getItem('fizibilite_katalog');
+    if (raw) {
+      const k = JSON.parse(raw);
+      if (k.urunler?.length) {
+        urunler = k.urunler.map(u => ({ id: u.id, ad: u.ad || '' }));
+        urunCounter = k.urunCounter || urunler.length;
+      }
+    } else {
+      // Eski proje state'inden katalog verilerini taşı (tek seferlik)
+      const oldRaw = localStorage.getItem('fizibilite_state');
+      if (oldRaw) {
+        const s = JSON.parse(oldRaw);
+        if (s.urunler?.length) {
+          urunler = s.urunler.map(u => ({ id: u.id, ad: u.ad || '' }));
+          urunCounter = s.urunCounter || urunler.length;
+          saveKatalog();
+        }
+      }
+    }
+    renderKatalog();
+  } catch(e) {}
+}
+
 function _filterUrunler(q) {
   const lq = (q || '').toLowerCase();
   return urunler.filter(u => !lq || (u.ad || '').toLowerCase().includes(lq));
@@ -9,7 +42,7 @@ function katalogEkle(ad) {
   const id = ++urunCounter;
   urunler.push({ id, ad: ad || '' });
   renderKatalog();
-  saveLocal();
+  saveKatalog();
   requestAnimationFrame(() => {
     document.querySelector(`#krow-${id} .ks-input`)?.focus();
   });
@@ -18,14 +51,14 @@ function katalogEkle(ad) {
 function katalogSil(id) {
   urunler = urunler.filter(u => u.id !== id);
   renderKatalog();
-  saveLocal();
+  saveKatalog();
 }
 
 function katalogGuncelle(id, val) {
   const u = urunler.find(u => u.id === id);
   if (!u) return;
   u.ad = val;
-  saveLocal();
+  saveKatalog();
 }
 
 function katalogGorunenler() {
@@ -38,7 +71,7 @@ function katalogTemizle() {
   urunler = [];
   urunCounter = 0;
   renderKatalog();
-  saveLocal();
+  saveKatalog();
 }
 
 function renderKatalog() {
@@ -59,21 +92,21 @@ function renderKatalog() {
 
   if (thead && !thead.firstChild) {
     thead.innerHTML = `<tr style="background:var(--surface2);position:sticky;top:0;z-index:2">
-      <th style="width:50px;padding:10px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-align:center">#</th>
+      <th style="width:44px;padding:10px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-align:center">#</th>
       <th style="padding:10px 8px;border-bottom:1px solid var(--border)">Ürün / Hizmet Adı</th>
-      <th style="width:50px;border-bottom:1px solid var(--border)"></th>
+      <th style="width:44px;border-bottom:1px solid var(--border)"></th>
     </tr>`;
   }
 
   if (liste.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:52px 20px;color:var(--muted)">
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:60px 20px;color:var(--muted)">
       ${isFiltered
-        ? `<div style="font-size:28px;margin-bottom:10px">🔍</div>
+        ? `<div style="font-size:26px;margin-bottom:10px">🔍</div>
            <div style="font-size:14px;font-weight:600;margin-bottom:4px">Sonuç bulunamadı</div>
            <div style="font-size:12px">Arama kriterini değiştirin</div>`
-        : `<div style="font-size:36px;margin-bottom:12px">📦</div>
-           <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">Katalog boş</div>
-           <div style="font-size:13px;margin-bottom:18px">Ürün ve hizmetleri buraya ekleyin,<br>ardından Veri Girişi bölümünde maliyet veya gelire ekleyin</div>
+        : `<div style="font-size:40px;margin-bottom:14px">📦</div>
+           <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px">Katalog henüz boş</div>
+           <div style="font-size:13px;margin-bottom:20px">Ürün ve hizmetlerinizi ekleyin.</div>
            <button class="btn btn-primary" onclick="katalogEkle()">+ İlk Ürünü Ekle</button>`
       }
     </td></tr>`;
@@ -84,7 +117,7 @@ function renderKatalog() {
     <tr class="kstr" id="krow-${u.id}">
       <td style="color:var(--muted);font-size:11px;text-align:center;padding:8px 6px">${i + 1}</td>
       <td style="padding:4px 8px">
-        <input class="ks-input" value="${escHtml(u.ad)}" placeholder="Ürün / Hizmet adı..."
+        <input class="ks-input" value="${escHtml(u.ad)}" placeholder="Ürün veya hizmet adı..."
           onchange="katalogGuncelle(${u.id},this.value)" style="width:100%"
           onkeydown="katalogKeyNav(event,${u.id})">
       </td>
@@ -105,20 +138,6 @@ function katalogKeyNav(e, id) {
     if (inp) { inp.focus(); return; }
   }
   katalogEkle();
-}
-
-// ── Toplu satır ekleme ────────────────────────────
-function addMultipleKatalogRows() {
-  const n = Math.max(1, Math.min(100, parseInt(document.getElementById('katalogSatirSayisi')?.value) || 5));
-  const firstId = urunCounter + 1;
-  for (let i = 0; i < n; i++) {
-    urunler.push({ id: ++urunCounter, ad: '' });
-  }
-  renderKatalog();
-  saveLocal();
-  requestAnimationFrame(() => {
-    document.querySelector(`#krow-${firstId} .ks-input`)?.focus();
-  });
 }
 
 // ── Katalogdan Seç Modal ──────────────────────────
@@ -193,6 +212,6 @@ function _pasteToKatalog(text) {
   if (!names.length) return;
   names.forEach(name => urunler.push({ id: ++urunCounter, ad: name }));
   renderKatalog();
-  saveLocal();
+  saveKatalog();
   showToast(`✓ ${names.length} ürün yapıştırıldı`, 'success');
 }
