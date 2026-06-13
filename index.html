@@ -217,6 +217,12 @@
   .ksth:hover { color: var(--text); }
   .kstr { transition: background .1s; }
   .kstr:hover { background: rgba(79,125,255,.05); }
+  .katalog-sec-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; cursor: pointer;
+    border-radius: 6px; transition: background .12s;
+  }
+  .katalog-sec-item:hover { background: rgba(79,125,255,.1); }
   .kstr.selected { background: rgba(79,125,255,.1) !important; }
   .kstr td { padding: 6px 8px; border-bottom: 1px solid rgba(46,51,82,.4); vertical-align: middle; }
   .kstr:last-child td { border-bottom: none; }
@@ -1603,8 +1609,8 @@
         </select>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" style="flex:1" onclick="katalogSecUygulaMaliyet()">↓ Maliyet'e Ekle</button>
-        <button class="btn btn-ghost" style="flex:1" onclick="katalogSecUygulaGelir()">↑ Gelir'e Ekle</button>
+        <button class="btn btn-primary" style="flex:1" onclick="katalogSecUygula('maliyet')">↓ Maliyet'e Ekle</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="katalogSecUygula('gelir')">↑ Gelir'e Ekle</button>
       </div>
     </div>
   </div>

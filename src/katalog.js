@@ -1,14 +1,18 @@
 // ── ÜRÜN KATALOĞU ─────────────────────────────────
 
+function _filterUrunler(q) {
+  const lq = (q || '').toLowerCase();
+  return urunler.filter(u => !lq || (u.ad || '').toLowerCase().includes(lq));
+}
+
 function katalogEkle(ad) {
   const id = ++urunCounter;
   urunler.push({ id, ad: ad || '' });
   renderKatalog();
   saveLocal();
-  setTimeout(() => {
-    const inp = document.querySelector(`#krow-${id} .ks-input`);
-    if (inp) inp.focus();
-  }, 50);
+  requestAnimationFrame(() => {
+    document.querySelector(`#krow-${id} .ks-input`)?.focus();
+  });
 }
 
 function katalogSil(id) {
@@ -25,8 +29,7 @@ function katalogGuncelle(id, val) {
 }
 
 function katalogGorunenler() {
-  const arama = (document.getElementById('katalogArama')?.value || '').toLowerCase();
-  return urunler.filter(u => !arama || (u.ad || '').toLowerCase().includes(arama));
+  return _filterUrunler(document.getElementById('katalogArama')?.value);
 }
 
 function katalogTemizle() {
@@ -54,7 +57,7 @@ function renderKatalog() {
       : `${urunler.length} ürün`;
   }
 
-  if (thead) {
+  if (thead && !thead.firstChild) {
     thead.innerHTML = `<tr style="background:var(--surface2);position:sticky;top:0;z-index:2">
       <th style="width:50px;padding:10px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-align:center">#</th>
       <th style="padding:10px 8px;border-bottom:1px solid var(--border)">Ürün / Hizmet Adı</th>
@@ -107,19 +110,14 @@ function katalogKeyNav(e, id) {
 // ── Toplu satır ekleme ────────────────────────────
 function addMultipleKatalogRows() {
   const n = Math.max(1, Math.min(100, parseInt(document.getElementById('katalogSatirSayisi')?.value) || 5));
-  const startIdx = urunler.length;
+  const firstId = urunCounter + 1;
   for (let i = 0; i < n; i++) {
     urunler.push({ id: ++urunCounter, ad: '' });
   }
   renderKatalog();
   saveLocal();
   requestAnimationFrame(() => {
-    const rows = document.querySelectorAll('#katalogBody tr');
-    const targetRow = rows[startIdx];
-    if (targetRow) {
-      const first = targetRow.querySelector('.ks-input');
-      if (first) first.focus();
-    }
+    document.querySelector(`#krow-${firstId} .ks-input`)?.focus();
   });
 }
 
@@ -143,8 +141,8 @@ function katalogSecKapat() {
 }
 
 function katalogSecFiltrele() {
-  const q = (document.getElementById('katalogSecArama')?.value || '').toLowerCase();
-  const liste = urunler.filter(u => !q || (u.ad || '').toLowerCase().includes(q));
+  const q = document.getElementById('katalogSecArama')?.value;
+  const liste = _filterUrunler(q);
   const container = document.getElementById('katalogSecListe');
   if (!container) return;
   if (!liste.length) {
@@ -152,10 +150,7 @@ function katalogSecFiltrele() {
     return;
   }
   container.innerHTML = liste.map(u => `
-    <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;
-      border-radius:6px;transition:background .12s"
-      onmouseover="this.style.background='rgba(79,125,255,.1)'"
-      onmouseout="this.style.background=''">
+    <label class="katalog-sec-item">
       <input type="checkbox" value="${u.id}"
         style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
       <span style="font-size:13px;flex:1">${u.ad ? escHtml(u.ad) : '<em style="color:var(--muted)">İsimsiz</em>'}</span>
@@ -169,29 +164,25 @@ function _katalogSecSec() {
     .filter(Boolean);
 }
 
-function katalogSecUygulaMaliyet() {
+function katalogSecUygula(hedef) {
   const secilen = _katalogSecSec();
   if (!secilen.length) { showToast('Lütfen en az bir ürün seçin.', 'error'); return; }
-  const tip = document.getElementById('katalogSecTip')?.value || 'malzeme';
-  secilen.forEach(u => {
-    maliyetRows.push({ id: ++rowCounter, tip, ad: u.ad, miktar: 1, birim: 'Adet', birimFiyat: 0, doviz: 'TL', kdv: true });
-  });
-  renderMaliyetTable();
+  if (hedef === 'maliyet') {
+    const tip = document.getElementById('katalogSecTip')?.value || 'malzeme';
+    secilen.forEach(u => {
+      maliyetRows.push({ id: ++rowCounter, tip, ad: u.ad, miktar: 1, birim: 'Adet', birimFiyat: 0, doviz: 'TL', kdv: true });
+    });
+    renderMaliyetTable();
+  } else {
+    secilen.forEach(u => {
+      gelirRows.push({ id: ++rowCounter, ad: u.ad, miktar: 1, birim: 'Adet', birimFiyat: 0 });
+    });
+    renderGelirTable();
+  }
   calculate();
   katalogSecKapat();
-  showToast(`✓ ${secilen.length} kalem maliyet tablosuna eklendi`, 'success');
-}
-
-function katalogSecUygulaGelir() {
-  const secilen = _katalogSecSec();
-  if (!secilen.length) { showToast('Lütfen en az bir ürün seçin.', 'error'); return; }
-  secilen.forEach(u => {
-    gelirRows.push({ id: ++rowCounter, ad: u.ad, miktar: 1, birim: 'Adet', birimFiyat: 0 });
-  });
-  renderGelirTable();
-  calculate();
-  katalogSecKapat();
-  showToast(`✓ ${secilen.length} kalem gelir tablosuna eklendi`, 'success');
+  const tablo = hedef === 'maliyet' ? 'maliyet' : 'gelir';
+  showToast(`✓ ${secilen.length} kalem ${tablo} tablosuna eklendi`, 'success');
 }
 
 // ── Paste ─────────────────────────────────────────
@@ -204,12 +195,4 @@ function _pasteToKatalog(text) {
   renderKatalog();
   saveLocal();
   showToast(`✓ ${names.length} ürün yapıştırıldı`, 'success');
-}
-
-function _pasteSingleColToKatalog(text) {
-  _pasteToKatalog(text);
-}
-
-function _pasteRangeToKatalog(text) {
-  _pasteToKatalog(text);
 }
