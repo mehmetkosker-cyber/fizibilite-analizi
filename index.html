@@ -217,6 +217,12 @@
   .ksth:hover { color: var(--text); }
   .kstr { transition: background .1s; }
   .kstr:hover { background: rgba(79,125,255,.05); }
+  .katalog-sec-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; cursor: pointer;
+    border-radius: 6px; transition: background .12s;
+  }
+  .katalog-sec-item:hover { background: rgba(79,125,255,.1); }
   .kstr.selected { background: rgba(79,125,255,.1) !important; }
   .kstr td { padding: 6px 8px; border-bottom: 1px solid rgba(46,51,82,.4); vertical-align: middle; }
   .kstr:last-child td { border-bottom: none; }
@@ -710,53 +716,32 @@
   <!-- TAB: ÜRÜN KATALOĞU -->
   <div class="tab-panel" id="tab-katalog">
 
-    <!-- Toolbar -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-      <button class="btn btn-primary btn-sm" onclick="katalogEkle()">+ Yeni Satır</button>
-      <button class="btn btn-ghost btn-sm" onclick="katalogCokluEkle('maliyet')" id="btnCokluMaliyet" disabled>↓ Seçilenleri Maliyet'e Ekle</button>
-      <button class="btn btn-ghost btn-sm" onclick="katalogCokluEkle('gelir')" id="btnCokluGelir" disabled>↑ Seçilenleri Gelir'e Ekle</button>
-      <button class="btn btn-ghost btn-sm" onclick="katalogTemizle()" title="Tüm satırları sil" style="color:var(--red)">🗑 Temizle</button>
-      <div style="flex:1"></div>
-      <input type="text" id="katalogArama" placeholder="🔍 Ara..." oninput="renderKatalog()"
-        style="width:200px">
-      <select id="katalogFiltreTip" onchange="renderKatalog()" style="width:140px">
-        <option value="">Tüm Tipler</option>
-        <option value="malzeme">Malzeme</option>
-        <option value="hizmet">Hizmet</option>
-        <option value="urun">Ürün</option>
-        <option value="diger">Diğer</option>
-      </select>
-      <!-- Sütun menüsü -->
-      <div style="position:relative">
-        <button class="btn btn-ghost btn-sm" id="katalogKolBtn" onclick="katalogKolToggle()">⚙ Sütunlar ▾</button>
-        <div id="katalogKolPanel" style="display:none;position:absolute;right:0;top:36px;
-          background:var(--surface);border:1px solid var(--border);border-radius:8px;
-          padding:10px 14px;z-index:300;min-width:170px;box-shadow:0 8px 24px rgba(0,0,0,.35)">
+    <!-- Başlık + araç çubuğu -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:160px">
+        <div style="font-size:17px;font-weight:700">📦 Ürün / Hizmet Kütüphanesi</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">
+          Tüm projelerde kullanılır · Ctrl+V ile Excel'den yapıştırın
         </div>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="katalogCSVIndir()">CSV İndir</button>
-      <button class="btn btn-ghost btn-sm" onclick="katalogCSVYukle()">CSV Yükle</button>
+      <input type="text" id="katalogArama" placeholder="🔍 Ara..." oninput="renderKatalog()" style="width:180px">
+      <span id="katalogSayac" style="display:none;font-size:12px;color:var(--muted)"></span>
+      <button class="btn btn-primary btn-sm" onclick="katalogEkle()">+ Ekle</button>
+      <button class="btn btn-ghost btn-sm" onclick="katalogTemizle()" title="Tümünü sil" style="color:var(--red)">🗑</button>
     </div>
 
-    <!-- İstatistik şeridi -->
-    <div id="katalogStats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px"></div>
-
-    <!-- Tablo wrapper -->
-    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px">
-      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:800px" id="katalogTable">
+    <!-- Tablo -->
+    <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:13px" id="katalogTable">
         <thead id="katalogHead"></thead>
         <tbody id="katalogBody"></tbody>
       </table>
     </div>
-    <!-- E-Tablo alt çubuğu -->
-    <div class="satir-ekle-bar">
-      <input type="number" id="katalogSatirSayisi" value="5" min="1" max="100">
-      <span>boş satır ekle</span>
-      <button class="btn btn-ghost btn-sm" onclick="addMultipleKatalogRows()">+ Ekle</button>
-      <div style="flex:1"></div>
-      <span class="paste-hint">⌨️ Ctrl+V ile Excel / Sheets'ten direkt yapıştırın</span>
+
+    <!-- Alt ipucu -->
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);text-align:right">
+      Enter ile sonraki satıra geç · Son satırda Enter ile yeni satır ekle
     </div>
-    <div style="font-size:12px;color:var(--muted);margin-top:6px" id="katalogAltBilgi"></div>
   </div>
 
   <!-- TAB 1: VERİ GİRİŞİ -->
@@ -972,6 +957,12 @@
         <button class="btn btn-ghost btn-sm" onclick="addRow('malzeme')">+ Malzeme</button>
         <button class="btn btn-ghost btn-sm" onclick="addRow('iscilik')">+ İşçilik</button>
         <button class="btn btn-ghost btn-sm" onclick="addRow('gider')">+ Gider</button>
+
+        <!-- Ayraç -->
+        <div style="width:1px;height:20px;background:var(--border)"></div>
+
+        <button class="btn btn-ghost btn-sm" onclick="katalogSecAc()" title="Katalogdan ürün/hizmet seçerek maliyet veya gelir satırı ekle"
+          style="color:var(--accent)">📦 Katalogdan Ekle</button>
       </div>
 
       <!-- Tablo -->
@@ -1002,7 +993,10 @@
     <div class="card mt16">
       <div class="flex items-center justify-between" style="margin-bottom:12px">
         <div class="card-title" style="margin-bottom:0"><span>💰</span> Gelir Kalemleri (Satış)</div>
-        <button class="btn btn-ghost btn-sm" onclick="addGelirRow()">+ Gelir Kalemi Ekle</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="katalogSecAc()" style="color:var(--accent)">📦 Katalogdan Ekle</button>
+          <button class="btn btn-ghost btn-sm" onclick="addGelirRow()">+ Gelir Kalemi Ekle</button>
+        </div>
       </div>
       <div style="overflow-x:auto">
       <table class="data-table" id="gelirTable">
@@ -1581,6 +1575,37 @@
   <div class="tab-panel" id="tab-rapor">
     <div class="card">
       <div id="raporIcerik"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Katalogdan Seç Modal -->
+<div class="modal-overlay" id="katalogSecModal" onclick="if(event.target===this)katalogSecKapat()" style="display:none">
+  <div class="modal" style="max-width:480px;width:95%;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <div>
+        <h2 style="font-size:16px;font-weight:700">📦 Katalogdan Seç</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px">Eklemek istediğiniz ürün/hizmetleri seçin</p>
+      </div>
+      <button class="btn btn-ghost" onclick="katalogSecKapat()" style="font-size:18px;padding:4px 10px">✕</button>
+    </div>
+    <div style="padding:12px 16px 0">
+      <input id="katalogSecArama" type="text" placeholder="🔍 Ürün veya hizmet ara..." oninput="katalogSecFiltrele()" style="width:100%">
+    </div>
+    <div id="katalogSecListe" style="flex:1;overflow-y:auto;padding:8px 8px;min-height:150px;max-height:360px;margin-top:8px"></div>
+    <div style="padding:14px 16px;border-top:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:13px;color:var(--muted);white-space:nowrap">Maliyet tipi:</span>
+        <select id="katalogSecTip" style="flex:1">
+          <option value="malzeme">📦 Malzeme</option>
+          <option value="iscilik">👷 İşçilik</option>
+          <option value="gider">🏢 Gider</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" style="flex:1" onclick="katalogSecUygula('maliyet')">↓ Maliyet'e Ekle</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="katalogSecUygula('gelir')">↑ Gelir'e Ekle</button>
+      </div>
     </div>
   </div>
 </div>

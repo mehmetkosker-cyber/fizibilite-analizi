@@ -52,7 +52,6 @@ function revizyonYukle(idx) {
   rakipRows = s.rakipRows || [];
   rowCounter = s.rowCounter || 0;
   rakipCounter = s.rakipCounter || 0;
-  if (s.urunler) { urunler = s.urunler; urunCounter = s.urunCounter || 0; }
   ekipmanRows = s.ekipmanRows || [];
   ekipmanCounter = s.ekipmanCounter || 0;
   renderMaliyetTable();
@@ -295,11 +294,7 @@ function buildState() {
     hedgingVade: document.getElementById('hedgingVade')?.value || '3',
     hedgingPrim: document.getElementById('hedgingPrim')?.value || '25',
     maliyetRows, gelirRows, rowCounter, rakipRows, rakipCounter,
-    urunler, urunCounter,
     ekipmanRows, ekipmanCounter,
-    katalogKolOrder: [...katalogKolOrder],
-    katalogKolVis: { ...katalogKolVis },
-    katalogKolNames: { ...katalogKolNames },
   };
 }
 
@@ -361,12 +356,6 @@ function loadLocal() {
     if (s.rowCounter) rowCounter = s.rowCounter;
     if (s.rakipRows && s.rakipRows.length) { rakipRows = s.rakipRows; renderRakipRows(); }
     if (s.rakipCounter) rakipCounter = s.rakipCounter;
-    if (s.urunler && s.urunler.length) { urunler = s.urunler; }
-    if (s.urunCounter) urunCounter = s.urunCounter;
-    if (s.katalogKolOrder && s.katalogKolOrder.length) katalogKolOrder = s.katalogKolOrder;
-    if (s.katalogKolVis)   Object.assign(katalogKolVis, s.katalogKolVis);
-    if (s.katalogKolNames) Object.assign(katalogKolNames, s.katalogKolNames);
-    renderKatalog();
     if (s.ekipmanRows && s.ekipmanRows.length) { ekipmanRows = s.ekipmanRows; renderEkipmanTable(); }
     if (s.ekipmanCounter) ekipmanCounter = s.ekipmanCounter;
   } catch(e) {}

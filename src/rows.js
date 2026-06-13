@@ -427,23 +427,11 @@ function setupSpreadsheetBehavior() {
       return;
     }
 
-    // Katalog: TSV veya tek sütun liste
+    // Katalog: her satırın ilk sütunu → ürün adı olarak ekle
     if (inKatalog || katalogAktif) {
       if (lines.length <= 1 && !hasTab) return; // tek hücre — tarayıcıya bırak
       e.preventDefault();
-      if (inKatalog && hasTab) {
-        // Hücre bazlı range paste: odaklanan hücreden başla
-        const tr = target.closest('tr');
-        if (tr) {
-          const rows = [...document.querySelectorAll('#katalogBody tr')];
-          const rowIdx = rows.indexOf(tr);
-          const inputs = [...tr.querySelectorAll('.ks-input, .ks-select')];
-          const colIdx = inputs.indexOf(target);
-          if (rowIdx >= 0 && colIdx >= 0) { _pasteRangeToKatalog(text, rowIdx, colIdx); return; }
-        }
-      }
-      if (hasTab) _pasteToKatalog(text);
-      else        _pasteSingleColToKatalog(text); // tek sütun liste → ürün adı
+      _pasteToKatalog(text);
       return;
     }
 
