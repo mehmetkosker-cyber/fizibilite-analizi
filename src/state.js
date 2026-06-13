@@ -9,7 +9,6 @@ const TIP_COLORS = { malzeme: '#4f7dff', iscilik: '#22c55e', gider: '#f59e0b', e
 
 // Katalog state
 let urunler = [];
-let urunCounter = 0;
 
 // Rakip state
 let rakipRows = [];
